@@ -1,7 +1,7 @@
 import { connectDb } from "@/configs/connectDb";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { Sensor } from "@/models/sensor.model";
-import { asyncHandler } from "@/utils/asynHanlder";
+import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import { NextResponse } from "next/server";
 

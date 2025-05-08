@@ -1,12 +1,8 @@
 import { connectDb } from "@/configs/connectDb";
-import {
-  configureCloudinary,
-  removeFromCloudinary,
-  uploadOnCloudinary,
-} from "@/lib/cloudinary";
+import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { Auth } from "@/models/auth.model";
-import { asyncHandler } from "@/utils/asynHanlder";
+import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import { NextResponse } from "next/server";
 

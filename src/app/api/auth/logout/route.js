@@ -1,7 +1,7 @@
 import { getEnv } from "@/configs/config";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { JWTService } from "@/services/auth/jwtService";
-import { asyncHandler } from "@/utils/asynHanlder";
+import { asyncHandler } from "@/utils/asyncHandler";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 

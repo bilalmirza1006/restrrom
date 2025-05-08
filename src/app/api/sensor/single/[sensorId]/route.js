@@ -1,7 +1,7 @@
 import { connectDb } from "@/configs/connectDb";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { Sensor } from "@/models/sensor.model";
-import { asyncHandler } from "@/utils/asynHanlder";
+import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import { isValidObjectId } from "mongoose";
 import { turborepoTraceAccess } from "next/dist/build/turborepo-access-trace";
@@ -12,8 +12,7 @@ export const GET = asyncHandler(async (req, { params }) => {
   const user = await isAuthenticated();
   const ownerId = user._id;
   const { sensorId } = await params;
-  if (!isValidObjectId(sensorId))
-    throw new customError(400, "Invalid sensor id");
+  if (!isValidObjectId(sensorId)) throw new customError(400, "Invalid sensor id");
 
   const sensor = await Sensor.findOne({ _id: sensorId, ownerId });
 
@@ -78,8 +77,7 @@ export const DELETE = asyncHandler(async (req, { params }) => {
   const user = await isAuthenticated();
   const ownerId = user._id;
   const { sensorId } = await params;
-  if (!isValidObjectId(sensorId))
-    throw new customError(400, "Invalid sensor id");
+  if (!isValidObjectId(sensorId)) throw new customError(400, "Invalid sensor id");
 
   const sensor = await Sensor.findOneAndDelete({ _id: sensorId, ownerId });
   if (!sensor) throw new customError(400, "Sensor not found");
