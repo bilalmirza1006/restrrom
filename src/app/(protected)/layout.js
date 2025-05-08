@@ -29,9 +29,9 @@ const ProtectedLayout = ({ children }) => {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (data?.user && isSuccess) {
-      dispatch(setUser(data.user));
-      const expectedPath = getRoleBaseRoute(data.user.role);
+    if (data?.data && isSuccess) {
+      dispatch(setUser(data.data));
+      const expectedPath = getRoleBaseRoute(data.data.role);
 
       if (!pathname.startsWith(expectedPath)) {
         router.replace(expectedPath);
@@ -44,17 +44,7 @@ const ProtectedLayout = ({ children }) => {
     if (isError && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [
-    data,
-    isSuccess,
-    isLoading,
-    pathname,
-    router,
-    dispatch,
-    isError,
-    isAuthenticated,
-    user,
-  ]);
+  }, [data, isSuccess, isLoading, pathname, router, dispatch, isError, isAuthenticated, user]);
 
   if (isLoading || (!isAuthenticated && !isError) || !checked) {
     return <Loader />;

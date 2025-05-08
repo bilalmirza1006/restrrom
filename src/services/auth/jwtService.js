@@ -20,7 +20,6 @@ export const JWTService = () => ({
       const decoded = jwt.verify(token, getEnv("ACCESS_TOKEN_SECRET"));
       return decoded;
     } catch (error) {
-      console.error("verifyAccessToken error:", error.name, error.message);
       return null;
     }
   },
@@ -30,7 +29,6 @@ export const JWTService = () => ({
       const decoded = jwt.verify(token, getEnv("REFRESH_TOKEN_SECRET"));
       return decoded;
     } catch (error) {
-      console.error("verifyRefreshToken error:", error.name, error.message);
       return null;
     }
   },

@@ -7,10 +7,7 @@ import Dropdown from "@/components/global/small/Dropdown";
 import { BiChevronDown, BiChevronUp } from "react-icons/bi";
 import { useGetAllSensorsQuery } from "@/features/sensor/sensorApi";
 import MarkRestroomModel from "./MarkRestroomModel";
-import {
-  setRestrooms,
-  updateRestroom,
-} from "@/features/building/buildingSlice";
+import { setRestrooms, updateRestroom } from "@/features/building/buildingSlice";
 import { getFileCache, setFileCache } from "@/utils/fileStore";
 import toast from "react-hot-toast";
 
@@ -39,8 +36,7 @@ const Restrooms = ({ setCurrentStep }) => {
   useEffect(() => {
     if (
       building?.totalRestrooms &&
-      (!restroomData.length ||
-        restroomData.length !== parseInt(building.totalRestrooms))
+      (!restroomData.length || restroomData.length !== parseInt(building.totalRestrooms))
     ) {
       // If we already have restrooms in redux, use them
       if (building.restrooms && building.restrooms.length) {
@@ -68,16 +64,11 @@ const Restrooms = ({ setCurrentStep }) => {
     if (restroomData.length && availableSensors.length) {
       // Extract all sensors used across all restrooms
       const usedSensors = restroomData
-        .flatMap(
-          (restroom) =>
-            restroom.restroomCoordinates?.map((polygon) => polygon.sensor) || []
-        )
+        .flatMap((restroom) => restroom.restroomCoordinates?.map((polygon) => polygon.sensor) || [])
         .filter((sensor) => sensor && sensor !== "No sensor");
 
       // Filter available sensors
-      const filteredSensors = availableSensors.filter(
-        (sensor) => !usedSensors.includes(sensor.value)
-      );
+      const filteredSensors = availableSensors.filter((sensor) => !usedSensors.includes(sensor.value));
 
       setAvailableSensors(filteredSensors);
     }
@@ -129,13 +120,7 @@ const Restrooms = ({ setCurrentStep }) => {
     const restroom = restroomData[index];
 
     // Validate required fields
-    if (
-      !restroom.name ||
-      !restroom.type ||
-      !restroom.status ||
-      !restroom.area ||
-      !restroom.toilets
-    ) {
+    if (!restroom.name || !restroom.type || !restroom.status || !restroom.area || !restroom.toilets) {
       toast.error("Please fill all required fields for this restroom");
       return false;
     }
@@ -155,12 +140,7 @@ const Restrooms = ({ setCurrentStep }) => {
   const saveBuilding = () => {
     // Validate all restrooms have required fields
     const isRestroomDataComplete = restroomData.every(
-      (restroom) =>
-        restroom.name &&
-        restroom.type &&
-        restroom.status &&
-        restroom.area &&
-        restroom.toilets
+      (restroom) => restroom.name && restroom.type && restroom.status && restroom.area && restroom.toilets
     );
 
     if (!isRestroomDataComplete) {
@@ -179,10 +159,7 @@ const Restrooms = ({ setCurrentStep }) => {
   if (!restroomData.length) {
     return (
       <div className="py-10 text-center">
-        <p>
-          No restrooms to display. Please add restrooms in the General
-          Information step.
-        </p>
+        <p>No restrooms to display. Please add restrooms in the General Information step.</p>
         <div className="flex items-center justify-end gap-4 mt-5">
           <Button
             text="Back"
@@ -200,24 +177,13 @@ const Restrooms = ({ setCurrentStep }) => {
       <h6 className="text-base text-primary font-medium">Restrooms</h6>
       <div className="py-6">
         {restroomData.map((restroom, index) => (
-          <div
-            key={index}
-            className="border border-[#DFDFDF] rounded-md mb-4 overflow-hidden"
-          >
+          <div key={index} className="border border-[#DFDFDF] rounded-md mb-4 overflow-hidden">
             <div
               className="flex items-center justify-between px-4 py-3 bg-[#F5F5F5] cursor-pointer"
               onClick={() => toggleAccordion(index)}
             >
-              <h6 className="font-medium">
-                {restroom.name || `Restroom ${index + 1}`}
-              </h6>
-              <span>
-                {activeAccordion === index ? (
-                  <BiChevronUp size={20} />
-                ) : (
-                  <BiChevronDown size={20} />
-                )}
-              </span>
+              <h6 className="font-medium">{restroom.name || `Restroom ${index + 1}`}</h6>
+              <span>{activeAccordion === index ? <BiChevronUp size={20} /> : <BiChevronDown size={20} />}</span>
             </div>
 
             {activeAccordion === index && (
@@ -227,18 +193,14 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Restroom Name"
                     placeholder="Enter name"
                     value={restroom.name || ""}
-                    onChange={(e) =>
-                      handleRestroomChange(index, "name", e.target.value)
-                    }
+                    onChange={(e) => handleRestroomChange(index, "name", e.target.value)}
                   />
 
                   <Dropdown
                     label="Type"
                     placeholder="Select type"
                     value={restroom.type}
-                    setValue={(value) =>
-                      handleRestroomChange(index, "type", value)
-                    }
+                    setValue={(value) => handleRestroomChange(index, "type", value)}
                     options={[
                       { label: "Public", value: "public" },
                       { label: "Private", value: "private" },
@@ -249,9 +211,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Status"
                     placeholder="Select status"
                     value={restroom.status}
-                    setValue={(value) =>
-                      handleRestroomChange(index, "status", value)
-                    }
+                    setValue={(value) => handleRestroomChange(index, "status", value)}
                     options={[
                       { label: "Active", value: "active" },
                       { label: "Inactive", value: "inactive" },
@@ -263,9 +223,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     placeholder="Enter area"
                     type="number"
                     value={restroom.area || ""}
-                    onChange={(e) =>
-                      handleRestroomChange(index, "area", e.target.value)
-                    }
+                    onChange={(e) => handleRestroomChange(index, "area", e.target.value)}
                   />
 
                   <Input
@@ -273,9 +231,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     placeholder="Enter toilets"
                     type="number"
                     value={restroom.toilets || ""}
-                    onChange={(e) =>
-                      handleRestroomChange(index, "toilets", e.target.value)
-                    }
+                    onChange={(e) => handleRestroomChange(index, "toilets", e.target.value)}
                   />
                 </div>
 
@@ -284,28 +240,18 @@ const Restrooms = ({ setCurrentStep }) => {
                   <div className="py-4 grid place-items-center">
                     <MarkRestroomModel
                       restroomIndex={index}
-                      setFile={(file) =>
-                        handleImageChange(index, null, file, null)
-                      }
+                      setFile={(file) => handleImageChange(index, null, file, null)}
                       restroomImage={restroom.restroomImage}
-                      setRestroomImage={(image) =>
-                        handleImageChange(index, image, null, null)
-                      }
+                      setRestroomImage={(image) => handleImageChange(index, image, null, null)}
                       polygons={restroom.restroomCoordinates || []}
-                      setPolygons={(coordinates) =>
-                        handleImageChange(index, null, null, coordinates)
-                      }
+                      setPolygons={(coordinates) => handleImageChange(index, null, null, coordinates)}
                       availableSensors={availableSensors}
                     />
                   </div>
                 </div>
 
                 <div className="mt-4 flex justify-end">
-                  <Button
-                    text="Save Restroom"
-                    width="!w-[160px]"
-                    onClick={() => saveRestroomData(index)}
-                  />
+                  <Button text="Save Restroom" width="!w-[160px]" onClick={() => saveRestroomData(index)} />
                 </div>
               </div>
             )}
@@ -320,11 +266,7 @@ const Restrooms = ({ setCurrentStep }) => {
           onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
-        <Button
-          text="Save Building"
-          width="!w-[200px]"
-          onClick={saveBuilding}
-        />
+        <Button text="Save Building" width="!w-[200px]" onClick={saveBuilding} />
       </div>
     </div>
   );
