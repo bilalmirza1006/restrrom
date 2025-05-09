@@ -1,5 +1,5 @@
 const Inspectionist = () => {
-  return <div>Inspectionist</div>;
+  return <div>Inspectionistddddd</div>;
 };
 
 export default Inspectionist;

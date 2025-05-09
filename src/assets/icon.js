@@ -1,11 +1,12 @@
-import DashboardIcon from "./aside/DashboardIcon";
-import BuildingIcon from "./aside/BuildingIcon";
-import SensorsIcon from "./aside/SensorsIcon";
-import PlansIcon from "./aside/PlansIcon";
-import SettingIcon from "./aside/SettingIcon";
-import ReportsIcon from "./aside/ReportsIcon";
-import LogoIcon from "./aside/LogoIcon";
-import ArrowUpIcon from "./default/ArrowUpIcon";
+import DashboardIcon from './aside/DashboardIcon';
+import BuildingIcon from './aside/BuildingIcon';
+import SensorsIcon from './aside/SensorsIcon';
+import PlansIcon from './aside/PlansIcon';
+import SettingIcon from './aside/SettingIcon';
+import ReportsIcon from './aside/ReportsIcon';
+import LogoIcon from './aside/LogoIcon';
+import ArrowUpIcon from './default/ArrowUpIcon';
+import History from './aside/History';
 
 export {
   DashboardIcon,
@@ -16,4 +17,5 @@ export {
   SettingIcon,
   LogoIcon,
   ArrowUpIcon,
+  History,
 };
