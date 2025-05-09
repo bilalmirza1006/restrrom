@@ -1,7 +1,12 @@
+import AllHistory from '@/components/inspectionist/history/AllHistory';
 import React from 'react';
 
 function History() {
-  return <div>Historyyyyyy</div>;
+  return (
+    <div>
+      <AllHistory />
+    </div>
+  );
 }
 
 export default History;

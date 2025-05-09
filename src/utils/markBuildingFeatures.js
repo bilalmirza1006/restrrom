@@ -18,17 +18,11 @@ export const handleImageUpload = (
 };
 //  -------------------------------------------------------__start
 //  Draw Canvas Content
-export const drawCanvas = ({
-  canvasRef,
-  isDrawingEnabled,
-  image,
-  polygons,
-  currentPolygon,
-}) => {
+export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, currentPolygon }) => {
   const canvas = canvasRef.current;
   if (!canvas || !isDrawingEnabled) return;
 
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext('2d');
   context.clearRect(0, 0, canvas.width, canvas.height);
 
   if (image) {
@@ -45,27 +39,27 @@ export const drawCanvas = ({
     context.closePath();
 
     // Fill the polygon with the color
-    context.fillStyle = `${polygon.color}${90}` || "#A449EB60";
-    context.strokeStyle = polygon.fillColor || "#A449EB";
+    context.fillStyle = `${polygon.color}${90}` || '#A449EB60';
+    context.strokeStyle = polygon.fillColor || '#A449EB';
     context.fill();
 
     // Draw the border with the specified color
-    context.strokeStyle = polygon.fillColor || polygon.color || "#A449EB60";
+    context.strokeStyle = polygon.fillColor || polygon.color || '#A449EB60';
     context.lineWidth = 2;
     context.stroke();
 
     // Determine the label position based on `labelPoint`
     let idX, idY;
-    if (polygon?.labelPoint === "first" && polygon.points[0]) {
+    if (polygon?.labelPoint === 'first' && polygon.points[0]) {
       idX = polygon.points[0].x;
       idY = polygon.points[0].y - 5;
-    } else if (polygon?.labelPoint === "second" && polygon.points[1]) {
+    } else if (polygon?.labelPoint === 'second' && polygon.points[1]) {
       idX = polygon.points[1].x;
       idY = polygon.points[1].y - 5;
-    } else if (polygon?.labelPoint === "third" && polygon.points[2]) {
+    } else if (polygon?.labelPoint === 'third' && polygon.points[2]) {
       idX = polygon.points[2].x;
       idY = polygon.points[2].y - 5;
-    } else if (polygon?.labelPoint === "fourth" && polygon.points[3]) {
+    } else if (polygon?.labelPoint === 'fourth' && polygon.points[3]) {
       idX = polygon.points[3].x;
       idY = polygon.points[3].y - 5;
     }
@@ -73,7 +67,7 @@ export const drawCanvas = ({
     const padding = 4;
     const text = polygon.id;
 
-    context.font = "12px Arial";
+    context.font = '12px Arial';
     const textWidth = context.measureText(text).width;
     const textHeight = 14;
     const boxWidth = textWidth + padding * 2;
@@ -82,7 +76,7 @@ export const drawCanvas = ({
     const boxY = idY - textHeight - padding;
 
     // Draw the box background
-    context.fillStyle = "#FFFFFF";
+    context.fillStyle = '#FFFFFF';
     context.beginPath();
     context.moveTo(boxX + 4, boxY);
     context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, 4);
@@ -93,7 +87,7 @@ export const drawCanvas = ({
     context.fill();
 
     // Draw the text inside the box
-    context.fillStyle = "#000000";
+    context.fillStyle = '#000000';
     context.fillText(text, boxX + padding, boxY + padding + textHeight - 4);
   });
 
@@ -101,7 +95,7 @@ export const drawCanvas = ({
     context.beginPath();
     context.moveTo(currentPolygon[0].x, currentPolygon[0].y);
     currentPolygon.forEach((point) => context.lineTo(point.x, point.y));
-    context.strokeStyle = "#A449EB";
+    context.strokeStyle = '#A449EB';
     context.lineWidth = 2;
     context.stroke();
   }
@@ -257,28 +251,28 @@ export const exportSVG = async ({ canvasRef, image, polygons }) => {
   polygons.forEach((polygon) => {
     if (!polygon || !polygon.points) return;
 
-    const fillColor = `${polygon.color}${90}` || "#A449EB60";
-    const strokeColor = polygon.fillColor || polygon.color || "#A449EB60";
+    const fillColor = `${polygon.color}${90}` || '#A449EB60';
+    const strokeColor = polygon.fillColor || polygon.color || '#A449EB60';
 
     svgContent += `<polygon points="${polygon.points
       .map((point) => `${point.x},${point.y}`)
-      .join(" ")}" id="${polygon.id}" sensorAttached="${
-      polygon.sensorAttached || ""
-    }" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2"/>`;
+      .join(' ')}" id="${polygon.id}" sensorAttached="${
+      polygon.sensorAttached || ''
+    }" fill="${fillColor}" stroke="${strokeColor}" strokeWidth="2"/>`;
 
     svgContent += `<text x="${polygon.points[0].x}" y="${
       polygon.points[0].y - 10
     }" font-size="12" fill="black">${polygon.id}</text>`;
   });
 
-  svgContent += "</svg>";
+  svgContent += '</svg>';
 
   // Create a blob and download the SVG file
-  const blob = new Blob([svgContent], { type: "image/svg+xml" });
+  const blob = new Blob([svgContent], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
+  const link = document.createElement('a');
   link.href = url;
-  link.download = "parking-slot.svg";
+  link.download = 'parking-slot.svg';
   link.click();
   URL.revokeObjectURL(url);
 };
@@ -377,7 +371,7 @@ export const handleCanvasMouseDown = ({
     polygon.points.forEach((point) => path.lineTo(point.x, point.y));
     path.closePath();
 
-    return canvas.getContext("2d").isPointInPath(path, x, y);
+    return canvas.getContext('2d').isPointInPath(path, x, y);
   });
 
   if (selectedPolygon) {
@@ -399,19 +393,14 @@ export const handleDeletePolygon = (x, y, polygons, setPolygons, canvasRef) => {
     path.closePath();
 
     // Check if the clicked point is inside the polygon
-    return !canvas.getContext("2d").isPointInPath(path, x, y);
+    return !canvas.getContext('2d').isPointInPath(path, x, y);
   });
   setPolygons(updatedPolygons);
 };
 
 // Polygon Label Position
-export const polygonsLabelHandler = (
-  selectedOption,
-  selectedPolygon,
-  polygons,
-  setPolygons
-) => {
-  console.log("In polygon label handler", selectedOption, selectedPolygon);
+export const polygonsLabelHandler = (selectedOption, selectedPolygon, polygons, setPolygons) => {
+  console.log('In polygon label handler', selectedOption, selectedPolygon);
   let selectedPolygonId = selectedPolygon.id;
   setPolygons(
     polygons.map((poly) => {
@@ -441,7 +430,7 @@ export const sensorInfoSubmitHandler = (
             sensorAttached: selectedSensor || sensorIdInput,
             color: color,
             fillColor: color,
-            labelPoint: polygon.labelPoint || "first",
+            labelPoint: polygon.labelPoint || 'first',
           }
         : polygon
     );
@@ -449,25 +438,19 @@ export const sensorInfoSubmitHandler = (
     setSensorPopup(false);
   } else {
     // If sensorIdInput is empty, we do not allow the polygon to be drawn.
-    alert("without sensor id and sensor name polygon not draw");
+    alert('without sensor id and sensor name polygon not draw');
   }
 };
 
 // Re-Edit Polygon
-export const handleReEditPolygon = ({
-  x,
-  y,
-  canvasRef,
-  polygons,
-  handlePolygonClick,
-}) => {
+export const handleReEditPolygon = ({ x, y, canvasRef, polygons, handlePolygonClick }) => {
   const canvas = canvasRef.current;
   const clickedPolygon = polygons.find((polygon) => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
     polygon.points.forEach((point) => path.lineTo(point.x, point.y));
     path.closePath();
-    return canvas.getContext("2d").isPointInPath(path, x, y);
+    return canvas.getContext('2d').isPointInPath(path, x, y);
   });
   if (clickedPolygon) {
     handlePolygonClick(clickedPolygon.id, clickedPolygon.sensorAttached);
@@ -517,13 +500,10 @@ export const handleCancelPolygon = (
   setSelectedPolygon(null);
 };
 
-export const convertImageSrcToFile = async (
-  imageSrc,
-  fileName = "image.png"
-) => {
+export const convertImageSrcToFile = async (imageSrc, fileName = 'image.png') => {
   const res = await fetch(imageSrc);
   const blob = await res.blob();
-  return new File([blob], fileName, { type: "image/png" });
+  return new File([blob], fileName, { type: 'image/png' });
 };
 
 export const getCroppedImg = (imageSrc, crop) => {
@@ -531,10 +511,10 @@ export const getCroppedImg = (imageSrc, crop) => {
     const image = new Image();
     image.src = imageSrc;
     image.onload = () => {
-      const canvas = document.createElement("canvas");
+      const canvas = document.createElement('canvas');
       canvas.width = 800;
       canvas.height = 500;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
 
       ctx.drawImage(
         image,
@@ -550,7 +530,7 @@ export const getCroppedImg = (imageSrc, crop) => {
 
       canvas.toBlob((blob) => {
         resolve(URL.createObjectURL(blob));
-      }, "image/jpeg");
+      }, 'image/jpeg');
     };
   });
 };

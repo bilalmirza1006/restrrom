@@ -1,5 +1,12 @@
-const Inspectionist = () => {
-  return <div>Inspectionistddddd</div>;
-};
+import AllBuildings from '@/components/user/buildings/AllBuildings';
+import React from 'react';
 
-export default Inspectionist;
+function Inspection() {
+  return (
+    <div>
+      <AllBuildings />
+    </div>
+  );
+}
+
+export default Inspection;
