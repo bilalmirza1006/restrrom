@@ -137,7 +137,7 @@ const AllHistory = () => {
       console.error('Error updating sensor status:', error);
     }
   };
-  const data = [
+  const data1 = [
     { name: 'Queuing', value: 80, color: '#FF6B6B' },
     { name: 'Flow Count', value: 70, color: '#00CFFF' },
     { name: 'Stall Occupancy', value: 60, color: '#00C49F' },
@@ -150,7 +150,7 @@ const AllHistory = () => {
       <div className="flex justify-between items-center">
         <h4 className="text-base md:text-xl font-semibold text-[#05004E]">All Sensors</h4>
       </div>
-      <ActiveSensors data={data} title={'hall'} />
+      <ActiveSensors data={data1} title={'hall'} />
       <div className="mt-6">
         {isLoading ? (
           <Spinner />
@@ -265,13 +265,4 @@ const tableColumns = () => [
       </div>
     ),
   },
-  //   {
-  //     name: 'Progress',
-  //     selector: (row) => row?.progress,
-  //     cell: (row) => (
-
-  //     ),
-  //   },
 ];
-
-// export default AllHistory
