@@ -25,7 +25,7 @@ const AddSensor = ({ onClose }) => {
     e.preventDefault();
     try {
       const res = await createSensor(formData).unwrap();
-      toast.success(res.messsage || "Sensor created successfully");
+      toast.success(res.message || "Sensor created successfully");
       onClose();
     } catch (error) {
       toast.error(error.message || "Something went wrong");
@@ -34,10 +34,7 @@ const AddSensor = ({ onClose }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-1 lg:grid-cols-12 gap-4"
-    >
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
       <div className="lg:col-span-6">
         <Input
           label="Sensor Name"
@@ -67,16 +64,8 @@ const AddSensor = ({ onClose }) => {
       </div>
 
       <div className="lg:col-span-12 flex items-center justify-center gap-4 mt-4">
-        <Button
-          onClick={onClose}
-          text="Cancel"
-          cn="border-primary bg-transparent !text-primary"
-        />
-        <Button
-          type="submit"
-          text={isLoading ? "Adding..." : "Add Sensor"}
-          disabled={isLoading}
-        />
+        <Button onClick={onClose} text="Cancel" cn="border-primary bg-transparent !text-primary" />
+        <Button type="submit" text={isLoading ? "Adding..." : "Add Sensor"} disabled={isLoading} />
       </div>
     </form>
   );

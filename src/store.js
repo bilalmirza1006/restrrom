@@ -13,10 +13,7 @@ const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [sensorApi.reducerPath]: sensorApi.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware()
-      .concat(authApi.middleware)
-      .concat(sensorApi.middleware),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(authApi.middleware).concat(sensorApi.middleware),
 });
 
 const StoreProvider = ({ children }) => {

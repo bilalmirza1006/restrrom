@@ -2,10 +2,7 @@
 import { useState, useEffect } from "react";
 import Button from "@/components/global/small/Button";
 import Input from "@/components/global/small/Input";
-import {
-  useGetProfileQuery,
-  useUpdateProfileMutation,
-} from "@/features/auth/authApi";
+import { useGetProfileQuery, useUpdateProfileMutation } from "@/features/auth/authApi";
 import toast from "react-hot-toast";
 import Loader from "@/components/global/Loader";
 
@@ -20,14 +17,14 @@ const Profile = () => {
   const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
-    if (data?.user) {
-      setProfile(data.user);
+    if (data?.data) {
+      setProfile(data.data);
       setFormData({
-        fullName: data.user.fullName || "",
-        email: data.user.email || "",
-        phoneNumber: data.user.phoneNumber || "",
-        dob: data.user.dob?.substring(0, 10) || "",
-        nationality: data.user.nationality || "",
+        fullName: data.data.fullName || "",
+        email: data.data.email || "",
+        phoneNumber: data.data.phoneNumber || "",
+        dob: data.data.dob?.substring(0, 10) || "",
+        nationality: data.data.nationality || "",
       });
     }
   }, [data]);
@@ -87,11 +84,7 @@ const Profile = () => {
       <div className="w-full bg-white shadow rounded-xl p-6">
         <div className="flex flex-col items-center">
           <img
-            src={
-              previewImage ||
-              profile?.image?.url ||
-              "/images/default/profile.png"
-            }
+            src={previewImage || profile?.image?.url || "/images/default/profile.png"}
             alt={formData.fullName}
             className="size-32 md:size-52 rounded-full mb-4 object-cover shadow"
           />
@@ -111,19 +104,8 @@ const Profile = () => {
         <div className="mt-6">
           {isEditing ? (
             <form className="space-y-4">
-              <Input
-                label="Full Name"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-              />
-              <Input
-                label="Email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-              />
+              <Input label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} />
+              <Input label="Email" name="email" type="email" value={formData.email} onChange={handleChange} />
               <Input
                 label="Phone Number"
                 name="phoneNumber"
@@ -131,19 +113,8 @@ const Profile = () => {
                 value={formData.phoneNumber}
                 onChange={handleChange}
               />
-              <Input
-                label="Date of Birth"
-                name="dob"
-                type="date"
-                value={formData.dob}
-                onChange={handleChange}
-              />
-              <Input
-                label="Nationality"
-                name="nationality"
-                value={formData.nationality}
-                onChange={handleChange}
-              />
+              <Input label="Date of Birth" name="dob" type="date" value={formData.dob} onChange={handleChange} />
+              <Input label="Nationality" name="nationality" value={formData.nationality} onChange={handleChange} />
             </form>
           ) : (
             <div className="space-y-4">
@@ -159,9 +130,7 @@ const Profile = () => {
           <Button
             onClick={handleToggleEdit}
             width="max-w-[130px]"
-            text={
-              isEditing ? (isUpdating ? "Saving..." : "Save") : "Edit Profile"
-            }
+            text={isEditing ? (isUpdating ? "Saving..." : "Save") : "Edit Profile"}
           />
         </div>
       </div>

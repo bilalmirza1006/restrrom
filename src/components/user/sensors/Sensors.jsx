@@ -3,11 +3,7 @@ import Modal from "@/components/global/Modal";
 import Button from "@/components/global/small/Button";
 import ToggleButton from "@/components/global/small/ToggleButton";
 import { tableStyles } from "@/data/data";
-import {
-  useDeleteSensorMutation,
-  useGetAllSensorsQuery,
-  useUpdateSensorMutation,
-} from "@/features/sensor/sensorApi";
+import { useDeleteSensorMutation, useGetAllSensorsQuery, useUpdateSensorMutation } from "@/features/sensor/sensorApi";
 import Link from "next/link";
 import { useState } from "react";
 import DataTable from "react-data-table-component";
@@ -25,8 +21,7 @@ const Sensors = () => {
   const [selectedSensor, setSelectedSensor] = useState(null);
   const { data, isLoading } = useGetAllSensorsQuery();
   const [updateSensor] = useUpdateSensorMutation();
-  const [deleteSensor, { isLoading: deleteLoading }] =
-    useDeleteSensorMutation();
+  const [deleteSensor, { isLoading: deleteLoading }] = useDeleteSensorMutation();
   const modalOpenHandler = (type, sensor = null) => {
     setModalType(type);
     setSelectedSensor(sensor);
@@ -62,9 +57,7 @@ const Sensors = () => {
   return (
     <section className="bg-white p-4 md:p-5 rounded-[10px]">
       <div className="flex justify-between items-center">
-        <h4 className="text-base md:text-xl font-semibold text-[#05004E]">
-          All Sensors
-        </h4>
+        <h4 className="text-base md:text-xl font-semibold text-[#05004E]">All Sensors</h4>
         <button onClick={() => modalOpenHandler("add")}>
           <IoIosAddCircle className="text-primary text-2xl" />
         </button>
@@ -75,7 +68,7 @@ const Sensors = () => {
           <Spinner />
         ) : (
           <DataTable
-            data={data?.sensors || []}
+            data={data?.data || []}
             columns={tableColumns(handleStatusHandler, modalOpenHandler)}
             customStyles={tableStyles}
             pagination
@@ -92,28 +85,15 @@ const Sensors = () => {
       )}
       {modalType === "edit" && (
         <Modal onClose={modalCloseHandler} title={"Edit Sensor"}>
-          <EditSensor
-            onClose={modalCloseHandler}
-            selectedSensor={selectedSensor}
-          />
+          <EditSensor onClose={modalCloseHandler} selectedSensor={selectedSensor} />
         </Modal>
       )}
       {modalType === "delete" && (
-        <Modal
-          onClose={modalCloseHandler}
-          title={"Confirmation"}
-          width="w-[300px] md:w-[600px]"
-        >
+        <Modal onClose={modalCloseHandler} title={"Confirmation"} width="w-[300px] md:w-[600px]">
           <div>
-            <p className="text-[16px] text-[#00000090]">
-              Are you sure you want to delete this sensor?
-            </p>
+            <p className="text-[16px] text-[#00000090]">Are you sure you want to delete this sensor?</p>
             <div className="flex items-center justify-end gap-4 mt-5">
-              <Button
-                onClick={modalCloseHandler}
-                text="Cancel"
-                cn="border-primary bg-transparent !text-primary"
-              />
+              <Button onClick={modalCloseHandler} text="Cancel" cn="border-primary bg-transparent !text-primary" />
               <Button
                 onClick={() => deleteSensorHandler(selectedSensor?._id)}
                 text={deleteLoading ? "Deleting..." : "Delete Sensor"}
@@ -144,21 +124,11 @@ const tableColumns = (handleStatusHandler, modalOpenHandler) => [
   },
   {
     name: "Is Connected",
-    selector: (row) =>
-      row?.isConnected === true ? (
-        <span>Connected</span>
-      ) : (
-        <span>Disconnected</span>
-      ),
+    selector: (row) => (row?.isConnected === true ? <span>Connected</span> : <span>Disconnected</span>),
   },
   {
     name: "Status",
-    cell: (row) => (
-      <ToggleButton
-        isChecked={row.status}
-        onToggle={() => handleStatusHandler(row)}
-      />
-    ),
+    cell: (row) => <ToggleButton isChecked={row.status} onToggle={() => handleStatusHandler(row)} />,
   },
   {
     name: "Action",
@@ -170,16 +140,10 @@ const tableColumns = (handleStatusHandler, modalOpenHandler) => [
           </div>
         </Link>
 
-        <div
-          className="cursor-pointer"
-          onClick={() => modalOpenHandler("edit", row)}
-        >
+        <div className="cursor-pointer" onClick={() => modalOpenHandler("edit", row)}>
           <CiEdit fontSize={23} />
         </div>
-        <div
-          className="cursor-pointer"
-          onClick={() => modalOpenHandler("delete", row)}
-        >
+        <div className="cursor-pointer" onClick={() => modalOpenHandler("delete", row)}>
           <AiOutlineDelete fontSize={23} style={{ color: "red" }} />
         </div>
       </div>

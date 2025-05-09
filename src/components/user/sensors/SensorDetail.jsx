@@ -15,17 +15,15 @@ const SensorDetail = ({ id }) => {
   console.log("SensorDetail", sensorData);
 
   useEffect(() => {
-    if (data?.sensor) {
-      setSensorData(data.sensor);
+    if (data?.data) {
+      setSensorData(data.data);
     }
   }, [data]);
 
   if (error) return <div className="text-red-500">Error: {error}</div>;
   return (
     <section className="bg-white p-4 md:p-5 rounded-[10px]">
-      <h4 className="text-base md:text-xl font-semibold text-[#05004E]">
-        Sensor Details
-      </h4>
+      <h4 className="text-base md:text-xl font-semibold text-[#05004E]">Sensor Details</h4>
       {isLoading ? (
         <Spinner />
       ) : (
