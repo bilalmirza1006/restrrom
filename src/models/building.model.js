@@ -7,19 +7,28 @@ const buildingSchema = new mongoose.Schema(
     buildingThumbnail: { type: imageSchema, required: true },
     name: { type: String, required: true },
     type: { type: String, required: true },
+    location: { type: String, required: true },
     area: { type: String, required: true },
     totalFloors: { type: Number, required: true },
+    numberOfRooms: { type: Number, required: true },
     buildingManager: { type: String, required: true },
     phone: { type: String, required: true },
-    numberOfRooms: { type: Number, required: true },
-    images: { type: [imageSchema], required: true },
-    location: { type: String, required: true },
-    restRooms: [{ type: mongoose.Schema.Types.ObjectId, ref: "RestRoom" }],
     buildingModelImage: { type: imageSchema, required: true },
-    buildingModleCoordinates: { type: Array, required: true },
+    buildingModelCoordinates: {
+      type: [
+        {
+          points: [{ x: Number, y: Number }],
+          id: String,
+          color: String,
+          fillColor: String,
+          labelPoint: String,
+          sensorAttached: String,
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );
 
-export const Building =
-  mongoose.models.Building || mongoose.model("Building", buildingSchema);
+export const Building = mongoose.models.Building || mongoose.model("Building", buildingSchema);
