@@ -642,21 +642,6 @@ const mostUsedRoomsList = [
     floor: 'Floor 3',
     used: '45%',
   },
-  {
-    room: 'Meeting Room 2',
-    floor: 'Floor 5',
-    used: '55%',
-  },
-  {
-    room: 'Restroom 7',
-    floor: 'Floor 4',
-    used: '65%',
-  },
-  {
-    room: 'Executive Lounge',
-    floor: 'Floor 10',
-    used: '75%',
-  },
 ];
 
 const floorListData = [

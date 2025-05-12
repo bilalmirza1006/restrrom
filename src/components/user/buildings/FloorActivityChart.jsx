@@ -1,5 +1,5 @@
-"use client";
-import { activityChartData } from "@/data/data";
+'use client';
+import { activityChartData } from '@/data/data';
 import {
   CartesianGrid,
   Legend,
@@ -9,15 +9,13 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from "recharts";
+} from 'recharts';
 
 const FloorActivityChart = () => {
   return (
-    <section>
+    <section className="bg-white h-[495px] rounded-[14px] px-4 py-3">
       <div className="flex items-center justify-between mb-4">
-        <h6 className="text-lg md:text-2xl font-semibold text-black">
-          Floors Activity
-        </h6>
+        <h6 className="text-lg md:text-2xl font-semibold  text-black">Floors Activity</h6>
       </div>
       <ResponsiveContainer width="100%" height={400}>
         <LineChart
@@ -34,13 +32,13 @@ const FloorActivityChart = () => {
             dataKey="name"
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: "#555" }}
+            tick={{ fontSize: 12, fill: '#555' }}
           />
           <YAxis
-            domain={["auto", "auto"]}
+            domain={['auto', 'auto']}
             axisLine={false}
             tickLine={false}
-            tick={{ fontSize: 12, fill: "#555" }}
+            tick={{ fontSize: 12, fill: '#555' }}
           />
           <Tooltip />
           <Legend
@@ -48,36 +46,16 @@ const FloorActivityChart = () => {
             align="center"
             verticalAlign="start"
             wrapperStyle={{
-              position: "relative",
+              position: 'relative',
               bottom: 10,
               marginTop: 5,
               marginBottom: 20,
             }}
-            formatter={(value, entry) => (
-              <span style={{ color: entry.color }}>{value}</span>
-            )}
+            formatter={(value, entry) => <span style={{ color: entry.color }}>{value}</span>}
           />
-          <Line
-            type="monotone"
-            dataKey="floor1"
-            stroke="#FF4C85"
-            strokeWidth={3}
-            dot={false}
-          />{" "}
-          <Line
-            type="monotone"
-            dataKey="floor2"
-            stroke="#FF7300"
-            strokeWidth={3}
-            dot={false}
-          />{" "}
-          <Line
-            type="monotone"
-            dataKey="floor3"
-            stroke="#1F2253"
-            strokeWidth={3}
-            dot={false}
-          />{" "}
+          <Line type="monotone" dataKey="floor1" stroke="#FF4C85" strokeWidth={3} dot={false} />
+          <Line type="monotone" dataKey="floor2" stroke="#FF7300" strokeWidth={3} dot={false} />
+          <Line type="monotone" dataKey="floor3" stroke="#1F2253" strokeWidth={3} dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </section>

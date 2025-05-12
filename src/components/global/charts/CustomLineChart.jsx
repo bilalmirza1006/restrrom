@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   ResponsiveContainer,
@@ -8,8 +8,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-} from "recharts";
-import { AiOutlineArrowUp } from "react-icons/ai";
+} from 'recharts';
+import { AiOutlineArrowUp } from 'react-icons/ai';
 
 // Custom Tooltip Component
 function CustomTooltip({ active, payload, label }) {
@@ -27,27 +27,18 @@ function CustomTooltip({ active, payload, label }) {
   );
 }
 
-export default function CustomAreaChart({
-  type = "monotone",
-  height = 300,
-  data,
-  xaxis,
-  yaxis,
-}) {
+export default function CustomAreaChart({ type = 'monotone', height = 300, data, xaxis, yaxis }) {
   return (
-    <div className="w-full">
+    <div className="bg-white w-full">
       <ResponsiveContainer width="100%" height={height}>
-        <AreaChart
-          data={data}
-          margin={{ top: 20, right: 0, left: -25, bottom: 0 }}
-        >
+        <AreaChart data={data} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#f0f0f0" />
           {xaxis && (
             <XAxis
               dataKey="day"
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#888" }}
+              tick={{ fontSize: 12, fill: '#888' }}
             />
           )}
 
@@ -56,14 +47,14 @@ export default function CustomAreaChart({
               domain={[10, 50]}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#888" }}
+              tick={{ fontSize: 12, fill: '#888' }}
               tickFormatter={(val) => `${val}%`}
             />
           )}
 
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ stroke: "#d0d0d0", strokeDasharray: "3 3" }}
+            cursor={{ stroke: '#d0d0d0', strokeDasharray: '3 3' }}
           />
 
           {/* Define gradients */}
@@ -89,9 +80,9 @@ export default function CustomAreaChart({
             dot={false}
             activeDot={{
               r: 6,
-              stroke: "#A449EB",
+              stroke: '#A449EB',
               strokeWidth: 2,
-              fill: "#fff",
+              fill: '#fff',
             }}
             baseValue="dataMin"
           />
