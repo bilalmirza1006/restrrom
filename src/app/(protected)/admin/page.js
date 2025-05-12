@@ -1,9 +1,9 @@
-import Dashboard from '@/components/admin/dashboard/Dashboard';
+import AdminDashboard from '@/components/admin/dashboard/AdminDashboard';
 
 const Admin = () => {
   return (
     <div>
-      <Dashboard />
+      <AdminDashboard />
     </div>
   );
 };

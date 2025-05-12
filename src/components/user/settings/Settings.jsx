@@ -1,10 +1,10 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Profile from "./Profile";
-import SubscriptionHistory from "./SubscriptionHistory";
-import ChangePassword from "./ChangePassword";
-import Configuration from "./Configuration";
+'use client';
+import { useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Profile from '@/components/user/settings/Profile';
+import SubscriptionHistory from '@/components/user/settings/SubscriptionHistory';
+import ChangePassword from '@/components/user/settings/ChangePassword';
+import Configuration from '@/components/user/settings/Configuration';
 
 const tabComponents = {
   profile: <Profile />,
@@ -17,14 +17,14 @@ const Settings = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const tabParam = searchParams.get("tab")?.toLowerCase() || "profile";
+  const tabParam = searchParams.get('tab')?.toLowerCase() || 'profile';
   const [activeTab, setActiveTab] = useState(tabParam);
 
   const tabs = [
-    { label: "Profile", value: "profile" },
-    { label: "Subscriptions History", value: "subscriptions" },
-    { label: "Change Password", value: "password" },
-    { label: "Configuration", value: "configuration" },
+    { label: 'Profile', value: 'profile' },
+    { label: 'Subscriptions History', value: 'subscriptions' },
+    { label: 'Change Password', value: 'password' },
+    { label: 'Configuration', value: 'configuration' },
   ];
 
   const handleTabChange = (value) => {
@@ -45,8 +45,8 @@ const Settings = () => {
             onClick={() => handleTabChange(value)}
             className={`text-base font-semibold px-5 py-3 rounded-md transition-all duration-150 ${
               activeTab === value
-                ? "bg-primary text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-100"
+                ? 'bg-primary text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-100'
             }`}
           >
             {label}
@@ -54,9 +54,7 @@ const Settings = () => {
         ))}
       </div>
 
-      <div className="mt-4 md:mt-5">
-        {tabComponents[activeTab] || <Profile />}
-      </div>
+      <div className="mt-4 md:mt-5">{tabComponents[activeTab] || <Profile />}</div>
     </section>
   );
 };

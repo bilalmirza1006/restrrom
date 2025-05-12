@@ -1,4 +1,4 @@
-import Plans from "@/components/user/plans/Plans";
+import Plans from '@/components/user/plans/Plans';
 
 const PlansPage = () => {
   return <Plans />;

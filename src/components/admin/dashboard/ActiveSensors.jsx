@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { GoAlertFill } from 'react-icons/go';
 import { ResponsiveContainer, RadialBarChart, RadialBar, Legend } from 'recharts';
 function ActiveSensors() {
   const legenditems = [
@@ -64,10 +65,13 @@ function ActiveSensors() {
   ];
   return (
     <div className="basis-[100%] mt-5 h-101 bg-white rounded-xl shadow-lg py-3 px-4 xl:basis-[32%]">
-      <div>
+      <div className="px-2 flex gap-2 items-center">
+        <span>
+          <GoAlertFill fontSize={26} fill="#FF3B30" />
+        </span>
         <h1 className="flex items-center gap-2 text-[20px] font-bold">ActiveSensors</h1>
       </div>
-      <div className="relative top-[34%] w-fit left-[44%] flex items-center gap-2">
+      <div className="relative top-[34%] w-fit left-[44%] lg:left-[44%] sm:left-[47%] flex items-center gap-2">
         <h1 className="text-[24px] font-bold">99%</h1>
       </div>
       <ResponsiveContainer className="" height={310}>

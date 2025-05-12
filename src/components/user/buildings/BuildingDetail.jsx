@@ -10,6 +10,7 @@ import MostUsedRooms from './MostUsedRooms';
 import FloorList from './FloorList';
 import { MdAdd, MdEdit, MdDelete } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
+import CustomDropdown from '@/components/global/CustomDropdown';
 
 const BuildingDetail = () => {
   const router = useRouter();
@@ -55,7 +56,12 @@ const BuildingDetail = () => {
               <BuildingCard data={item} key={i} />
             ))}
           </div>
+
           <div className="mt-5 bg-white p-5 rounded-xl">
+            <div className="flex justify-between">
+              <h1 className="text-[24px] font-semibold">Floors Activity</h1>
+              <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
+            </div>
             <FloorActivityChart />
           </div>
         </div>

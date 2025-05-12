@@ -13,10 +13,7 @@ import {
 
 const FloorActivityChart = () => {
   return (
-    <section className="bg-white h-[495px] rounded-[14px] px-4 py-3">
-      <div className="flex items-center justify-between mb-4">
-        <h6 className="text-lg md:text-2xl font-semibold  text-black">Floors Activity</h6>
-      </div>
+    <section className="h-[495px] rounded-[14px] px-4 py-3">
       <ResponsiveContainer width="100%" height={400}>
         <LineChart
           data={activityChartData}

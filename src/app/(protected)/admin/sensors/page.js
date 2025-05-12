@@ -1,4 +1,4 @@
-import Sensors from "@/components/user/sensors/Sensors";
+import Sensors from '@/components/user/sensors/Sensors';
 
 const SensorPage = () => {
   return <Sensors />;

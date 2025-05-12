@@ -1,20 +1,20 @@
-"use client";
-import Modal from "@/components/global/Modal";
-import { useState } from "react";
-import { GoAlertFill } from "react-icons/go";
+'use client';
+import Modal from '@/components/global/Modal';
+import { useState } from 'react';
+import { GoAlertFill } from 'react-icons/go';
 
 const alerts = [
-  "Heating - 1 sensor has problem",
-  "Heating - 1 sensor has problem",
-  "Heating - 1 sensor has problem",
-  "Heating - 1 sensor has problem",
-  "Heating - 1 sensor has problem",
-  "Heating - 2 sensors have problem",
-  "Heating - 2 sensors have problem",
-  "Heating - 2 sensors have problem",
-  "Heating - 2 sensors have problem",
-  "Heating - 2 sensors have problem",
-  "Cooling - 1 sensor has problem",
+  'Heating - 1 sensor has problem',
+  'Heating - 1 sensor has problem',
+  'Heating - 1 sensor has problem',
+  'Heating - 1 sensor has problem',
+  'Heating - 1 sensor has problem',
+  'Heating - 2 sensors have problem',
+  'Heating - 2 sensors have problem',
+  'Heating - 2 sensors have problem',
+  'Heating - 2 sensors have problem',
+  'Heating - 2 sensors have problem',
+  'Cooling - 1 sensor has problem',
 ];
 
 const Alerts = () => {
@@ -33,22 +33,15 @@ const Alerts = () => {
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <GoAlertFill className="text-2xl text-[#FF3B30]" />
-          <h2 className="text-sm md:text-lg leading-[30px] font-[500]">
-            Alerts
-          </h2>
+          <h2 className="text-[19px] font-semibold md:text-lg leading-[30px]">Alerts</h2>
         </div>
-        <button
-          onClick={() => handleModalOpen()}
-          className="text-primary text-xs cursor-pointer"
-        >
+        <button onClick={() => handleModalOpen()} className="text-primary text-xs cursor-pointer">
           See all
         </button>
       </div>
 
       {alerts.length === 0 ? (
-        <h2 className="bg-[#00000010] text-[#00000090] p-3 text-[21px]">
-          No Alert Found!
-        </h2>
+        <h2 className="bg-[#00000010] text-[#00000090] p-3 text-[21px]">No Alert Found!</h2>
       ) : (
         <div className="flex flex-col gap-3 h-[344px] overflow-y-scroll scroll-0">
           {alerts.map((alert, i) => (
