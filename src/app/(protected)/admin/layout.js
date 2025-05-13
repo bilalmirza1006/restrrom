@@ -25,23 +25,25 @@ const AdminLayout = ({ children }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
   const pathname = usePathname();
+  console.log('isAuthenticated', isAuthenticated);
+  console.log('admin', user);
 
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.replace('/login');
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+      return;
+    }
 
-  //   if (user && user.role !== 'admin') {
-  //     const route = getRoleBaseRoute(user.role);
-  //     if (pathname !== route) {
-  //       toast.error('You are not authorized to access this page');
-  //       router.replace(route);
-  //     }
-  //   }
-  // }, [user, isAuthenticated, pathname, router]);
+    if (user && user.role !== 'admin') {
+      const route = getRoleBaseRoute(user.role);
+      if (pathname !== route) {
+        toast.error('You are not authorized to access this page');
+        router.replace(route);
+      }
+    }
+  }, [user, isAuthenticated, pathname, router]);
 
-  // if (!isAuthenticated || !user || user.role !== 'admin') return <Loader />;
+  if (!isAuthenticated || !user || user.role !== 'admin') return <Loader />;
 
   return (
     <section className="bg-[#F5F2FF] w-screen h-screen grid place-items-center overflow-hidden">

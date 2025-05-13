@@ -1,22 +1,22 @@
-"use client";
+'use client';
 
-import Loader from "@/components/global/Loader";
-import { useGetProfileQuery } from "@/features/auth/authApi";
-import { setUser } from "@/features/auth/authSlice";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import Loader from '@/components/global/Loader';
+import { useGetProfileQuery } from '@/features/auth/authApi';
+import { setUser } from '@/features/auth/authSlice';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 const getRoleBaseRoute = (role) => {
   switch (role) {
-    case "user":
-      return "/";
-    case "admin":
-      return "/admin";
-    case "inspectionist":
-      return "/inspectionist";
+    case 'user':
+      return '/';
+    case 'admin':
+      return '/admin';
+    case 'inspector':
+      return '/inspectionist';
     default:
-      return "/";
+      return '/';
   }
 };
 
@@ -42,7 +42,7 @@ const ProtectedLayout = ({ children }) => {
     }
 
     if (isError && !isAuthenticated) {
-      router.replace("/login");
+      router.replace('/login');
     }
   }, [data, isSuccess, isLoading, pathname, router, dispatch, isError, isAuthenticated, user]);
 

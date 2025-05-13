@@ -1,15 +1,15 @@
-const { createSlice } = require("@reduxjs/toolkit");
+const { createSlice } = require('@reduxjs/toolkit');
 
 const initialState = {
-  buildingName: "",
-  buildingImage: "",
-  buildingType: "",
-  location: "",
-  area: "",
-  totalFloors: "",
-  totalRestrooms: "",
-  buildingManager: "",
-  phone: "",
+  buildingName: '',
+  buildingImage: '',
+  buildingType: '',
+  location: '',
+  area: '',
+  totalFloors: '',
+  totalRestrooms: '1',
+  buildingManager: '',
+  phone: '',
   buildingModelPreview: null,
   buildingModelCoordinates: [],
   mapInfo: {},
@@ -17,7 +17,7 @@ const initialState = {
 };
 
 const buildingSlice = createSlice({
-  name: "building",
+  name: 'building',
   initialState,
   reducers: {
     setBuilding: (state, action) => {
@@ -45,10 +45,8 @@ const buildingSlice = createSlice({
       state.totalRestrooms = totalRestrooms || state.totalRestrooms;
       state.buildingManager = buildingManager || state.buildingManager;
       state.phone = phone || state.phone;
-      state.buildingModelPreview =
-        buildingModelPreview || state.buildingModelPreview;
-      state.buildingModelCoordinates =
-        buildingModelCoordinates || state.buildingModelCoordinates;
+      state.buildingModelPreview = buildingModelPreview || state.buildingModelPreview;
+      state.buildingModelCoordinates = buildingModelCoordinates || state.buildingModelCoordinates;
       state.mapInfo = mapInfo || state.mapInfo;
     },
     addRestroom: (state, action) => {
@@ -67,11 +65,6 @@ const buildingSlice = createSlice({
   },
 });
 
-export const {
-  setBuilding,
-  removeBuilding,
-  addRestroom,
-  updateRestroom,
-  setRestrooms,
-} = buildingSlice.actions;
+export const { setBuilding, removeBuilding, addRestroom, updateRestroom, setRestrooms } =
+  buildingSlice.actions;
 export default buildingSlice;

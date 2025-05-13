@@ -27,23 +27,25 @@ const InspectionistLayout = ({ children }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
   const pathname = usePathname();
+  console.log('isAuthenticated', isAuthenticated);
+  console.log('inspector', user);
 
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     router.replace('/login');
-  //     return;
-  //   }
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+      return;
+    }
 
-  //   if (user && user.role !== 'inspectionist') {
-  //     const route = getRoleBaseRoute(user.role);
-  //     if (pathname !== route) {
-  //       toast.error('You are not authorized to access this page');
-  //       router.replace(route);
-  //     }
-  //   }
-  // }, [user, isAuthenticated, pathname, router]);
+    if (user && user.role !== 'inspector') {
+      const route = getRoleBaseRoute(user.role);
+      if (pathname !== route) {
+        toast.error('You are not authorized to access this page');
+        router.replace(route);
+      }
+    }
+  }, [user, isAuthenticated, pathname, router]);
 
-  // if (!isAuthenticated || !user || user.role !== 'inspectionist') return <Loader />;
+  if (!isAuthenticated || !user || user.role !== 'inspector') return <Loader />;
 
   return (
     <section className="bg-[#F5F2FF] w-screen h-screen grid place-items-center overflow-hidden">
