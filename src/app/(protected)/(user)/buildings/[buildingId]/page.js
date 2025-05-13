@@ -1,7 +1,12 @@
-import BuildingDetail from "@/components/user/buildings/BuildingDetail";
+'use client';
 
-const BuildingDetailsPage = () => {
-  return <BuildingDetail />;
+import BuildingDetail from '@/components/user/buildings/BuildingDetail';
+
+const BuildingDetailsPage = ({ params }) => {
+  const { buildingId } = params;
+  console.log('const { buildingId } = params;', buildingId);
+
+  return <BuildingDetail buildingId={buildingId} />;
 };
 
 export default BuildingDetailsPage;

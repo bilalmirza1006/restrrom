@@ -12,16 +12,14 @@ import { MdAdd, MdEdit, MdDelete } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import CustomDropdown from '@/components/global/CustomDropdown';
 
-const BuildingDetail = () => {
+const BuildingDetail = ({ buildingId }) => {
   const router = useRouter();
-  // const { id } = router.query;
-  // console.log('sdugyfcv', id);
 
   const AddFloorHandle = () => {
     router.push('/floor/add-floor');
   };
   const editBuildingHandle = () => {
-    router.push('/building/edit-building');
+    router.push(`/buildings/edit-building/${buildingId}`);
   };
   return (
     <div className="">
@@ -36,6 +34,7 @@ const BuildingDetail = () => {
         </button>
 
         <button
+          onClick={editBuildingHandle}
           title="Edit Building"
           className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg shadow text-blue-800"
         >
