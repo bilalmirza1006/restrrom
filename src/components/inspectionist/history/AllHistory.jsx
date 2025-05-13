@@ -147,10 +147,10 @@ const AllHistory = () => {
 
   return (
     <section className="bg-white p-4 md:p-5 rounded-[10px]">
-      <div className="flex justify-between items-center">
+      {/* <div className="flex justify-between items-center">
         <h4 className="text-base md:text-xl font-semibold text-[#05004E]">All Sensors</h4>
       </div>
-      <ActiveSensors data={data1} title={'hall'} />
+      <ActiveSensors data={data1} title={'hall'} /> */}
       <div className="mt-6">
         {isLoading ? (
           <Spinner />
