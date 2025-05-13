@@ -14,7 +14,7 @@ const AllBuildings = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
         {buildingData.map((building, i) => (
-          <Link href={`/buildings/buildingdetails${building?.id}`} key={i}>
+          <Link href={`/buildings/building-detail/${building?.id}`} key={i}>
             <BuildingCard data={building} />
           </Link>
         ))}
