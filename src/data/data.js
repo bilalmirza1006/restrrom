@@ -95,7 +95,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '12',
+    id: '2',
     title: 'Bahrain Plaza',
     location: 'Downtown, Manama, Bahrain',
     image: '/images/dashboard/building-two.png',
@@ -104,7 +104,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '23',
+    id: '3',
     title: 'Dubai Heights',
     location: 'Business Bay, Dubai, UAE',
     image: '/images/dashboard/building-three.png',
@@ -113,7 +113,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '34',
+    id: '4',
     title: 'Kuwait Residency',
     location: 'Salmiya, Kuwait',
     image: '/images/dashboard/building-one.png',
@@ -122,7 +122,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '54',
+    id: '5',
     title: 'Qatar Hub',
     location: 'West Bay, Doha, Qatar',
     image: '/images/dashboard/building-two.png',
@@ -131,7 +131,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '56',
+    id: '6',
     title: 'Oman Oasis',
     location: 'Muscat, Oman',
     image: '/images/dashboard/building-three.png',
@@ -140,7 +140,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '34',
+    id: '7',
     title: 'Kuwait Residency',
     location: 'Salmiya, Kuwait',
     image: '/images/dashboard/building-one.png',
@@ -149,7 +149,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '54',
+    id: '8',
     title: 'Qatar Hub',
     location: 'West Bay, Doha, Qatar',
     image: '/images/dashboard/building-two.png',
@@ -158,7 +158,7 @@ const buildingData = [
     buildingType: 'Commercial',
   },
   {
-    id: '56',
+    id: '9',
     title: 'Oman Oasis',
     location: 'Muscat, Oman',
     image: '/images/dashboard/building-three.png',

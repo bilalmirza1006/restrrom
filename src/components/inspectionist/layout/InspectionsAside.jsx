@@ -29,7 +29,7 @@ const pages = [
   },
 
   {
-    id: 5,
+    id: 3,
     title: 'Settings',
     link: ['/inspectionist/settings'],
     icon: <SettingIcon />,

@@ -23,7 +23,7 @@ const Dashboard = () => {
         ))}
       </div>
       <div className="col-span-12 lg:col-span-8">
-        <Map />
+        <Map location={'lahore'} name={'Dream house'} status={'free'} />
       </div>
       <div className="col-span-12 lg:col-span-4">
         <Alerts />
