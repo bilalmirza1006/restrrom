@@ -368,11 +368,17 @@ const MarkRestroomModel = ({
               <div>
                 <label className="block text-sm font-medium mb-2">Label Position</label>
                 <div className="flex items-center flex-wrap gap-2">
-                  {['first', 'second', 'third', 'fourth'].map((point) => (
+                  {['left', 'right', 'top', 'bottom'].map((point) => (
                     <button
                       key={point}
                       onClick={() =>
-                        polygonsLabelHandler(point, selectedPolygon, polygons, setPolygons)
+                        polygonsLabelHandler(
+                          point,
+                          selectedPolygon,
+                          polygons,
+                          setPolygons,
+                          setSelectedPolygon // ✅ Pass setter
+                        )
                       }
                       className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point
@@ -461,11 +467,17 @@ const MarkRestroomModel = ({
               <div>
                 <label className="block text-sm font-medium mb-2">Label Position</label>
                 <div className="flex items-center flex-wrap gap-2">
-                  {['first', 'second', 'third', 'fourth'].map((point) => (
+                  {['left', 'right', 'top', 'bottom'].map((point) => (
                     <button
                       key={point}
                       onClick={() =>
-                        polygonsLabelHandler(point, selectedPolygon, polygons, setPolygons)
+                        polygonsLabelHandler(
+                          point,
+                          selectedPolygon,
+                          polygons,
+                          setPolygons,
+                          setSelectedPolygon // ✅ Pass setter
+                        )
                       }
                       className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point

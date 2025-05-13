@@ -6,7 +6,7 @@ import Restrooms from './Restrooms';
 import { useState } from 'react';
 
 const AddBuilding = () => {
-  const [currentStep, setCurrentStep] = useState(4);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const steps = ['General Information', 'Building Model', 'Maping', 'Restrooms'];
 

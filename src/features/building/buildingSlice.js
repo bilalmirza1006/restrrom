@@ -7,7 +7,7 @@ const initialState = {
   location: '',
   area: '',
   totalFloors: '',
-  totalRestrooms: '1',
+  totalRestrooms: '',
   buildingManager: '',
   phone: '',
   buildingModelPreview: null,
