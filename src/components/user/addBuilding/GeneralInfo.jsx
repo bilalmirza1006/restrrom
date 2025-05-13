@@ -1,53 +1,45 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { setBuilding } from '@/features/building/buildingSlice';
-import Button from '@/components/global/small/Button';
-import Input from '@/components/global/small/Input';
-import UploadBuildingImage from './UploadBuildingImage';
-import toast from 'react-hot-toast';
-import { getFileCache, setFileCache } from '@/utils/fileStore';
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setBuilding } from "@/features/building/buildingSlice";
+import Button from "@/components/global/small/Button";
+import Input from "@/components/global/small/Input";
+import UploadBuildingImage from "./UploadBuildingImage";
+import toast from "react-hot-toast";
+import { getFileCache, setFileCache } from "@/utils/fileStore";
 
 const GeneralInfo = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
   const building = useSelector((state) => state.building);
-  console.log('building', building);
-
-  const [image, setImage] = useState({
-    file: null,
-    imagePreview: null,
-  });
-  console.log('image', image);
-
+  const [image, setImage] = useState({ file: null, imagePreview: null });
   const [buildingInfo, setBuildingInfo] = useState({
-    buildingName: '',
-    buildingType: '',
-    location: '',
-    area: '',
-    totalFloors: '',
-    totalRestrooms: '',
-    buildingManager: '',
-    phone: '',
+    buildingName: "",
+    buildingType: "",
+    location: "",
+    area: "",
+    totalFloors: "",
+    totalRestrooms: "",
+    buildingManager: "",
+    phone: "",
   });
 
   // Load redux values into form on mount
   useEffect(() => {
     if (building) {
       setBuildingInfo({
-        buildingName: building.buildingName || '',
-        buildingType: building.buildingType || '',
-        location: building.location || '',
-        area: building.area || '',
-        totalFloors: building.totalFloors || '',
-        totalRestrooms: building.totalRestrooms || '',
-        buildingManager: building.buildingManager || '',
-        phone: building.phone || '',
+        buildingName: building.buildingName || "",
+        buildingType: building.buildingType || "",
+        location: building.location || "",
+        area: building.area || "",
+        totalFloors: building.totalFloors || "",
+        totalRestrooms: building.totalRestrooms || "",
+        buildingManager: building.buildingManager || "",
+        phone: building.phone || "",
       });
-
       if (building.buildingImage) {
         setImage({
-          file: getFileCache('buildingImage'),
+          file: getFileCache("buildingImage"),
           imagePreview: building.buildingImage,
         });
       }
@@ -56,40 +48,23 @@ const GeneralInfo = ({ setCurrentStep }) => {
 
   const buildingInfoChangeHandler = (e) => {
     const { name, value } = e.target;
-    setBuildingInfo((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setBuildingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
   const nextBtnHandler = (e) => {
     e.preventDefault();
-
     const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
     const hasImage = !!(image?.file || image?.imagePreview);
-
-    if (hasEmptyField || !hasImage) {
-      toast.error('Please fill all fields and upload building image.');
-      return;
-    }
-
-    dispatch(
-      setBuilding({
-        ...buildingInfo,
-        buildingImage: image.imagePreview,
-      })
-    );
-    setFileCache('buildingImage', image.file);
+    if (hasEmptyField || !hasImage) return toast.error("Please fill all fields and upload building image.");
+    dispatch(setBuilding({ ...buildingInfo, buildingImage: image.imagePreview }));
+    setFileCache("buildingImage", image.file);
     setCurrentStep((s) => s + 1);
   };
 
   return (
     <div>
       <h6 className="text-base text-primary font-medium">General Information</h6>
-      <form
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
-        onSubmit={nextBtnHandler}
-      >
+      <form className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5" onSubmit={nextBtnHandler}>
         <div className="lg:col-span-3">
           <UploadBuildingImage image={image} setImage={setImage} />
         </div>

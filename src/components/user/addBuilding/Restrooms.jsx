@@ -15,18 +15,18 @@ const Restrooms = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
   const building = useSelector((state) => state.building);
   const { data: sensorsData, isLoading } = useGetAllSensorsQuery();
-
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [restroomData, setRestroomData] = useState([]);
   const [availableSensors, setAvailableSensors] = useState([]);
 
+  console.log("rest rooms data", restroomData);
+
   // Transform and set sensor data for dropdowns
   useEffect(() => {
     if (sensorsData?.data) {
-      // Transform API data for dropdown use
       const formattedSensors = sensorsData.data.map((sensor) => ({
-        label: `${sensor.id} - ${sensor.name}`,
-        value: sensor.id,
+        option: sensor?.name,
+        value: sensor?._id,
       }));
       setAvailableSensors(formattedSensors);
     }
@@ -38,11 +38,9 @@ const Restrooms = ({ setCurrentStep }) => {
       building?.totalRestrooms &&
       (!restroomData.length || restroomData.length !== parseInt(building.totalRestrooms))
     ) {
-      // If we already have restrooms in redux, use them
       if (building.restrooms && building.restrooms.length) {
         setRestroomData(building.restrooms);
       } else {
-        // Otherwise create empty placeholders based on totalRestrooms
         const initialRestroomData = Array.from({
           length: parseInt(building.totalRestrooms),
         }).map((_, index) => ({
@@ -66,11 +64,8 @@ const Restrooms = ({ setCurrentStep }) => {
       const usedSensors = restroomData
         .flatMap((restroom) => restroom.restroomCoordinates?.map((polygon) => polygon.sensor) || [])
         .filter((sensor) => sensor && sensor !== "No sensor");
-
       // Filter available sensors
       const filteredSensors = availableSensors.filter((sensor) => !usedSensors.includes(sensor.value));
-
-      setAvailableSensors(filteredSensors);
     }
   }, [restroomData]);
 
@@ -118,11 +113,11 @@ const Restrooms = ({ setCurrentStep }) => {
 
   const saveRestroomData = (index) => {
     const restroom = restroomData[index];
+    console.log("rest room data is ", restroom);
 
     // Validate required fields
     if (!restroom.name || !restroom.type || !restroom.status || !restroom.area || !restroom.toilets) {
-      toast.error("Please fill all required fields for this restroom");
-      return false;
+      return toast.error("Please fill all required fields for this restroom");
     }
 
     // Update single restroom in Redux
@@ -200,10 +195,10 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Type"
                     placeholder="Select type"
                     value={restroom.type}
-                    setValue={(value) => handleRestroomChange(index, "type", value)}
+                    onSelect={(value) => handleRestroomChange(index, "type", value)}
                     options={[
-                      { label: "Public", value: "public" },
-                      { label: "Private", value: "private" },
+                      { option: "Public", value: "public" },
+                      { option: "Private", value: "private" },
                     ]}
                   />
 
@@ -211,10 +206,10 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Status"
                     placeholder="Select status"
                     value={restroom.status}
-                    setValue={(value) => handleRestroomChange(index, "status", value)}
+                    onSelect={(value) => handleRestroomChange(index, "status", value)}
                     options={[
-                      { label: "Active", value: "active" },
-                      { label: "Inactive", value: "inactive" },
+                      { option: "Active", value: "active" },
+                      { option: "Inactive", value: "inactive" },
                     ]}
                   />
 
@@ -246,6 +241,7 @@ const Restrooms = ({ setCurrentStep }) => {
                       polygons={restroom.restroomCoordinates || []}
                       setPolygons={(coordinates) => handleImageChange(index, null, null, coordinates)}
                       availableSensors={availableSensors}
+                      updateRestRoomHandler={handleRestroomChange}
                     />
                   </div>
                 </div>
