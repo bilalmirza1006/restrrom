@@ -12,8 +12,10 @@ import { MdAdd, MdEdit, MdDelete } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import CustomDropdown from '@/components/global/CustomDropdown';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 const BuildingDetail = ({ buildingId }) => {
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
 
   const AddFloorHandle = () => {
@@ -25,33 +27,34 @@ const BuildingDetail = ({ buildingId }) => {
 
   return (
     <div className="">
-      <div className="flex gap-4 justify-end my-2">
-        <button
-          onClick={AddFloorHandle}
-          title="Add New Floor"
-          className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg shadow text-gray-800"
-        >
-          <MdAdd size={20} />
-          <span className="ml-2">Add</span>
-        </button>
+      {user.role === 'user' && (
+        <div className="flex gap-4 justify-end my-2">
+          <button
+            onClick={AddFloorHandle}
+            title="Add New Floor"
+            className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg shadow text-gray-800"
+          >
+            <MdAdd size={20} />
+            <span className="ml-2">Add</span>
+          </button>
+          <button
+            onClick={editBuildingHandle}
+            title="Edit Building"
+            className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg shadow text-blue-800"
+          >
+            <MdEdit size={20} />
+            <span className="ml-2">Edit</span>
+          </button>
 
-        <button
-          onClick={editBuildingHandle}
-          title="Edit Building"
-          className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg shadow text-blue-800"
-        >
-          <MdEdit size={20} />
-          <span className="ml-2">Edit</span>
-        </button>
-
-        <button
-          title="Delete Building"
-          className="flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg shadow text-red-800"
-        >
-          <MdDelete size={20} />
-          <span className="ml-2">Delete</span>
-        </button>
-      </div>
+          <button
+            title="Delete Building"
+            className="flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg shadow text-red-800"
+          >
+            <MdDelete size={20} />
+            <span className="ml-2">Delete</span>
+          </button>
+        </div>
+      )}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 ">
         <div className="lg:col-span-8 bg-white rounded-lg p-4 md:p-5">Building Details</div>
         <div className="lg:col-span-4">

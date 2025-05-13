@@ -1,12 +1,7 @@
-import React from 'react';
 import AllBuildings from '@/components/user/buildings/AllBuildings';
 
-function buildings() {
-  return (
-    <div>
-      <AllBuildings />
-    </div>
-  );
-}
+const Buildings = () => {
+  return <AllBuildings />;
+};
 
-export default buildings;
+export default Buildings;
