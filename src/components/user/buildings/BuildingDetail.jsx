@@ -14,8 +14,8 @@ import CustomDropdown from '@/components/global/CustomDropdown';
 
 const BuildingDetail = () => {
   const router = useRouter();
-  const { id } = router.query;
-  console.log('sdugyfcv', id);
+  // const { id } = router.query;
+  // console.log('sdugyfcv', id);
 
   const AddFloorHandle = () => {
     router.push('/floor/add-floor');
