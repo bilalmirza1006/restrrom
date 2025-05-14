@@ -13,7 +13,7 @@ const AllBuildings = () => {
       case 'admin':
         return `/admin/buildings/building-details/${id}`;
       case 'user':
-        return `/buildings/building-detail/${id}`;
+        return `/user/buildings/building-detail/${id}`;
       default:
         return '';
     }
@@ -24,7 +24,7 @@ const AllBuildings = () => {
       <div className="mb-4 flex justify-between items-center">
         <h4 className="text-base md:text-lg font-semibold leading-[32px]">All Buildings</h4>
         {user.role === 'user' && (
-          <Link href="/add-building">
+          <Link href="/user/add-building">
             <FaPlus className="text-blue-500 hover:text-blue-600 text-2xl" />
           </Link>
         )}

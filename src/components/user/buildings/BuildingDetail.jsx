@@ -17,6 +17,7 @@ import { useSelector } from 'react-redux';
 const BuildingDetail = ({ buildingId }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const router = useRouter();
+  console.log('user', user.role);
 
   const AddFloorHandle = () => {
     router.push('/floor/add-floor');

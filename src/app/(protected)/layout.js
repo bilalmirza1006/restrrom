@@ -1,56 +1,45 @@
 'use client';
 
-import Loader from '@/components/global/Loader';
 import { useGetProfileQuery } from '@/features/auth/authApi';
 import { setUser } from '@/features/auth/authSlice';
-import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-const getRoleBaseRoute = (role) => {
-  switch (role) {
-    case 'user':
-      return '/';
-    case 'admin':
-      return '/admin';
-    case 'inspector':
-      return '/inspectionist';
-    default:
-      return '/';
-  }
-};
+import AuthGuard from '@/components/auth/AuthGuard';
+import Loader from '@/components/global/Loader';
+import { useRouter } from 'next/navigation';
+import { getDefaultRouteForRole } from '@/utils/routingUtils';
 
 const ProtectedLayout = ({ children }) => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const pathname = usePathname();
   const { data, isSuccess, isLoading, isError } = useGetProfileQuery();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  const [checked, setChecked] = useState(false);
 
+  // This useEffect handles fetching the user profile and setting up initial routing
   useEffect(() => {
     if (data?.data && isSuccess) {
+      // Dispatch user data to Redux store
       dispatch(setUser(data.data));
-      const expectedPath = getRoleBaseRoute(data.data.role);
 
-      if (!pathname.startsWith(expectedPath)) {
-        router.replace(expectedPath);
-        return;
+      // If we're at the root path '/' and user has a different role than 'user',
+      // redirect them to their role-specific route
+      if (window.location.pathname === '/') {
+        const role = data.data.role;
+        if (role !== 'user') {
+          const redirectPath = getDefaultRouteForRole(role);
+          router.replace(redirectPath);
+        }
       }
-
-      setChecked(true);
     }
+  }, [data, isSuccess, dispatch, router]);
 
-    if (isError && !isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [data, isSuccess, isLoading, pathname, router, dispatch, isError, isAuthenticated, user]);
-
-  if (isLoading || (!isAuthenticated && !isError) || !checked) {
+  // Show loader while loading the profile
+  if (isLoading) {
     return <Loader />;
   }
 
-  return <>{children}</>;
+  // AuthGuard will handle the role-based routing
+  return <AuthGuard>{children}</AuthGuard>;
 };
 
 export default ProtectedLayout;
