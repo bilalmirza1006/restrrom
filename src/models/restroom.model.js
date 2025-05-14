@@ -11,7 +11,21 @@ const restroomSchema = new mongoose.Schema(
     area: { type: String, required: true },
     numOfToilets: { type: Number, required: true },
     modelImage: { type: [imageSchema], required: true },
-    modelCoordinates: { type: Array, required: true },
+    modelCoordinates: {
+      type: [
+        {
+          points: { type: Array, required: true },
+          sensor: { type: mongoose.Schema.Types.ObjectId, ref: "Sensor" },
+          id: { type: String, required: true },
+          color: { type: String, required: true },
+          fillColor: { type: String, required: true },
+          labelPoint: { type: String, required: true },
+        },
+      ],
+      default: [],
+      _id: false,
+    },
+    sensors: { type: [mongoose.Schema.Types.ObjectId], ref: "Sensor", default: [] },
   },
   { timestamps: true }
 );

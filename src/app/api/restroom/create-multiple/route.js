@@ -2,9 +2,11 @@ import { connectDb } from "@/configs/connectDb";
 import { configureCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { RestRoom } from "@/models/restroom.model";
+import { Sensor } from "@/models/sensor.model";
 import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import sendResponse from "@/utils/sendResponse";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export const POST = asyncHandler(async (req) => {
@@ -13,13 +15,14 @@ export const POST = asyncHandler(async (req) => {
   const { user, accessToken } = await isAuthenticated();
   const formData = await req?.formData();
   if (!formData) throw new customError(400, "Please Add Fields For Building");
-  const rawRestRooms = formData.get("restRooms");
+  const rawRestRoomsJson = formData.get("restRooms");
   const buildingId = formData.get("buildingId");
-  if (!rawRestRooms?.length || !buildingId) throw new customError(400, "Please provide all fields");
+  const restRoomImages = formData.getAll("restRoomImages");
+  if (!buildingId) throw new customError(400, "Please provide building id");
   // Parse JSON array of restrooms
   let restRooms;
   try {
-    restRooms = JSON.parse(rawRestRooms);
+    restRooms = JSON.parse(rawRestRoomsJson);
   } catch (err) {
     throw new customError(400, "'restRooms' must be valid JSON.");
   }
@@ -28,22 +31,45 @@ export const POST = asyncHandler(async (req) => {
 
   // Validate each restroom object
   restRooms.forEach((r, idx) => {
-    if (!r?.name || !r?.type || !r?.status || !r?.area || !r?.numOfToilets)
+    // console.log(r);
+    if (!r?.name || !r?.type || !r?.status || !r?.area || !r?.numOfToilets || !r?.coordinates)
       throw new customError(400, `Invalid or missing fields in restRooms[${idx}].`);
+    r.coordinates?.map((item) => {
+      if (!item?.sensor) throw new customError(400, `Invalid or missing fields Sensor in coordinates.`);
+      if (!item?.points?.length) throw new customError(400, `Invalid or missing fields points in coordinates.`);
+    });
   });
-  const data = restRooms.map((r) => ({
-    ownerId: user?._id,
-    name: r.name,
-    type: r.type,
-    status: r.status,
-    area: r.area,
-    numOfToilets: r.numOfToilets,
-    buildingId,
-  }));
-  //  handle images and attach them to each restroom
-  const restRoomImages = formData.getAll("restRoomImages");
+  const sensorIds = [];
+  const data = restRooms.map((r) => {
+    const sensors = r.coordinates?.map((item) => {
+      const sens = item?.sensor;
+      sensorIds.push(sens);
+      return String(sens);
+    });
+    return {
+      ownerId: user?._id,
+      name: r.name,
+      type: r.type,
+      status: r.status,
+      area: r.area,
+      numOfToilets: r.numOfToilets,
+      modelCoordinates: r.coordinates,
+      buildingId,
+      sensors,
+    };
+  });
   if (restRoomImages.length !== data.length)
     throw new customError(400, "You must upload exactly one image per restroom.");
+  // check for sensor availability
+  const sensorObjectIds = sensorIds.map((id) => new mongoose.Types.ObjectId(id));
+  const isSensorAvailable = await Sensor.find({
+    _id: { $in: sensorObjectIds },
+    isConnected: false,
+    ownerId: user?._id,
+  });
+  if (isSensorAvailable?.length !== sensorObjectIds?.length)
+    throw new customError(400, "All sensors must be available.");
+  //  handle images and attach them to each restroom
   const uploadPromises = restRoomImages.map((file) => uploadOnCloudinary(file, "restroom-models"));
   const uploads = await Promise.all(uploadPromises);
   uploads.forEach((upload, idx) => {
@@ -51,6 +77,8 @@ export const POST = asyncHandler(async (req) => {
     data[idx].modelImage = { public_id: upload.public_id, url: upload.secure_url };
   });
   const createdRestRooms = await RestRoom.insertMany(data);
-  if (!created) throw new customError(500, "Failed to create restrooms.");
+  if (!createdRestRooms) throw new customError(500, "Failed to create restrooms.");
+  const updateSensors = await Sensor.updateMany({ _id: { $in: sensorObjectIds } }, { $set: { isConnected: true } });
+  if (!updateSensors) throw new customError(500, "Failed to update sensors.");
   return sendResponse(NextResponse, "Restrooms created successfully.", createdRestRooms, accessToken);
 });

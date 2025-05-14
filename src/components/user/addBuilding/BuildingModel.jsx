@@ -8,22 +8,20 @@ import toast from "react-hot-toast";
 
 const BuildingModel = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
-  const [buildingModelImage, setBuildingModelImage] = useState(null);
+  const [buildingModelPreview, setBuildingModelPreview] = useState(null);
   const [polygons, setPolygons] = useState([]);
   const [file, setFile] = useState(null);
   const building = useSelector((state) => state.building);
+  console.log("building", building);
 
   const nextBtnHandler = () => {
-    if (polygons.length > 0 && buildingModelImage) {
-      // Store the file in cache
-      if (file) {
-        setFileCache("buildingModelImage", file);
-      }
-
+    if (polygons.length > 0 && buildingModelPreview) {
+      if (file) setFileCache("buildingModelPreview", file);
       // Update Redux store
       dispatch(
         setBuilding({
-          buildingModelPreview: buildingModelImage,
+          buildingModelPreview: buildingModelPreview,
+          buildingModelImage: file,
           buildingModelCoordinates: polygons,
         })
       );
@@ -31,16 +29,17 @@ const BuildingModel = ({ setCurrentStep }) => {
       // Proceed to next step
       setCurrentStep((prevStep) => prevStep + 1);
     } else {
-      toast.error(
-        "Please upload a building model image and mark at least one floor"
-      );
+      toast.error("Please upload a building model image and mark at least one floor");
     }
   };
 
   useEffect(() => {
     if (building?.buildingModelPreview && building?.buildingModelCoordinates) {
-      setBuildingModelImage(building?.buildingModelPreview);
+      setBuildingModelPreview(building?.buildingModelPreview);
       setPolygons(building.buildingModelCoordinates);
+    }
+    if (building?.buildingModelImage) {
+      setFile(building?.buildingModelImage);
     }
   }, [building]);
 
@@ -48,16 +47,15 @@ const BuildingModel = ({ setCurrentStep }) => {
     <div>
       <h6 className="text-base text-primary font-medium">Building Model</h6>
       <p className="text-sm text-gray-600 mt-2">
-        Upload your building model and mark each floor by creating a polygon.
-        Each polygon needs a floor ID/name which will be used to identify the
-        floor.
+        Upload your building model and mark each floor by creating a polygon. Each polygon needs a floor ID/name which
+        will be used to identify the floor.
       </p>
 
       <div className="py-10 grid place-items-center">
         <MarkBuildingModel
           setFile={setFile}
-          buildingModelImage={buildingModelImage}
-          setBuildingModelImage={setBuildingModelImage}
+          buildingModelImage={buildingModelPreview}
+          setBuildingModelImage={setBuildingModelPreview}
           polygons={polygons}
           setPolygons={setPolygons}
         />

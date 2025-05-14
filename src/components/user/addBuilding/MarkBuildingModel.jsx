@@ -31,13 +31,7 @@ import {
   sensorInfoUpdateHandler,
 } from "@/utils/markBuildingFeatures";
 
-const MarkBuildingModel = ({
-  setFile,
-  buildingModelImage,
-  setBuildingModelImage,
-  polygons,
-  setPolygons,
-}) => {
+const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage, polygons, setPolygons }) => {
   const canvasRef = useRef(null);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -150,14 +144,7 @@ const MarkBuildingModel = ({
     <div className="relative inline-block">
       {!isDrawingEnabled && (
         <BrowseFileBtn
-          onFileChange={(event) =>
-            handleImageUpload(
-              event,
-              setImageSrc,
-              setShowCropper,
-              setIsDrawingEnabled
-            )
-          }
+          onFileChange={(event) => handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)}
         />
       )}
 
@@ -227,16 +214,10 @@ const MarkBuildingModel = ({
               onCropComplete={onCropComplete}
             />
             <div className="flex items-center gap-2 mt-4 z-[999] absolute bottom-6 right-6">
-              <button
-                onClick={() => setShowCropper(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-              >
+              <button onClick={() => setShowCropper(false)} className="bg-gray-500 text-white px-4 py-2 rounded">
                 Cancel
               </button>
-              <button
-                onClick={handleCropConfirm}
-                className="bg-primary text-white px-4 py-2 rounded"
-              >
+              <button onClick={handleCropConfirm} className="bg-primary text-white px-4 py-2 rounded">
                 Crop
               </button>
             </div>
@@ -254,14 +235,9 @@ const MarkBuildingModel = ({
                 setIsDeleteMode(false);
                 setIsUpdateMode(false);
               }}
-              className={`p-2 border rounded-md text-white ${
-                isEditMode ? "border-primary" : "border-[#565656]"
-              }`}
+              className={`p-2 border rounded-md text-white ${isEditMode ? "border-primary" : "border-[#565656]"}`}
             >
-              <LiaDrawPolygonSolid
-                fontSize={20}
-                color={isEditMode ? "#A449EB" : "#565656"}
-              />
+              <LiaDrawPolygonSolid fontSize={20} color={isEditMode ? "#A449EB" : "#565656"} />
             </button>
             <button
               onClick={() =>
@@ -275,14 +251,9 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isCopyMode ? "border-primary" : "border-[#565656]"
-              }`}
+              className={`p-2 border rounded-md text-white ${isCopyMode ? "border-primary" : "border-[#565656]"}`}
             >
-              <VscCopy
-                fontSize={20}
-                color={isCopyMode ? "#A449EB" : "#565656"}
-              />
+              <VscCopy fontSize={20} color={isCopyMode ? "#A449EB" : "#565656"} />
             </button>
             <button
               onClick={() =>
@@ -296,14 +267,9 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isUpdateMode ? "border-primary" : "border-[#565656]"
-              }`}
+              className={`p-2 border rounded-md text-white ${isUpdateMode ? "border-primary" : "border-[#565656]"}`}
             >
-              <RiEditBoxFill
-                fontSize={20}
-                color={isUpdateMode ? "#A449EB" : "#565656"}
-              />
+              <RiEditBoxFill fontSize={20} color={isUpdateMode ? "#A449EB" : "#565656"} />
             </button>
             <button
               onClick={() =>
@@ -317,14 +283,9 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isMoveMode ? "border-primary" : "border-[#565656]"
-              }`}
+              className={`p-2 border rounded-md text-white ${isMoveMode ? "border-primary" : "border-[#565656]"}`}
             >
-              <SlCursorMove
-                fontSize={20}
-                color={isMoveMode ? "#A449EB" : "#565656"}
-              />
+              <SlCursorMove fontSize={20} color={isMoveMode ? "#A449EB" : "#565656"} />
             </button>
             <button
               onClick={() =>
@@ -337,24 +298,15 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isDeleteMode ? "border-primary" : "border-[#565656]"
-              }`}
+              className={`p-2 border rounded-md text-white ${isDeleteMode ? "border-primary" : "border-[#565656]"}`}
             >
-              <AiOutlineDelete
-                fontSize={20}
-                color={isDeleteMode ? "#A449EB" : "#565656"}
-              />
+              <AiOutlineDelete fontSize={20} color={isDeleteMode ? "#A449EB" : "#565656"} />
             </button>
           </div>
         </>
       )}
       {sensorPopup && selectedPolygon && (
-        <Modal
-          title="Add Floor"
-          isCrossShow={false}
-          onClose={() => setSensorPopup(false)}
-        >
+        <Modal title="Add Floor" isCrossShow={false} onClose={() => setSensorPopup(false)}>
           <div className="flex flex-col gap-2">
             <Input
               type="text"
@@ -374,22 +326,13 @@ const MarkBuildingModel = ({
               ]}
               label="Label Positioning of polygon"
               onSelect={(selectedOption) =>
-                polygonsLabelHandler(
-                  selectedOption,
-                  selectedPolygon,
-                  polygons,
-                  setPolygons
-                )
+                polygonsLabelHandler(selectedOption, selectedPolygon, polygons, setPolygons)
               }
             />
 
             <div className="flex items-center gap-4">
               <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-              />
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
             </div>
 
             <div className="flex justify-center gap-3">
@@ -448,22 +391,13 @@ const MarkBuildingModel = ({
               ]}
               label="Label Positioning of polygon"
               onSelect={(selectedOption) =>
-                polygonsLabelHandler(
-                  selectedOption,
-                  selectedPolygon,
-                  polygons,
-                  setPolygons
-                )
+                polygonsLabelHandler(selectedOption, selectedPolygon, polygons, setPolygons)
               }
             />
 
             <div className="flex items-center gap-4">
               <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-              />
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
             </div>
             <div className="flex justify-center">
               <Button
@@ -495,11 +429,7 @@ const BrowseFileBtn = ({ onFileChange }) => {
   return (
     <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 cursor-pointer rounded-lg bg-primary text-white font-semibold">
       Browse File
-      <input
-        type="file"
-        className="absolute inset-0 cursor-pointer opacity-0"
-        onChange={onFileChange}
-      />
+      <input type="file" className="absolute inset-0 cursor-pointer opacity-0" onChange={onFileChange} />
     </button>
   );
 };

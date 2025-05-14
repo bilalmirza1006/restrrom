@@ -14,7 +14,9 @@ const buildingSchema = new mongoose.Schema(
     buildingManager: { type: String, required: true },
     phone: { type: String, required: true },
     buildingModelImage: { type: imageSchema, required: true },
-    buildingModelCoordinates: {
+    latitude: { type: String },
+    longitude: { type: String },
+    buildingCoordinates: {
       type: [
         {
           points: [{ x: Number, y: Number }],

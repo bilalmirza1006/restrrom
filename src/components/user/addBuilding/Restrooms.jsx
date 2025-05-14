@@ -10,6 +10,8 @@ import MarkRestroomModel from "./MarkRestroomModel";
 import { setRestrooms, updateRestroom } from "@/features/building/buildingSlice";
 import { getFileCache, setFileCache } from "@/utils/fileStore";
 import toast from "react-hot-toast";
+import { useCreateBuildingMutation, useDeleteBuildingMutation } from "@/features/building/buildingApi";
+import { useCreateMultipleRestroomsMutation } from "@/features/restroom/restroomApi";
 
 const Restrooms = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
@@ -18,8 +20,9 @@ const Restrooms = ({ setCurrentStep }) => {
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [restroomData, setRestroomData] = useState([]);
   const [availableSensors, setAvailableSensors] = useState([]);
-
-  console.log("rest rooms data", restroomData);
+  const [createNewBuilding, { isLoading: createNewBuildingLoading }] = useCreateBuildingMutation();
+  const [createMultipleRestrooms, { isLoading: createRestroomsLoading }] = useCreateMultipleRestroomsMutation();
+  const [deleteBuilding, { isLoading: deleteBuildingLoading }] = useDeleteBuildingMutation();
 
   // Transform and set sensor data for dropdowns
   useEffect(() => {
@@ -66,6 +69,7 @@ const Restrooms = ({ setCurrentStep }) => {
         .filter((sensor) => sensor && sensor !== "No sensor");
       // Filter available sensors
       const filteredSensors = availableSensors.filter((sensor) => !usedSensors.includes(sensor.value));
+      setAvailableSensors(filteredSensors);
     }
   }, [restroomData]);
 
@@ -132,23 +136,125 @@ const Restrooms = ({ setCurrentStep }) => {
     return true;
   };
 
-  const saveBuilding = () => {
-    // Validate all restrooms have required fields
-    const isRestroomDataComplete = restroomData.every(
-      (restroom) => restroom.name && restroom.type && restroom.status && restroom.area && restroom.toilets
-    );
-
-    if (!isRestroomDataComplete) {
-      toast.error("Please fill all required fields for all restrooms");
-      return;
+  const saveBuilding = async () => {
+    let buildingData = {};
+    let allRestRooms = [];
+    let buildingId = "";
+    // validation for building and restroom data
+    try {
+      buildingData = {
+        name: building.buildingName,
+        type: building.buildingType,
+        location: building.location,
+        area: building.area,
+        latitude: building.mapInfo?.lat,
+        longitude: building.mapInfo?.lng,
+        totalFloors: building.totalFloors,
+        numberOfRooms: building.totalRestrooms,
+        buildingManager: building.buildingManager,
+        phone: building.phone,
+        buildingThumbnail: building.buildingThumbnail,
+        buildingModelImage: building.buildingModelImage,
+        buildingCoordinates: building?.buildingModelCoordinates || [],
+      };
+      const {
+        name,
+        type,
+        location,
+        area,
+        totalFloors,
+        numberOfRooms,
+        buildingManager,
+        phone,
+        latitude,
+        longitude,
+        buildingCoordinates,
+      } = buildingData;
+      if (
+        !name ||
+        !type ||
+        !location ||
+        !area ||
+        !totalFloors ||
+        !numberOfRooms ||
+        !buildingManager ||
+        !phone ||
+        !latitude ||
+        !longitude ||
+        !buildingCoordinates?.length
+      )
+        return toast.error("Please provide all fields");
+      allRestRooms = restroomData.map((restroom) => {
+        const { name, type, status, area, toilets, restroomImage, restroomCoordinates } = restroom;
+        if (!name || !type || !status || !area || !toilets || !restroomImage || !restroomCoordinates.length)
+          return toast.error("Please provide all fields");
+        restroomCoordinates.forEach((coordinate) => {
+          if (
+            !coordinate.sensor ||
+            !coordinate.color ||
+            !coordinate.fillColor ||
+            !coordinate.labelPoint ||
+            !coordinate?.id
+          ) {
+            return toast.error("Please Fill all fields for Coordinates Of RestRooms");
+          }
+        });
+        return {
+          name: restroom.name,
+          type: restroom.type,
+          status: restroom.status,
+          area: restroom.area,
+          numOfToilets: restroom.toilets,
+          modelImage: restroom.restroomImage,
+          coordinates: restroom.restroomCoordinates,
+        };
+      });
+    } catch (error) {
+      toast.error("error in Validation for building and restrooms");
+      return console.log("error in Validation for building and restrooms", error);
+    }
+    // upload building and save building id
+    try {
+      const buildingFormData = new FormData();
+      buildingFormData.append("buildingThumbnail", buildingData?.buildingThumbnail);
+      buildingFormData.append("buildingModelImage", buildingData?.buildingModelImage);
+      buildingFormData.append("name", buildingData?.name);
+      buildingFormData.append("type", buildingData?.type);
+      buildingFormData.append("location", buildingData?.location);
+      buildingFormData.append("area", buildingData?.area);
+      buildingFormData.append("totalFloors", buildingData?.totalFloors);
+      buildingFormData.append("numberOfRooms", buildingData?.numberOfRooms);
+      buildingFormData.append("buildingManager", buildingData?.buildingManager);
+      buildingFormData.append("phone", buildingData?.phone);
+      buildingFormData.append("longitude", buildingData?.longitude);
+      buildingFormData.append("latitude", buildingData?.latitude);
+      buildingFormData.append("buildingCoordinates", JSON.stringify(buildingData?.buildingCoordinates));
+      const res = await createNewBuilding(buildingFormData).unwrap();
+      buildingId = res?.data;
+      if (!buildingId) return toast.error("error in creating building");
+    } catch (error) {
+      toast.error("error in building creation");
+      return console.log("error in building creation", error);
+    }
+    // create all restRooms in one query
+    try {
+      const restRoomsFormData = new FormData();
+      restRoomsFormData.append("buildingId", buildingId);
+      const roomsMeta = allRestRooms.map(({ modelImage, ...meta }) => meta);
+      restRoomsFormData.append("restRooms", JSON.stringify(roomsMeta));
+      allRestRooms.forEach((r) => {
+        restRoomsFormData.append("restRoomImages", r.modelImage);
+      });
+      const res = await createMultipleRestrooms(restRoomsFormData).unwrap();
+      if (res?.success) toast.success("You Building and all Restrooms added successfully");
+    } catch (error) {
+      console.log("Error while adding restrooms", error);
+      toast.error(error?.data?.message || "Error while adding restrooms");
+      return await deleteBuilding(buildingId).unwrap();
     }
 
-    // Save to redux
-    dispatch(setRestrooms(restroomData));
-
-    // TODO: Add API call to save the building with all information
-    console.log("Building saved:", { ...building, restrooms: restroomData });
-    toast.success("Building data saved successfully");
+    console.log("building", buildingData);
+    console.log("restRoom", allRestRooms);
   };
 
   if (!restroomData.length) {
