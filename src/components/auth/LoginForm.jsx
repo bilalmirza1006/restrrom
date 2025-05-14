@@ -6,7 +6,7 @@ import Input from '../global/small/Input';
 import Button from '../global/small/Button';
 import Link from 'next/link';
 import { useLoginMutation } from '@/features/auth/authApi';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { setUser } from '@/features/auth/authSlice';
@@ -14,6 +14,9 @@ import { setUser } from '@/features/auth/authSlice';
 const LoginForm = () => {
   const [login, { isLoading, isError }] = useLoginMutation();
   const dispatch = useDispatch();
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  console.log('login user', user);
+
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',

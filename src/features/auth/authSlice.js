@@ -1,9 +1,22 @@
 const { createSlice } = require('@reduxjs/toolkit');
 
-const initialState = {
-  user: null,
-  isAuthenticated: false,
+// Helper to safely access localStorage (avoids errors in SSR)
+const getStoredAuth = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      const storedAuth = localStorage.getItem('auth');
+      if (storedAuth) {
+        return JSON.parse(storedAuth);
+      }
+    } catch (error) {
+      console.error('Error retrieving auth from localStorage:', error);
+    }
+  }
+  return { user: null, isAuthenticated: false };
 };
+
+// Initialize from localStorage if available
+const initialState = getStoredAuth();
 
 const authSlice = createSlice({
   name: 'auth',
@@ -27,6 +40,15 @@ const authSlice = createSlice({
             };
           }
           state.isAuthenticated = true;
+
+          // Persist auth state to localStorage
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('auth', JSON.stringify(state));
+            } catch (error) {
+              console.error('Error storing auth in localStorage:', error);
+            }
+          }
         } else {
           console.error('Invalid user payload format:', action.payload);
         }
@@ -34,11 +56,29 @@ const authSlice = createSlice({
         console.warn('Received null/undefined user payload');
         state.user = null;
         state.isAuthenticated = false;
+
+        // Clear localStorage on logout/null user
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.removeItem('auth');
+          } catch (error) {
+            console.error('Error removing auth from localStorage:', error);
+          }
+        }
       }
     },
     deleteUser: (state) => {
       state.user = null;
       state.isAuthenticated = false;
+
+      // Clear localStorage on logout
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.removeItem('auth');
+        } catch (error) {
+          console.error('Error removing auth from localStorage:', error);
+        }
+      }
     },
   },
 });

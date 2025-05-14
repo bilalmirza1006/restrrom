@@ -20,10 +20,10 @@ const BuildingDetail = ({ buildingId }) => {
   console.log('user', user.role);
 
   const AddFloorHandle = () => {
-    router.push('/floor/add-floor');
+    router.push('/user/floor/add-floor');
   };
   const editBuildingHandle = () => {
-    router.push(`/buildings/edit-building/${buildingId}`);
+    router.push(`/user/buildings/edit-building/${buildingId}`);
   };
 
   return (
