@@ -29,8 +29,8 @@ export const restroomApis = createApi({
       invalidatesTags: ["restroom"],
     }),
     getAllRestrooms: builder.query({
-      query: () => ({
-        url: "/get-all",
+      query: (buildingId) => ({
+        url: `/all?buildingId=${buildingId}`,
         method: "GET",
       }),
       providesTags: ["restroom"],

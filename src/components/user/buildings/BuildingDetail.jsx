@@ -1,6 +1,6 @@
 "use client";
 import CustomDropdown from "@/components/global/CustomDropdown";
-import { floorListData } from "@/data/data";
+import { useGetAllRestroomsQuery } from "@/features/restroom/restroomApi";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ const FloorActivityChart = dynamic(() => import("./FloorActivityChart"), {
 
 const BuildingDetail = ({ building }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { data: restroom } = useGetAllRestroomsQuery(building?._id);
   const router = useRouter();
   const AddFloorHandle = () => router.push("/user/floor/add-floor");
   const editBuildingHandle = () => router.push(`/user/buildings/edit-building/${building?._id}`);
@@ -111,7 +112,7 @@ const BuildingDetail = ({ building }) => {
         <div className="lg:col-span-12 bg-white p-5 rounded-xl">
           <h6 className="text-lg md:text-2xl font-semibold text-black mb-6">All Floors</h6>
           <div className="flex flex-col gap-5">
-            {floorListData.map((item, i) => (
+            {restroom?.data?.map((item, i) => (
               <FloorList key={i} data={item} buildingId={building?._id} />
             ))}
           </div>
