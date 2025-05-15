@@ -1,14 +1,13 @@
-'use client';
+"use client";
 
-import BuildingDetail from '@/components/user/buildings/BuildingDetail';
-import { use } from 'react';
+import BuildingDetail from "@/components/user/buildings/BuildingDetail";
+import { useGetBuildingQuery } from "@/features/building/buildingApi";
+import { use } from "react";
 
 const BuildingDetailsPage = ({ params }) => {
-  const { buildingId } = use(params); // ✅ unwrap the params Promise
-
-  console.log('Building ID:', buildingId);
-
-  return <BuildingDetail buildingId={buildingId} />;
+  const { buildingId } = use(params);
+  const { data } = useGetBuildingQuery(buildingId);
+  return <BuildingDetail building={data?.data} />;
 };
 
 export default BuildingDetailsPage;

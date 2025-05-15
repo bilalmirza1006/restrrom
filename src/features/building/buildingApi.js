@@ -22,7 +22,7 @@ export const buildingApis = createApi({
     }),
     getAllBuildings: builder.query({
       query: () => ({
-        url: "/get-all",
+        url: "/all",
         method: "GET",
       }),
       providesTags: ["building"],
