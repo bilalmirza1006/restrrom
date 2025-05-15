@@ -20,6 +20,7 @@ export const GET = asyncHandler(async (req, { params }) => {
 
 export const DELETE = asyncHandler(async (req, { params }) => {
   await connectDb();
+  await configureCloudinary();
   const { user, accessToken } = await isAuthenticated();
   const { buildingId } = await params;
   if (!isValidObjectId(buildingId)) throw new customError(400, "Invalid building id");
@@ -28,7 +29,8 @@ export const DELETE = asyncHandler(async (req, { params }) => {
   const promises = [];
   if (building?.buildingThumbnail?.public_id)
     promises.push(removeFromCloudinary(building?.buildingThumbnail?.public_id));
-  if (building?.buildingModel?.public_id) promises.push(removeFromCloudinary(building?.buildingModel?.public_id));
+  if (building?.buildingModelImage?.public_id)
+    promises.push(removeFromCloudinary(building?.buildingModelImage?.public_id));
   await Promise.all([...promises, Building.findByIdAndDelete(buildingId)]);
   return sendResponse(NextResponse, "Building deleted successfully", building, accessToken);
 });

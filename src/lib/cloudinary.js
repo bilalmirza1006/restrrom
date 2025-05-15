@@ -49,11 +49,12 @@ export const uploadOnCloudinary = async (image, subFolder) => {
 
 // REMOVE FILE FROM CLOUDINARY
 // ===========================
-export const removeFromCloudinary = async (fileName) => {
+export const removeFromCloudinary = async (public_id) => {
   try {
-    const response = await cloudinary.v2.uploader.destroy(fileName, {
+    const response = await cloudinary.v2.uploader.destroy(public_id, {
       resource_type: "image",
     });
+
     console.log(`Image deleted successfully from cloudinary`);
     return response;
   } catch (error) {

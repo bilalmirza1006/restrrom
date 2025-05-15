@@ -20,6 +20,7 @@ export const GET = asyncHandler(async (req, { params }) => {
 
 export const DELETE = asyncHandler(async (req, { params }) => {
   await connectDb();
+  await configureCloudinary();
   const { user, accessToken } = await isAuthenticated();
   const { restroomId } = await params;
   if (!isValidObjectId(restroomId)) throw new customError(400, "Invalid restroomId id");

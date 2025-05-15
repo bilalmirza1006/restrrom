@@ -24,55 +24,6 @@ const Restrooms = ({ setCurrentStep }) => {
   const [createMultipleRestrooms, { isLoading: createRestroomsLoading }] = useCreateMultipleRestroomsMutation();
   const [deleteBuilding, { isLoading: deleteBuildingLoading }] = useDeleteBuildingMutation();
 
-  // Transform and set sensor data for dropdowns
-  useEffect(() => {
-    if (sensorsData?.data) {
-      const formattedSensors = sensorsData.data.map((sensor) => ({
-        option: sensor?.name,
-        value: sensor?._id,
-      }));
-      setAvailableSensors(formattedSensors);
-    }
-  }, [sensorsData]);
-
-  // Initialize restroom data based on totalRestrooms from redux
-  useEffect(() => {
-    if (
-      building?.totalRestrooms &&
-      (!restroomData.length || restroomData.length !== parseInt(building.totalRestrooms))
-    ) {
-      if (building.restrooms && building.restrooms.length) {
-        setRestroomData(building.restrooms);
-      } else {
-        const initialRestroomData = Array.from({
-          length: parseInt(building.totalRestrooms),
-        }).map((_, index) => ({
-          name: `Restroom ${index + 1}`,
-          type: "",
-          status: "",
-          area: "",
-          toilets: "",
-          restroomImage: null,
-          restroomCoordinates: [],
-        }));
-        setRestroomData(initialRestroomData);
-      }
-    }
-  }, [building?.totalRestrooms, building.restrooms]);
-
-  // Filter out sensors already used in any restroom
-  useEffect(() => {
-    if (restroomData.length && availableSensors.length) {
-      // Extract all sensors used across all restrooms
-      const usedSensors = restroomData
-        .flatMap((restroom) => restroom.restroomCoordinates?.map((polygon) => polygon.sensor) || [])
-        .filter((sensor) => sensor && sensor !== "No sensor");
-      // Filter available sensors
-      const filteredSensors = availableSensors.filter((sensor) => !usedSensors.includes(sensor.value));
-      setAvailableSensors(filteredSensors);
-    }
-  }, [restroomData]);
-
   const toggleAccordion = (index) => {
     // If we're closing an accordion, save its data first
     if (activeAccordion === index) {
@@ -257,6 +208,55 @@ const Restrooms = ({ setCurrentStep }) => {
     console.log("restRoom", allRestRooms);
   };
 
+  // Transform and set sensor data for dropdowns
+  useEffect(() => {
+    if (sensorsData?.data) {
+      const formattedSensors = [];
+      sensorsData?.data?.forEach((sensor) => {
+        if (!sensor?.isConnected) formattedSensors.push({ option: sensor?.name, value: sensor?._id });
+      });
+      setAvailableSensors(formattedSensors);
+    }
+  }, [sensorsData]);
+
+  // Initialize restroom data based on totalRestrooms from redux
+  useEffect(() => {
+    if (
+      building?.totalRestrooms &&
+      (!restroomData.length || restroomData.length !== parseInt(building.totalRestrooms))
+    ) {
+      if (building.restrooms && building.restrooms.length) {
+        setRestroomData(building.restrooms);
+      } else {
+        const initialRestroomData = Array.from({
+          length: parseInt(building.totalRestrooms),
+        }).map((_, index) => ({
+          name: `Restroom ${index + 1}`,
+          type: "",
+          status: "",
+          area: "",
+          toilets: "",
+          restroomImage: null,
+          restroomCoordinates: [],
+        }));
+        setRestroomData(initialRestroomData);
+      }
+    }
+  }, [building?.totalRestrooms, building.restrooms]);
+
+  // Filter out sensors already used in any restroom
+  useEffect(() => {
+    if (restroomData.length && availableSensors.length) {
+      // Extract all sensors used across all restrooms
+      const usedSensors = restroomData
+        .flatMap((restroom) => restroom.restroomCoordinates?.map((polygon) => polygon.sensor) || [])
+        .filter((sensor) => sensor && sensor !== "No sensor");
+      // Filter available sensors
+      const filteredSensors = availableSensors.filter((sensor) => !usedSensors.includes(sensor.value));
+      setAvailableSensors(filteredSensors);
+    }
+  }, [restroomData]);
+
   if (!restroomData.length) {
     return (
       <div className="py-10 text-center">
@@ -277,7 +277,7 @@ const Restrooms = ({ setCurrentStep }) => {
     <div>
       <h6 className="text-base text-primary font-medium">Restrooms</h6>
       <div className="py-6">
-        {restroomData.map((restroom, index) => (
+        {restroomData?.map((restroom, index) => (
           <div key={index} className="border border-[#DFDFDF] rounded-md mb-4 overflow-hidden">
             <div
               className="flex items-center justify-between px-4 py-3 bg-[#F5F5F5] cursor-pointer"
@@ -368,7 +368,17 @@ const Restrooms = ({ setCurrentStep }) => {
           onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
-        <Button text="Save Building" width="!w-[200px]" onClick={saveBuilding} />
+        <Button
+          disabled={createNewBuildingLoading || createRestroomsLoading || deleteBuildingLoading}
+          className={`${
+            createNewBuildingLoading || createRestroomsLoading || deleteBuildingLoading
+              ? "opacity-30 cursor-not-allowed"
+              : ""
+          }`}
+          text="Save Building"
+          width="!w-[200px]"
+          onClick={saveBuilding}
+        />
       </div>
     </div>
   );
