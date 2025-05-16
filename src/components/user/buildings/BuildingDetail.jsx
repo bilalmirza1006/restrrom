@@ -18,7 +18,7 @@ const BuildingDetail = ({ building }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
   const router = useRouter();
-  const AddFloorHandle = () => router.push("/user/floor/add-floor");
+  const AddFloorHandle = () => router.push(`/user/floor/add-floor/${building?._id}`);
   const editBuildingHandle = () => router.push(`/user/buildings/edit-building/${building?._id}`);
 
   return (

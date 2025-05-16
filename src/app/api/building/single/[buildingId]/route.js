@@ -1,5 +1,5 @@
 import { connectDb } from "@/configs/connectDb";
-import { configureCloudinary, removeFromCloudinary } from "@/lib/cloudinary";
+import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { Building } from "@/models/building.model";
 import { asyncHandler } from "@/utils/asyncHandler";

@@ -1,58 +1,30 @@
-'use client';
-import Button from '@/components/global/small/Button';
-import Input from '@/components/global/small/Input';
-import UploadBuildingImage from '@/components/user/addBuilding/UploadBuildingImage';
-import { setBuilding } from '@/features/building/buildingSlice';
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+"use client";
+import Button from "@/components/global/small/Button";
+import Input from "@/components/global/small/Input";
+import UploadBuildingImage from "@/components/user/addBuilding/UploadBuildingImage";
+import { useGetBuildingQuery, useUpdateBuildingMutation } from "@/features/building/buildingApi";
+import { getFileCache, setFileCache } from "@/utils/fileStore";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
-function EditBuildingById({ params }) {
-  // const { buildingId } = params;
-  // console.log('Editing building:', buildingId);
-
-  const dispatch = useDispatch();
-  const building = useSelector((state) => state.building);
-  console.log('building', building);
-
-  const [image, setImage] = useState({
-    file: null,
-    imagePreview: null,
-  });
-  console.log('image', image);
-
+function EditBuildingById() {
+  const params = useParams();
+  const buildingId = params.buildingId;
+  const { data: buildingData } = useGetBuildingQuery(buildingId);
+  const [updateBuilding, { isLoading }] = useUpdateBuildingMutation();
+  const [image, setImage] = useState({ file: null, imagePreview: null });
   const [buildingInfo, setBuildingInfo] = useState({
-    buildingName: '',
-    buildingType: '',
-    location: '',
-    area: '',
-    totalFloors: '',
-    totalRestrooms: '',
-    buildingManager: '',
-    phone: '',
+    buildingName: "",
+    buildingType: "",
+    location: "",
+    area: "",
+    totalFloors: "",
+    totalRestrooms: "",
+    buildingManager: "",
+    phone: "",
   });
-
-  // Load redux values into form on mount
-  useEffect(() => {
-    if (building) {
-      setBuildingInfo({
-        buildingName: building.buildingName || '',
-        buildingType: building.buildingType || '',
-        location: building.location || '',
-        area: building.area || '',
-        totalFloors: building.totalFloors || '',
-        totalRestrooms: building.totalRestrooms || '',
-        buildingManager: building.buildingManager || '',
-        phone: building.phone || '',
-      });
-
-      if (building.buildingImage) {
-        setImage({
-          file: getFileCache('buildingImage'),
-          imagePreview: building.buildingImage,
-        });
-      }
-    }
-  }, [building]);
 
   const buildingInfoChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -62,39 +34,65 @@ function EditBuildingById({ params }) {
     }));
   };
 
-  const nextBtnHandler = (e) => {
+  const updateBuildingHandler = async (e) => {
     e.preventDefault();
-
     const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
     const hasImage = !!(image?.file || image?.imagePreview);
+    if (hasEmptyField || !hasImage) return toast.error("Please fill all fields and upload building image.");
+    setFileCache("buildingImage", image?.file);
 
-    if (hasEmptyField || !hasImage) {
-      toast.error('Please fill all fields and upload building image.');
-      return;
+    try {
+      const formData = new FormData();
+      if (buildingInfo?.buildingName) formData.append("name", buildingInfo.buildingName);
+      if (buildingInfo?.buildingType) formData.append("type", buildingInfo.buildingType);
+      if (buildingInfo?.location) formData.append("location", buildingInfo.location);
+      if (buildingInfo?.area) formData.append("area", buildingInfo.area);
+      if (buildingInfo?.totalFloors) formData.append("totalFloors", buildingInfo.totalFloors);
+      if (buildingInfo?.totalRestrooms) formData.append("numberOfRooms", buildingInfo.totalRestrooms);
+      if (buildingInfo?.buildingManager) formData.append("buildingManager", buildingInfo.buildingManager);
+      if (buildingInfo?.phone) formData.append("phone", buildingInfo.phone);
+      if (image?.file) formData.append("buildingThumbnail", image?.file);
+
+      const res = await updateBuilding({ buildingId, data: formData }).unwrap();
+      if (res?.success) {
+        toast.success(res?.message || "Building updated successfully");
+        setFileCache("buildingImage", null);
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || "Something went wrong When Updating Building");
+      console.log("Error updating building:", error);
     }
-
-    dispatch(
-      setBuilding({
-        ...buildingInfo,
-        buildingImage: image.imagePreview,
-      })
-    );
-    setFileCache('buildingImage', image.file);
-    setCurrentStep((s) => s + 1);
   };
+
+  useEffect(() => {
+    if (buildingData?.data) {
+      const building = buildingData?.data;
+      setBuildingInfo({
+        buildingName: building?.name || "",
+        buildingType: building?.type || "",
+        location: building?.location || "",
+        area: building?.area || "",
+        totalFloors: building?.totalFloors || "",
+        totalRestrooms: building?.numberOfRooms || "",
+        buildingManager: building?.buildingManager || "",
+        phone: building?.phone || "",
+      });
+      if (building?.buildingThumbnail) {
+        setImage({
+          imagePreview: building?.buildingThumbnail?.url,
+        });
+      }
+    }
+  }, [buildingData?.data]);
 
   return (
     <div>
       <div>
         <h6 className="text-base text-primary font-medium">General Information</h6>
-        <form
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
-          onSubmit={nextBtnHandler}
-        >
+        <form className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5" onSubmit={updateBuildingHandler}>
           <div className="lg:col-span-3">
             <UploadBuildingImage image={image} setImage={setImage} />
           </div>
-
           <Input
             type="text"
             name="buildingName"
@@ -161,7 +159,7 @@ function EditBuildingById({ params }) {
           />
 
           <div className="lg:col-span-3 flex justify-end">
-            <Button text="Next" width="!w-[150px]" type="submit" />
+            <Button text="Update Building" width="!w-[250px]" type="submit" />
           </div>
         </form>
       </div>
