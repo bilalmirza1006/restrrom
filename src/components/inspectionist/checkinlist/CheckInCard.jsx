@@ -1,27 +1,23 @@
-'use client';
-import styles from '@/components/inspectionist/checkinlist/CheckInCard.module.css';
-import { FaCaretDown } from 'react-icons/fa';
-import { inspectionistFloorListData } from '@/data/data';
-import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
-import DataTable from 'react-data-table-component';
-import InputFields from './InputFields';
+"use client";
+import styles from "@/components/inspectionist/checkinlist/CheckInCard.module.css";
+import { FaCaretDown } from "react-icons/fa";
+import { inspectionistFloorListData } from "@/data/data";
+import Image from "next/image";
+import React, { useEffect, useState } from "react";
+import DataTable from "react-data-table-component";
+import InputFields from "./InputFields";
+import { useGetAllRestroomsQuery } from "@/features/restroom/restroomApi";
 
-const CheckInCard = () => {
-  const [inputValue, setInputValue] = useState('');
-  const onClickHandler = (e) => {
-    setInputValue(e.target.value);
-  };
-  useEffect(() => {
-    console.log(inputValue);
-  }, [inputValue]);
+const CheckInCard = ({ buildingId }) => {
+  const { data } = useGetAllRestroomsQuery(buildingId);
+  const [inputValue, setInputValue] = useState("");
+  const onClickHandler = (e) => setInputValue(e.target.value);
   const [tableId, setTableId] = useState(null);
-  const toggleTable = (id) => {
-    setTableId((prev) => (prev === id ? null : id));
-  };
+  const toggleTable = (id) => setTableId((prev) => (prev === id ? null : id));
+
   const columns = [
     {
-      name: 'Sensors',
+      name: "Sensors",
       selector: (row) => (
         <p className="text-[16px] text-black flex gap-2">
           <Image src={row.icon} width={19} height={19} alt="icon" />
@@ -30,7 +26,7 @@ const CheckInCard = () => {
       ),
     },
     {
-      name: 'Good',
+      name: "Good",
       selector: (row) => (
         <div className={`${styles.customRadio} flex items-center gap-1`}>
           <input
@@ -43,7 +39,7 @@ const CheckInCard = () => {
       ),
     },
     {
-      name: 'Bad',
+      name: "Bad",
       selector: (row) => (
         <div className={`${styles.customRadio} flex items-center gap-1`}>
           <input
@@ -56,7 +52,7 @@ const CheckInCard = () => {
       ),
     },
     {
-      name: 'Excellent',
+      name: "Excellent",
       selector: (row) => (
         <div className={`${styles.customRadio} flex items-center gap-1`}>
           <input
@@ -69,7 +65,7 @@ const CheckInCard = () => {
       ),
     },
     {
-      name: 'Malfunctioned',
+      name: "Malfunctioned",
       selector: (row) => (
         <div className={`${styles.customRadio} flex items-center gap-1`}>
           <input
@@ -92,7 +88,7 @@ const CheckInCard = () => {
             <div key={list.id} className="bg-white shadow-sm rounded-lg flex flex-col">
               <div className="flex items-center justify-between py-2 px-3">
                 <div className="flex items-center gap-3">
-                  <Image src={list.icon} width={30} height={34} alt="icon" />
+                  <Image src={"/svgs/user/total-restrooms.svg"} width={30} height={34} alt="icon" />
                   <h1 className="text-[#05004E] text-[20px] font-semibold">{list.name}</h1>
                 </div>
 
@@ -105,9 +101,7 @@ const CheckInCard = () => {
 
                     <div className="text-center">
                       <span className="block text-[#05004E80] text-[12px]">Number of Toilets</span>
-                      <h1 className="text-[#A449EB] text-[16px] font-semibold">
-                        {list.numberoftiolets}
-                      </h1>
+                      <h1 className="text-[#A449EB] text-[16px] font-semibold">{list.numberoftiolets}</h1>
                     </div>
                   </>
                 )}
@@ -115,7 +109,7 @@ const CheckInCard = () => {
                 <div className="flex items-center gap-4">
                   <p
                     className={`inline-block px-4 py-1.5 rounded-[8px] text-white ${
-                      list.status === 'Active' ? 'bg-[#61CA94]' : 'bg-[#FF8080]'
+                      list.status === "Active" ? "bg-[#61CA94]" : "bg-[#FF8080]"
                     }`}
                   >
                     {list.status}
@@ -127,8 +121,8 @@ const CheckInCard = () => {
                     <FaCaretDown
                       className={
                         tableId === list.id
-                          ? 'ease-in transition-transform duration-300 transform  rotate-180'
-                          : 'transition-transform duration-300'
+                          ? "ease-in transition-transform duration-300 transform  rotate-180"
+                          : "transition-transform duration-300"
                       }
                       fill="#A449EB96"
                     />
@@ -138,7 +132,7 @@ const CheckInCard = () => {
               <div>
                 {tableId === list.id && (
                   <div>
-                    <DataTable columns={columns} data={list.listdata} customStyles={tableStyles} />
+                    <DataTable columns={columns} data={list.sensors} customStyles={tableStyles} />
                   </div>
                 )}
               </div>
@@ -156,18 +150,18 @@ export default CheckInCard;
 const tableStyles = {
   headCells: {
     style: {
-      fontSize: '16px',
-      color: '#696969',
+      fontSize: "16px",
+      color: "#696969",
     },
   },
   rows: {
     style: {
-      width: '98%',
-      background: '#A449EB0F',
-      borderRadius: '6px',
-      margin: '10px 0',
-      alignSelf: 'center',
-      padding: '20px',
+      width: "98%",
+      background: "#A449EB0F",
+      borderRadius: "6px",
+      margin: "10px 0",
+      alignSelf: "center",
+      padding: "20px",
     },
   },
 };

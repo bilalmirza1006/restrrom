@@ -16,7 +16,7 @@ const AllBuildings = () => {
       case "user":
         return `/user/buildings/building-detail/${id}`;
       case "inspector":
-        return `/inspectionist/checkinlist`;
+        return `/inspectionist/checkinlist/${id}`;
       default:
         return ``;
     }
