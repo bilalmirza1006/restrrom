@@ -10,14 +10,17 @@ import BuildingCard from "./BuildingCard";
 import FloorList from "./FloorList";
 import MostUsedRooms from "./MostUsedRooms";
 import QueueingStatus from "./QueueingStatus";
-const FloorActivityChart = dynamic(() => import("./FloorActivityChart"), {
-  ssr: false,
-});
+import { useState } from "react";
+import Modal from "@/components/global/Modal";
+import { useGetAllInspectorsQuery } from "@/features/inspection/inspectionApi";
+const FloorActivityChart = dynamic(() => import("./FloorActivityChart"), { ssr: false });
 
 const BuildingDetail = ({ building }) => {
+  const router = useRouter();
+  const [inspectorModel, setInspectorModel] = useState(false);
+  const { data } = useGetAllInspectorsQuery();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
-  const router = useRouter();
   const AddFloorHandle = () => router.push(`/user/floor/add-floor/${building?._id}`);
   const editBuildingHandle = () => router.push(`/user/buildings/edit-building/${building?._id}`);
 
@@ -25,6 +28,14 @@ const BuildingDetail = ({ building }) => {
     <div className="">
       {user?.role === "user" && (
         <div className="flex gap-4 justify-end my-2">
+          <button
+            onClick={() => setInspectorModel(true)}
+            title="Assign Inspector"
+            className="flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 rounded-lg shadow text-gray-800"
+          >
+            <MdAdd size={20} />
+            <span className="ml-2">Assign Inspector</span>
+          </button>
           <button
             onClick={AddFloorHandle}
             title="Add New Floor"
@@ -118,8 +129,21 @@ const BuildingDetail = ({ building }) => {
           </div>
         </div>
       </section>
+      {/* {inspectorModel && (
+        <Modal isOpen={inspectorModel} onClose={() => setInspectorModel(false)}>
+          <div className="w-full md:min-w-[500px] p-5">
+            {data?.data?.map((item, i) => (
+              <InspectorCard key={i} data={item} />
+            ))}
+          </div>
+        </Modal>
+      )} */}
     </div>
   );
+};
+
+const InspectorCard = ({ data }) => {
+  return <div className="flex items-center gap-3 border-2 "></div>;
 };
 
 export default BuildingDetail;

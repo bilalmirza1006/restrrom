@@ -16,6 +16,7 @@ const buildingSchema = new mongoose.Schema(
     buildingModelImage: { type: imageSchema, required: true },
     latitude: { type: String },
     longitude: { type: String },
+    inspectors: { type: [mongoose.Schema.Types.ObjectId], ref: "Auth", default: [] },
     buildingCoordinates: {
       type: [
         {
