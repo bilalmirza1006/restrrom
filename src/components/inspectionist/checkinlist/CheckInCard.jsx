@@ -1,12 +1,11 @@
 "use client";
 import styles from "@/components/inspectionist/checkinlist/CheckInCard.module.css";
-import { FaCaretDown } from "react-icons/fa";
 import { inspectionistFloorListData } from "@/data/data";
-import Image from "next/image";
-import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
-import InputFields from "./InputFields";
 import { useGetAllRestroomsQuery } from "@/features/restroom/restroomApi";
+import Image from "next/image";
+import { useState } from "react";
+import { FaCaretDown } from "react-icons/fa";
+import InputFields from "./InputFields";
 
 const CheckInCard = ({ buildingId }) => {
   const { data } = useGetAllRestroomsQuery(buildingId);
@@ -132,7 +131,7 @@ const CheckInCard = ({ buildingId }) => {
               <div>
                 {tableId === list.id && (
                   <div>
-                    <DataTable columns={columns} data={list.sensors} customStyles={tableStyles} />
+                    <InspectionFields />
                   </div>
                 )}
               </div>
@@ -143,6 +142,14 @@ const CheckInCard = ({ buildingId }) => {
       </div>
     </>
   );
+};
+
+export const InspectionFields = () => {
+  const [waterLeakage, setWaterLeakage] = useState("");
+  const [queuingStatus, setQueuingStatus] = useState("");
+  const [odorStatus, setOdorStatus] = useState("");
+
+  return <div></div>;
 };
 
 export default CheckInCard;
