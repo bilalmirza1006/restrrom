@@ -724,6 +724,48 @@ const alertHistoryData = [
   },
 ];
 
+const inspectionistFloorListData = [
+  {
+    id: '1',
+    icon: '/svgs/user/total-restrooms.svg',
+    name: 'Restroom 1',
+    listdata: [
+      { id: '1', icon: '/svgs/inspertionist/water.svg', title: 'Water Leakage' },
+      { id: '4', icon: '/svgs/inspertionist/queu.svg', title: 'Queuing Status' },
+      { id: '7', icon: '/svgs/inspertionist/odor.svg', title: 'Odor Status' },
+    ],
+    status: 'Active',
+    type: 'private',
+    numberoftiolets: '50',
+  },
+  {
+    id: '2',
+    icon: '/svgs/user/total-restrooms.svg',
+    name: 'Restroom 2',
+    listdata: [
+      { id: '2', icon: '/svgs/inspertionist/water.svg', title: 'Water Leakage' },
+      { id: '5', icon: '/svgs/inspertionist/queu.svg', title: 'Queuing Status' },
+      { id: '8', icon: '/svgs/inspertionist/odor.svg', title: 'Odor Status' },
+    ],
+    status: 'Inactive',
+    type: 'public',
+    numberoftiolets: '50',
+  },
+  {
+    id: '3',
+    icon: '/svgs/user/total-restrooms.svg',
+    name: 'Restroom 3',
+    listdata: [
+      { id: '3', icon: '/svgs/inspertionist/water.svg', title: 'Water Leakage' },
+      { id: '6', icon: '/svgs/inspertionist/queu.svg', title: 'Queuing Status' },
+      { id: '9', icon: '/svgs/inspertionist/odor.svg', title: 'Odor Status' },
+    ],
+    status: 'Active',
+    type: 'private',
+    numberoftiolets: '50',
+  },
+];
+
 export {
   dashboardCardsData,
   pieChartData,
@@ -734,6 +776,7 @@ export {
   subscriptionHistoryData,
   queueingStatusData,
   infoCardsData,
+  inspectionistFloorListData,
   activityChartData,
   lineChartData,
   mostUsedRoomsList,
