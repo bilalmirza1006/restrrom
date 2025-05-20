@@ -1,15 +1,15 @@
-import Input from '@/components/global/small/Input';
-import React, { useState } from 'react';
+import Input from "@/components/global/small/Input";
+import React, { useState } from "react";
 
-function App({ tableId, list }) {
+function App({ tableId, restroom }) {
   const [input, setInput] = useState({});
   const [components, setComponents] = useState([]);
 
   function MyComponent() {
     const [showInputs, setShowInputs] = useState(true);
     const [value, setValue] = useState({
-      name: '',
-      desc: '',
+      name: "",
+      desc: "",
     });
     return (
       <div>
@@ -63,7 +63,7 @@ function App({ tableId, list }) {
 
   return (
     <div>
-      {tableId === list.id && (
+      {tableId === restroom?._id && (
         <>
           <div className="mx-3 my-3">
             <button className="text-[#05004E] text-[18px]" onClick={addComponent}>

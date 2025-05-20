@@ -11,6 +11,6 @@ export const GET = asyncHandler(async (req) => {
   const { searchParams } = new URL(req.url);
   const buildingId = searchParams.get("buildingId");
   if (!buildingId) throw new customError(400, "Please provide buildingId");
-  const restRooms = await RestRoom.find({ ownerId: user?._id, buildingId });
+  const restRooms = await RestRoom.find({ buildingId });
   return sendResponse(NextResponse, "Fetched restrooms successfully", restRooms, accessToken);
 });
