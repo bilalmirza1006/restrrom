@@ -9,9 +9,7 @@ function InspectionFields() {
   console.log(waterLeakage);
   console.log(queuingStatus);
   console.log(odorStatus);
-  const optionHandler = (e) => {
-    setWaterLeakage(e.target.value);
-  };
+
   return (
     <div className="mt-2 px-5 flex gap-2 mb-2 flex-col">
       <div className="mb-2 flex gap-[28%] px-3 text-[#696969]">
