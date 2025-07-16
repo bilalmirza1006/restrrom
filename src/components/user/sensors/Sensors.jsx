@@ -20,6 +20,15 @@ import AddSensor from './AddSensor';
 import EditSensor from './EditSensor';
 import Spinner from '@/components/global/small/Spinner';
 
+const PARAMETER_LABELS = {
+  temperature: 'Temperature',
+  humidity: 'Humidity',
+  co: 'Co',
+  co2: 'Co2',
+  ch: 'Ch',
+  tvoc: 'Tvoc',
+};
+
 const Sensors = () => {
   const [modalType, setModalType] = useState('');
   const [selectedSensor, setSelectedSensor] = useState(null);
@@ -125,8 +134,11 @@ const tableColumns = (handleStatusHandler, modalOpenHandler) => [
     selector: (row) => row?.name,
   },
   {
-    name: 'Type',
-    selector: (row) => row?.type,
+    name: 'Parameters',
+    selector: (row) =>
+      Array.isArray(row?.parameters) && row.parameters.length > 0
+        ? row.parameters.map((p) => PARAMETER_LABELS[p] || p).join(', ')
+        : '-',
   },
   {
     name: 'Unique Id',

@@ -4,13 +4,14 @@ import Input from "@/components/global/small/Input";
 import Button from "@/components/global/small/Button";
 import { useCreateSensorMutation } from "@/features/sensor/sensorApi";
 import toast from "react-hot-toast";
+import Dropdown from "@/components/global/small/Dropdown";
 
 const AddSensor = ({ onClose }) => {
   const [createSensor, { isLoading, isSuccess }] = useCreateSensorMutation();
   const [formData, setFormData] = useState({
     name: "",
-    type: "",
     uniqueId: "",
+    parameters: [],
   });
 
   const handleChange = (e) => {
@@ -34,7 +35,10 @@ const AddSensor = ({ onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <form
+      onSubmit={handleSubmit}
+      className="grid grid-cols-1 lg:grid-cols-12 gap-4"
+    >
       <div className="lg:col-span-6">
         <Input
           label="Sensor Name"
@@ -44,13 +48,21 @@ const AddSensor = ({ onClose }) => {
           onChange={handleChange}
         />
       </div>
-      <div className="lg:col-span-6">
-        <Input
-          label="Type"
-          name="type"
-          placeholder="e.g. Pressure, Temperature"
-          value={formData.type}
-          onChange={handleChange}
+      <div className="lg:col-span-6  mt-1">
+        <Dropdown
+          multi={true}
+          defaultText={"Select"}
+          initialValue={formData.parameters}
+          options={[
+            { value: "temperature", option: "Temperature" },
+            { value: "humidity", option: "Humidity" },
+            { value: "co", option: "Co" },
+            { value: "co2", option: "Co2" },
+            { value: "ch", option: "Ch" },
+            { value: "tvoc", option: "Tvoc" },
+          ]}
+          label="Sensor Parameters"
+          onSelect={(values) => setFormData((prev) => ({ ...prev, parameters: values }))}
         />
       </div>
       <div className="lg:col-span-12">
@@ -64,8 +76,16 @@ const AddSensor = ({ onClose }) => {
       </div>
 
       <div className="lg:col-span-12 flex items-center justify-center gap-4 mt-4">
-        <Button onClick={onClose} text="Cancel" cn="border-primary bg-transparent !text-primary" />
-        <Button type="submit" text={isLoading ? "Adding..." : "Add Sensor"} disabled={isLoading} />
+        <Button
+          onClick={onClose}
+          text="Cancel"
+          cn="border-primary bg-transparent !text-primary"
+        />
+        <Button
+          type="submit"
+          text={isLoading ? "Adding..." : "Add Sensor"}
+          disabled={isLoading}
+        />
       </div>
     </form>
   );

@@ -11,15 +11,15 @@ export const POST = asyncHandler(async (req) => {
   const { user, accessToken } = await isAuthenticated();
   const ownerId = user._id;
   const body = await req.json();
-  const { name, type, uniqueId } = body;
-  if (!name || !type || !uniqueId) throw new customError(400, "Please provide all fields");
+  const { name, uniqueId, parameters } = body;
+  if (!name || !uniqueId || !parameters || !Array.isArray(parameters) || parameters.length === 0) throw new customError(400, "Please provide all fields, including parameters");
   const isExist = await Sensor.findOne({ uniqueId });
   if (isExist) throw new customError(400, "Sensor uniqueId already exists");
   const sensor = await Sensor.create({
     name,
-    type,
     uniqueId,
     ownerId,
+    parameters,
   });
   return sendResponse(NextResponse, "Sensor created successfully", "", accessToken);
 });
