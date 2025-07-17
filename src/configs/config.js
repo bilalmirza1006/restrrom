@@ -34,6 +34,14 @@ const config = Object.freeze({
   NODEMAILER_PASSWORD: process.env.NODEMAILER_PASSWORD,
   NODEMAILER_PORT: process.env.NODEMAILER_PORT,
   NODEMAILER_USER: process.env.NODEMAILER_USER,
+
+  // SQL database configs
+  // -------------------
+  SQL_DB_NAME: process.env.SQL_DB_NAME,
+  SQL_USERNAME: process.env.SQL_USERNAME,
+  SQL_PASSWORD: process.env.SQL_PASSWORD,
+  SQL_HOST_NAME: process.env.SQL_HOST_NAME,
+  SQL_PORT: process.env.SQL_PORT,
 });
 
 const getEnv = (key) => {

@@ -48,7 +48,7 @@ const AddSensor = ({ onClose }) => {
           onChange={handleChange}
         />
       </div>
-      <div className="lg:col-span-6  mt-1">
+      <div className="lg:col-span-6 mt-1">
         <Dropdown
           multi={true}
           defaultText={"Select"}
@@ -62,7 +62,9 @@ const AddSensor = ({ onClose }) => {
             { value: "tvoc", option: "Tvoc" },
           ]}
           label="Sensor Parameters"
-          onSelect={(values) => setFormData((prev) => ({ ...prev, parameters: values }))}
+          onSelect={(values) =>
+            setFormData((prev) => ({ ...prev, parameters: values }))
+          }
         />
       </div>
       <div className="lg:col-span-12">
