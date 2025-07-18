@@ -4,14 +4,24 @@ import Input from "@/components/global/small/Input";
 import Button from "@/components/global/small/Button";
 import { useUpdateSensorMutation } from "@/features/sensor/sensorApi";
 import toast from "react-hot-toast";
+import Dropdown from "@/components/global/small/Dropdown";
+
+const validate = (formData) => {
+  if (!formData.name.trim()) return "Sensor name is required";
+  if (!formData.uniqueId.trim()) return "Unique ID is required";
+  if (!formData.parameters || formData.parameters.length === 0)
+    return "At least one parameter is required";
+  return null;
+};
 
 const EditSensor = ({ onClose, selectedSensor }) => {
   console.log("Selected Sensor:", selectedSensor);
   const [updateSensor, { isLoading }] = useUpdateSensorMutation();
   const [formData, setFormData] = useState({
+    id: selectedSensor._id,
     name: selectedSensor?.name || "",
-    type: selectedSensor?.type || "",
     uniqueId: selectedSensor?.uniqueId || "",
+    parameters: selectedSensor?.parameters || [],
   });
 
   const handleChange = (e) => {
@@ -24,11 +34,21 @@ const EditSensor = ({ onClose, selectedSensor }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const errorMsg = validate(formData);
+    if (errorMsg) {
+      toast.error(errorMsg);
+      return;
+    }
     try {
-      const res = await updateSensor({
-        sensorId: selectedSensor._id,
-        data: formData,
-      }).unwrap();
+      const payload = {
+        id: selectedSensor._id,
+        ...formData,
+        parameters: formData.parameters.map((p) =>
+          typeof p === "string" ? p.toLowerCase() : p.value.toLowerCase()
+        ),
+      };
+      console.log("Updating sensor:", payload);
+      const res = await updateSensor(payload).unwrap();
       toast.success(res.message || "Sensor updated successfully");
       onClose();
     } catch (error) {
@@ -51,13 +71,23 @@ const EditSensor = ({ onClose, selectedSensor }) => {
           onChange={handleChange}
         />
       </div>
-      <div className="lg:col-span-6">
-        <Input
-          label="Type"
-          name="type"
-          placeholder="e.g. Pressure, Temperature"
-          value={formData.type}
-          onChange={handleChange}
+      <div className="lg:col-span-6 mt-1">
+        <Dropdown
+          multi={true}
+          defaultText={"Select"}
+          initialValue={formData.parameters}
+          options={[
+            { value: "temperature", option: "Temperature" },
+            { value: "humidity", option: "Humidity" },
+            { value: "co", option: "Co" },
+            { value: "co2", option: "Co2" },
+            { value: "ch", option: "Ch" },
+            { value: "tvoc", option: "Tvoc" },
+          ]}
+          label="Sensor Parameters"
+          onSelect={(values) =>
+            setFormData((prev) => ({ ...prev, parameters: values }))
+          }
         />
       </div>
       <div className="lg:col-span-12">

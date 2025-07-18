@@ -1,14 +1,19 @@
-'use client';
-import GeneralInfo from './GeneralInfo';
-import BuildingModel from './BuildingModel';
-import Maping from './Maping';
-import Restrooms from './Restrooms';
-import { useState } from 'react';
+"use client";
+import GeneralInfo from "./GeneralInfo";
+import BuildingModel from "./BuildingModel";
+import Maping from "./Maping";
+import Restrooms from "./Restrooms";
+import { useState } from "react";
 
 const AddBuilding = () => {
   const [currentStep, setCurrentStep] = useState(1);
 
-  const steps = ['General Information', 'Building Model', 'Maping', 'Restrooms'];
+  const steps = [
+    "General Information",
+    "Building Model",
+    "Maping",
+    "Restrooms",
+  ];
 
   const renderStep = (step) => {
     switch (step) {
@@ -35,10 +40,10 @@ const AddBuilding = () => {
             <div
               className={`size-[32px] rounded-full text-lg font-medium grid place-items-center ${
                 index > currentStep
-                  ? 'bg-[#D9D9D9] text-[#11111180]'
+                  ? "bg-[#D9D9D9] text-[#11111180]"
                   : index == currentStep
-                  ? 'bg-[#D9D9D9] text-[#000]'
-                  : 'bg-primary text-white'
+                  ? "bg-[#D9D9D9] text-[#000]"
+                  : "bg-primary text-white"
               }`}
             >
               {index + 1}
@@ -46,10 +51,10 @@ const AddBuilding = () => {
             <h6
               className={`text-base md:text-lg font-semibold ml-3 ${
                 index > currentStep
-                  ? 'text-[#11111180]'
+                  ? "text-[#11111180]"
                   : index == currentStep
-                  ? 'text-[#000]'
-                  : 'text-primary'
+                  ? "text-[#000]"
+                  : "text-primary"
               }`}
             >
               {step}
@@ -57,7 +62,7 @@ const AddBuilding = () => {
             {index < steps.length - 1 && (
               <div
                 className={`h-[2px] w-[100px] ${
-                  index >= currentStep ? 'bg-[#D9D9D9]' : 'bg-primary'
+                  index >= currentStep ? "bg-[#D9D9D9]" : "bg-primary"
                 }`}
               ></div>
             )}

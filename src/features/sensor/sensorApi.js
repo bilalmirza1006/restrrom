@@ -31,9 +31,9 @@ export const sensorApi = createApi({
       providesTags: ["Sensor"],
     }),
     updateSensor: builder.mutation({
-      query: ({ sensorId, data }) => ({
-        url: `/single/${sensorId}`,
-        method: "PUT",
+      query: (data) => ({
+        url: "/create",
+        method: "POST",
         body: data,
       }),
       invalidatesTags: ["Sensor"],

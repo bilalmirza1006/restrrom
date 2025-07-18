@@ -29,10 +29,19 @@ const GeneralInfo = ({ setCurrentStep }) => {
   };
   const nextBtnHandler = (e) => {
     e.preventDefault();
-    const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
+    const hasEmptyField = Object.values(buildingInfo).some(
+      (val) => !val?.toString().trim()
+    );
     const hasImage = !!(image?.file || image?.imagePreview);
-    if (hasEmptyField || !hasImage) return toast.error("Please fill all fields and upload building image.");
-    dispatch(setBuilding({ ...buildingInfo, buildingImage: image.imagePreview, buildingThumbnail: image.file }));
+    if (hasEmptyField || !hasImage)
+      return toast.error("Please fill all fields and upload building image.");
+    dispatch(
+      setBuilding({
+        ...buildingInfo,
+        buildingImage: image.imagePreview,
+        buildingThumbnail: image.file,
+      })
+    );
     setFileCache("buildingImage", image.file);
     setCurrentStep((s) => s + 1);
   };
@@ -50,14 +59,22 @@ const GeneralInfo = ({ setCurrentStep }) => {
         phone: building?.phone || "",
       });
       if (building?.buildingImage)
-        setImage({ file: getFileCache("buildingImage"), imagePreview: building?.buildingImage });
+        setImage({
+          file: getFileCache("buildingImage"),
+          imagePreview: building?.buildingImage,
+        });
     }
   }, [building]);
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">General Information</h6>
-      <form className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5" onSubmit={nextBtnHandler}>
+      <h6 className="text-base text-primary font-medium">
+        General Information
+      </h6>
+      <form
+        className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
+        onSubmit={nextBtnHandler}
+      >
         <div className="lg:col-span-3">
           <UploadBuildingImage image={image} setImage={setImage} />
         </div>
