@@ -2,6 +2,7 @@ import { connectDb } from "@/configs/connectDb";
 import { configureCloudinary, removeFromCloudinary } from "@/lib/cloudinary";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { RestRoom } from "@/models/restroom.model";
+import { Sensor } from "@/models/sensor.model";
 import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import sendResponse from "@/utils/sendResponse";
@@ -27,6 +28,15 @@ export const DELETE = asyncHandler(async (req, { params }) => {
   const restroom = await RestRoom.findOne({ _id: restroomId, ownerId: user?._id });
   if (!restroom) throw new customError(404, "RestroomId not found");
   if (restroom?.modelImage?.public_id) await removeFromCloudinary(restroom.modelImage.public_id);
+    if (restroom.sensors?.length) {
+    await Sensor.updateMany(
+      { _id: { $in: restroom.sensors } },
+      {
+        $unset: { buildingId: "", restroomId: "" },
+        $set: { isConnected: false },
+      }
+    );
+  }
   await RestRoom.findByIdAndDelete(restroom?._id);
   return sendResponse(NextResponse, "Restroom deleted successfully", restroom, accessToken);
 });

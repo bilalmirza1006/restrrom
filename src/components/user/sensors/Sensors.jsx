@@ -35,10 +35,19 @@ const Sensors = () => {
   const { data, isLoading } = useGetAllSensorsQuery();
   const [updateSensor] = useUpdateSensorMutation();
   const [deleteSensor, { isLoading: deleteLoading }] = useDeleteSensorMutation();
+  const [formData, setFormData] = useState({
+    id: selectedSensor?._id,
+    name: selectedSensor?.name || "",
+    uniqueId: selectedSensor?.uniqueId || "",
+    parameters: selectedSensor?.parameters || [],
+    status: selectedSensor?.status || "",
+  });
   const modalOpenHandler = (type, sensor = null) => {
     setModalType(type);
     setSelectedSensor(sensor);
   };
+  console.log("selectedSensor", selectedSensor);
+
   const modalCloseHandler = (type) => setModalType('');
 
   const deleteSensorHandler = async (sensorId) => {
@@ -53,17 +62,31 @@ const Sensors = () => {
       modalCloseHandler();
     }
   };
+
+  const validate = (formData) => {
+    if (!formData.name.trim()) return "Sensor name is required";
+    if (!formData.uniqueId.trim()) return "Unique ID is required";
+    if (!formData.parameters || formData.parameters.length === 0)
+      return "At least one parameter is required";
+    return null;
+  };
   const handleStatusHandler = async (sensor) => {
-    const updatedStatus = !sensor.status;
     try {
-      const res = await updateSensor({
-        sensorId: sensor._id,
-        data: { status: updatedStatus },
-      }).unwrap();
-      toast.success(res.message || 'Sensor status updated successfully');
+      const payload = {
+        id: sensor._id,
+        name: sensor.name,
+        uniqueId: sensor.uniqueId,
+        status: !sensor.status, // Toggle the current status
+        parameters: sensor.parameters.map((p) =>
+          typeof p === "string" ? p.toLowerCase() : p.value.toLowerCase()
+        ),
+      };
+
+      const res = await updateSensor(payload).unwrap();
+      toast.success(res.message || "Sensor status updated");
     } catch (error) {
-      toast.error(error.message || 'Something went wrong');
-      console.error('Error updating sensor status:', error);
+      toast.error(error.message || "Failed to update status");
+      console.error("Status update error:", error);
     }
   };
 
@@ -82,7 +105,7 @@ const Sensors = () => {
         ) : (
           <DataTable
             data={data?.data || []}
-            columns={tableColumns(handleStatusHandler, modalOpenHandler)}
+            columns={tableColumns(handleStatusHandler, setSelectedSensor, modalOpenHandler)}
             customStyles={tableStyles}
             pagination
             fixedHeader
@@ -128,7 +151,7 @@ const Sensors = () => {
 
 export default Sensors;
 
-const tableColumns = (handleStatusHandler, modalOpenHandler) => [
+const tableColumns = (handleStatusHandler, setSelectedSensor, modalOpenHandler) => [
   {
     name: 'Sensor Name',
     selector: (row) => row?.name,
@@ -152,7 +175,14 @@ const tableColumns = (handleStatusHandler, modalOpenHandler) => [
   {
     name: 'Status',
     cell: (row) => (
-      <ToggleButton isChecked={row.status} onToggle={() => handleStatusHandler(row)} />
+      <div>
+
+        <ToggleButton
+          isChecked={row.status}
+          onToggle={() => handleStatusHandler(row)}
+        />
+
+      </div>
     ),
   },
   {

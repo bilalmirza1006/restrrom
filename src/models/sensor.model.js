@@ -20,6 +20,9 @@ const { default: mongoose } = require("mongoose");
 const sensorSchema = new mongoose.Schema(
   {
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Auth", required: true },
+    buildingId: { type: mongoose.Schema.Types.ObjectId, ref: "Building" },
+    restroomId: { type: mongoose.Schema.Types.ObjectId, ref: "RestRoom" },
+
     name: { type: String, required: true },
     parameters: [{ type: String, required: true }],
     uniqueId: { type: String, required: true },

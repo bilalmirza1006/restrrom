@@ -1,7 +1,10 @@
+// import {Floor} from "@/components/user/buildings/Floor";
 import { connectDb } from "@/configs/connectDb";
 import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
 import { isAuthenticated } from "@/lib/isAuthenticated";
 import { Building } from "@/models/building.model";
+import { RestRoom } from "@/models/restroom.model";
+import { Sensor } from "@/models/sensor.model";
 import { asyncHandler } from "@/utils/asyncHandler";
 import { customError } from "@/utils/customError";
 import sendResponse from "@/utils/sendResponse";
@@ -18,22 +21,73 @@ export const GET = asyncHandler(async (req, { params }) => {
   return sendResponse(NextResponse, "Building fetched successfully", building, accessToken);
 });
 
+// export const DELETE = asyncHandler(async (req, { params }) => {
+//   await connectDb();
+//   await configureCloudinary();
+//   const { user, accessToken } = await isAuthenticated();
+//   const { buildingId } = await params;
+//   if (!isValidObjectId(buildingId)) throw new customError(400, "Invalid building id");
+//   const building = await Building.findOne({ _id: buildingId, ownerId: user?._id });
+//   if (!building) throw new customError(404, "Building not found");
+//   const promises = [];
+//   if (building?.buildingThumbnail?.public_id)
+//     promises.push(removeFromCloudinary(building?.buildingThumbnail?.public_id));
+//   if (building?.buildingModelImage?.public_id)
+//     promises.push(removeFromCloudinary(building?.buildingModelImage?.public_id));
+//   await Promise.all([...promises, Building.findByIdAndDelete(buildingId)]);
+//   return sendResponse(NextResponse, "Building deleted successfully", building, accessToken);
+// });
 export const DELETE = asyncHandler(async (req, { params }) => {
   await connectDb();
   await configureCloudinary();
+
   const { user, accessToken } = await isAuthenticated();
   const { buildingId } = await params;
+
+console.log("6891d74878bf2c8a69875ead",buildingId);
+
   if (!isValidObjectId(buildingId)) throw new customError(400, "Invalid building id");
+
   const building = await Building.findOne({ _id: buildingId, ownerId: user?._id });
   if (!building) throw new customError(404, "Building not found");
+
   const promises = [];
+
+  // Remove cloudinary assets
   if (building?.buildingThumbnail?.public_id)
-    promises.push(removeFromCloudinary(building?.buildingThumbnail?.public_id));
+    promises.push(removeFromCloudinary(building.buildingThumbnail.public_id));
   if (building?.buildingModelImage?.public_id)
-    promises.push(removeFromCloudinary(building?.buildingModelImage?.public_id));
-  await Promise.all([...promises, Building.findByIdAndDelete(buildingId)]);
-  return sendResponse(NextResponse, "Building deleted successfully", building, accessToken);
+    promises.push(removeFromCloudinary(building.buildingModelImage.public_id));
+
+  // Fetch floors attached to this building
+  const floors = await RestRoom.find({ buildingId });
+
+  // Get all sensor IDs from floors
+  const allFloorSensorIds = floors.flatMap(floor => floor.sensors || []);
+
+  // Disconnect all sensors from building and floor
+  if (allFloorSensorIds.length) {
+    await Sensor.updateMany(
+      { _id: { $in: allFloorSensorIds } },
+      {
+        $unset: { buildingId: "", restroomId: "" },
+        $set: { isConnected: false },
+      }
+    );
+  }
+
+  // Delete all floors
+  await RestRoom.deleteMany({ buildingId });
+
+  // Delete the building
+  await Promise.all([
+    ...promises,
+    Building.findByIdAndDelete(buildingId),
+  ]);
+
+  return sendResponse(NextResponse, "Building and associated data deleted successfully", building, accessToken);
 });
+
 
 export const PUT = asyncHandler(async (req, { params }) => {
   await connectDb();
