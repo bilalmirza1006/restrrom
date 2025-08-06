@@ -73,7 +73,7 @@ const Profile = () => {
   const ProfileField = ({ label, value }) => (
     <div className="mb-4">
       <label className="block text-gray-600 font-medium mb-1">{label}</label>
-      <div className="text-gray-800">{value || "—"}</div>
+      <div className="text-gray-800 bg-gray-200 p-2 rounded-md">{value || "—"}</div>
     </div>
   );
 

@@ -3,7 +3,10 @@ import Modal from "@/components/global/Modal";
 import Button from "@/components/global/small/Button";
 import Dropdown from "@/components/global/small/Dropdown";
 import Input from "@/components/global/small/Input";
-import { useState } from "react";
+import { useUpdateProfileMutation } from "@/features/auth/authApi";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
 
 const intervalTimesInSeconds = [
   { option: "3 minutes", value: "180000" },
@@ -16,8 +19,16 @@ const intervalTimesInSeconds = [
 
 const Configuration = () => {
   const [modal, setModal] = useState(false);
-  const [selectedOption, setSelectedOption] = useState("Local Database");
-  const [pendingOption, setPendingOption] = useState("");
+  const { user } = useSelector((state) => state.auth);
+
+  const [selectedOption, setSelectedOption] = useState();
+  const [pendingOption, setPendingOption] = useState('');
+  const hasSubscription = Boolean(user?.user?.subscriptionId);
+  const [defaultTextForInterval, setDefaultTextForInterval] = useState('3 minutes');
+  const [timeInterval, setTimeInterval] = useState('180000'); // 3 min (ms)
+  const [updateProfile, { isLoading }] = useUpdateProfileMutation();
+
+
   const [formValues, setFormValues] = useState({
     timeInterval: "",
     dbName: "",
@@ -26,6 +37,7 @@ const Configuration = () => {
     password: "",
     hostName: "",
   });
+  // console.log("user", user?.user);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -39,14 +51,151 @@ const Configuration = () => {
     setPendingOption(event.target.value);
     setModal(true);
   };
+  // console.log("ssssssssssssssssssss", pendingOption);
+
   const handleConfirmChange = () => {
     setSelectedOption(pendingOption);
+    console.log("pendingOption", pendingOption);
+    if (pendingOption === 'Local Database') {
+
+      setFormValues((prevValues) => ({
+        ...prevValues, // keep timeInterval and any other existing values
+        dbName: "",
+        portNumber: "",
+        userName: "",
+        password: "",
+        hostName: "",
+      }));
+    }
+
     setModal(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  };
+  console.log("formvalue", formValues);
+
+
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const formData = new FormData();
+
+    const { dbName, hostName, portNumber, userName, password, timeInterval } = formValues;
+
+    if (selectedOption === 'Remote Database') {
+      // Validate remote DB fields
+      if (!dbName || !hostName || !portNumber || !userName || !password) {
+        toast.error('Please fill all the fields for the remote database.');
+        return;
+      }
+
+      formData.append('isCustomDb', 'true');
+      formData.append('customDbHost', hostName);
+      formData.append('customDbPort', portNumber);
+      formData.append('customDbUsername', userName);
+      formData.append('customDbPassword', password);
+      formData.append('customDbName', dbName);
+    }
+
+    if (selectedOption === 'Local Database') {
+      // No validation required, but still send null or empty values to reset
+      formData.append('isCustomDb', 'false');
+      formData.append('customDbHost', hostName || '');
+      formData.append('customDbPort', portNumber || '');
+      formData.append('customDbUsername', userName || '');
+      formData.append('customDbPassword', password || '');
+      formData.append('customDbName', dbName || '');
+    }
+
+    // Add time interval if exists
+    if (timeInterval) {
+      formData.append('interval', timeInterval);
+    }
+
+    const response = await updateProfile(formData).unwrap();
+
+    if (response?.success) {
+      toast.success(response?.message);
+      // Optionally re-fetch user data
+      // await refetch(); // Uncomment if needed
+    }
+  } catch (error) {
+    toast.error(error?.data?.message || 'Error while updating profile');
+    console.error('Error while updating profile:', error);
+  }
+};
+
+  // useEffect(() => {
+
+  //   if (user?.user) {
+  //     setFormValues({
+  //       hostName: user?.user?.customDbHost || '',
+  //       portNumber: user?.user?.customDbPort || '',
+  //       userName: user?.user?.customDbUsername || '',
+  //       password: user?.user?.customDbPassword || '',
+  //       dbName: user?.user?.customDbName || '',
+  //       timeInterval: '', // preserve or set explicitly if needed
+  //     });
+  //     setSelectedOption(user?.user?.isCustomDb ? 'Remote Database' : 'Local Database');
+  //   }
+  //   if (user?.user?.interval) {
+  //     const interval = intervalTimesInSeconds.find((item) => item.value == String(user?.user?.interval));
+  //     console.log(interval, interval?.option, user?.user?.interval);
+  //     setDefaultTextForInterval(interval?.option || 'Select Time Interval');
+  //   }
+
+  //   /* ───────────────────────────────────────────────────────── */
+  //   /* 1.  Un‑subscribed user ‑‑ force 3‑minute default         */
+  //   /* ───────────────────────────────────────────────────────── */
+  //   if (!hasSubscription) {
+  //     setDefaultTextForInterval('3 minutes');
+  //     setTimeInterval('180000');
+  //     return; // nothing else to check
+  //   }
+
+  //   /* ───────────────────────────────────────────────────────── */
+  //   /* 2.  Subscribed user with a saved custom interval         */
+  //   /* ───────────────────────────────────────────────────────── */
+  //   if (user?.user?.interval) {
+  //     const match = intervalTimesInSeconds.find((i) => i.value === String(user.interval));
+  //     setDefaultTextForInterval(match?.option ?? 'Select Time Interval');
+  //     setTimeInterval(match?.value ?? '180000');
+  //   }
+  // }, [user?.user]);
+
+useEffect(() => {
+  if (user?.user) {
+    const { customDbHost, customDbPort, customDbUsername, customDbPassword, customDbName, interval, isCustomDb } = user.user;
+    
+    setFormValues({
+      hostName: customDbHost || '',
+      portNumber: customDbPort || '',
+      userName: customDbUsername || '',
+      password: customDbPassword || '',
+      dbName: customDbName || '',
+      timeInterval: interval ? String(interval) : '180000',
+    });
+
+    setSelectedOption(isCustomDb ? 'Remote Database' : 'Local Database');
+
+    const match = intervalTimesInSeconds.find((item) => item.value === String(interval));
+    setDefaultTextForInterval(match?.option || '3 minutes');
+    setTimeInterval(String(interval) || '180000');
+  }
+
+  // Force 3-minute interval for unsubscribed users
+  if (!hasSubscription) {
+    setDefaultTextForInterval('3 minutes');
+    setTimeInterval('180000');
+    setFormValues((prev) => ({ ...prev, timeInterval: '180000' }));
+  }
+}, [user?.user]);
+
+
+
+
+  console.log("setSelectedOption",selectedOption);
+
   return (
     <section>
       <h3 className="text-lg md:text-xl font-[500] mb-4">
@@ -54,17 +203,24 @@ const Configuration = () => {
       </h3>
       <form onSubmit={handleSubmit}>
         <div className="pl-0 md:pl-8 mt-4 md:mt-6">
-          <Dropdown
-            label="Select Time Intervals"
-            defaultText={"Select Time Intervals"}
-            options={intervalTimesInSeconds}
-            onSelect={(option) =>
-              setFormValues((prevValues) => ({
-                ...prevValues,
-                timeInterval: option,
-              }))
-            }
-          />
+          {hasSubscription ? (
+            <Dropdown
+              label="Select Time Intervals"
+              defaultText={defaultTextForInterval}
+              options={intervalTimesInSeconds}
+              onSelect={(option) =>
+                setFormValues((prevValues) => ({
+                  ...prevValues,
+                  timeInterval: option,
+                }))
+              }
+            />
+          ) : (
+            <p className="text-sm text-gray-500">
+              Interval fixed at <strong>3&nbsp;minutes</strong>
+              &nbsp;(subscription required to change)
+            </p>
+          )}
 
           <h3 className="text-sm md:text-base font-medium mb-2 mt-4 md:mt-6">
             Database Type
@@ -91,6 +247,7 @@ const Configuration = () => {
               Remote Database
             </label>
           </div>
+
           <div className="mt-4">
             {selectedOption === "Remote Database" && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
