@@ -198,12 +198,70 @@ const initialSensorsData = [
   },
 ];
 
-const planCardsData = [
+// const planCardsData = [
+//   {
+//     title: 'Starter',
+//     subtitle: 'Basic Builder',
+//     price: '29',
+//     type: 'monthly',
+//     featuresList: [
+//       'Manage up to 3 buildings',
+//       'Connect up to 10 sensors',
+//       'Basic real-time monitoring',
+//       'Standard reporting tools',
+//       'Email support',
+//     ],
+//     description:
+//       'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+//     bg: '#B2FFB0',
+//     btnBg: '#008B26',
+//   },
+//   {
+//     title: 'Standard',
+//     subtitle: 'Pro Manager',
+
+//     price: '39',
+//     type: 'yearly',
+//     featuresList: [
+//       'Manage up to 3 buildings',
+//       'Connect up to 10 sensors',
+//       'Basic real-time monitoring',
+//       'Standard reporting tools',
+//       'Email support',
+//     ],
+//     description:
+//       'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+//     bg: '#81CEFF',
+//     btnBg: '#0067A9',
+//   },
+//   {
+//     title: 'Premium',
+//     subtitle: 'Basic Plan',
+
+//     price: '49',
+//     type: 'lifetime',
+//     featuresList: [
+//       'Manage up to 3 buildings',
+//       'Connect up to 10 sensors',
+//       'Basic real-time monitoring',
+//       'Standard reporting tools',
+//       'Email support',
+//     ],
+//     description:
+//       'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+//     bg: '#FFCF87',
+//     btnBg: '#F2AC44',
+//   },
+// ];
+
+export const planCardsData = [
   {
     title: 'Starter',
     subtitle: 'Basic Builder',
     price: '29',
-    type: 'monthly',
+    currency: 'USD',
+    type: 'monthly', // recurring
+    stripePriceId: 'price_1RtRrdIvRUTQBOxaElD7rMOr', // replace with Stripe monthly price ID
     featuresList: [
       'Manage up to 3 buildings',
       'Connect up to 10 sensors',
@@ -212,43 +270,46 @@ const planCardsData = [
       'Email support',
     ],
     description:
-      'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+      'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently.',
     bg: '#B2FFB0',
     btnBg: '#008B26',
   },
   {
     title: 'Standard',
     subtitle: 'Pro Manager',
-
     price: '39',
-    type: 'yearly',
+    currency: 'USD',
+    type: 'yearly', // recurring
+    stripePriceId: 'price_1RtSKmIvRUTQBOxahzPBw0WH', // replace with Stripe yearly price ID
     featuresList: [
       'Manage up to 3 buildings',
       'Connect up to 10 sensors',
       'Basic real-time monitoring',
       'Standard reporting tools',
-      'Email support',
+      'Priority email support',
     ],
     description:
-      'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+      'Perfect for growing teams managing multiple properties with enhanced support and advanced features.',
     bg: '#81CEFF',
     btnBg: '#0067A9',
   },
   {
     title: 'Premium',
-    subtitle: 'Basic Plan',
-
+    subtitle: 'Lifetime Premium',
     price: '49',
-    type: 'lifetime',
+    currency: 'USD',
+    type: 'lifetime', // one-time payment
+    stripePriceId: 'price_1RuqUHIvRUTQBOxaNFpQ9cCh', // Stripe lifetime price ID
     featuresList: [
-      'Manage up to 3 buildings',
-      'Connect up to 10 sensors',
-      'Basic real-time monitoring',
-      'Standard reporting tools',
-      'Email support',
+      'Manage unlimited buildings',
+      'Connect unlimited sensors',
+      'Full real-time monitoring',
+      'Advanced reporting tools',
+      'Priority email & phone support',
+      'Lifetime access — no renewal fees',
     ],
     description:
-      'Start with the essentials. Ideal for small teams or single buildings, this plan provides the foundational tools to get your smart building up and running efficiently',
+      'Unlock every premium feature forever with a one-time payment. No renewals, no hidden costs — just lifetime value.',
     bg: '#FFCF87',
     btnBg: '#F2AC44',
   },
@@ -772,7 +833,7 @@ export {
   buildingData,
   tableStyles,
   initialSensorsData,
-  planCardsData,
+  // planCardsData,
   subscriptionHistoryData,
   queueingStatusData,
   infoCardsData,

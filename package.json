@@ -6,10 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "ngrok": "ngrok http --domain=urchin-awake-firmly.ngrok-free.app 3000"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
+    "@stripe/stripe-js": "^7.9.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
@@ -30,13 +32,15 @@
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",
     "recharts": "^2.15.2",
-    "sequelize": "^6.37.7"
+    "sequelize": "^6.37.7",
+    "stripe": "^18.5.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
+    "ngrok": "^5.0.0-beta.2",
     "tailwindcss": "^4"
   }
 }

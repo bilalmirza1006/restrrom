@@ -33,6 +33,8 @@ const authSchema = new mongoose.Schema(
     customDbPort: { type: Number, default: null },
     isCustomDbConnected: { type: Boolean, default: false },
     subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" },
+    isTrialDone: { type: Boolean, default: false },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "Auth", default: null },
   },
   { timestamps: true }
 );
