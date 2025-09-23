@@ -1,36 +1,38 @@
-import { Sequelize } from "sequelize";
-import mongoose from "mongoose";
-import { getEnv } from "./config";
+import { Sequelize } from 'sequelize';
+import mongoose from 'mongoose';
+import { getEnv } from './config';
 // import { Sequelize } from "sequelize";
 // import { config } from "../config/config.js";
-import mysql2 from "mysql2"; // ✅ Use ES Module import
-import { Auth } from "@/models/auth.model";
-import { initModels } from "@/sequelizeSchemas/initModels";
+import mysql2 from 'mysql2'; // ✅ Use ES Module import
+import { Auth } from '@/models/auth.model';
+import { initModels } from '@/sequelizeSchemas/initModels';
 
 let isConnected = false;
 export async function connectDb() {
   if (isConnected) return console.log(`MongoDB is already connected`, isConnected);
   try {
-    const connection = await mongoose.connect(getEnv("MONGODB_URL"));
+    const connection = await mongoose.connect(getEnv('MONGODB_URL'));
     isConnected = connection.connections[0].readyState === 1;
     console.log(`MongoDB connected successfully`, isConnected);
-    connection.connection.on("error", (error) => console.log("Error in connection to database", error));
+    connection.connection.on('error', (error) =>
+      console.log('Error in connection to database', error)
+    );
   } catch (error) {
-    console.log("Connection failed", error);
-    console.error("Error in connection to database", error);
+    console.log('Connection failed', error);
+    console.error('Error in connection to database', error);
   }
 }
 
 // connect mysql
 // -------------
 export const sequelize = new Sequelize(
-  getEnv("SQL_DB_NAME"),
-  getEnv("SQL_USERNAME"),
-  getEnv("SQL_PASSWORD"),
+  getEnv('SQL_DB_NAME'),
+  getEnv('SQL_USERNAME'),
+  getEnv('SQL_PASSWORD'),
   {
-    host: getEnv("SQL_HOST_NAME"),
-    port: Number(getEnv("SQL_PORT")) || 3306,
-    dialect: "mysql",
+    host: getEnv('SQL_HOST_NAME'),
+    port: Number(getEnv('SQL_PORT')) || 3306,
+    dialect: 'mysql',
     dialectModule: mysql2,
   }
 );
@@ -81,7 +83,6 @@ const mySqlConnectionCache = new Map();
 //   }
 // };
 
-
 export const connectCustomMySqll = async (userId) => {
   let dbConnection = sequelize; // default = global
   let customDbConnected = false;
@@ -111,7 +112,6 @@ export const connectCustomMySqll = async (userId) => {
         dialect: 'mysql',
         logging: false,
         dialectModule: mysql2,
-
       });
       customDbConnected = true;
     }
@@ -151,7 +151,13 @@ export const connectCustomMySqll = async (userId) => {
     console.error('Unable to connect to the database:', err.message);
     throw new Error(
       err.message ||
-      'Something went wrong with your database credentials. Please contact the admin.'
+        'Something went wrong with your database credentials. Please contact the admin.'
     );
   }
 };
+
+export const clearCustomMySqlConnection = (userId) => {
+  mySqlConnectionCache.delete(String(userId));
+};
+
+//  dispatch(setUser(userData))

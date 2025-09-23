@@ -1,55 +1,63 @@
-import { getEnv } from "@/configs/config";
-import { connectCustomMySql, connectCustomMySqll, connectDb } from "@/configs/connectDb";
-import { accessTokenOptions } from "@/configs/constants";
-import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
-import { isAuthenticated } from "@/lib/isAuthenticated";
-import { Auth } from "@/models/auth.model";
-import { asyncHandler } from "@/utils/asyncHandler";
-import { customError } from "@/utils/customError";
-import sendResponse from "@/utils/sendResponse";
-import { NextResponse } from "next/server";
+import { getEnv } from '@/configs/config';
+import {
+  clearCustomMySqlConnection,
+  connectCustomMySql,
+  connectCustomMySqll,
+  connectDb,
+} from '@/configs/connectDb';
+import { accessTokenOptions } from '@/configs/constants';
+import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from '@/lib/cloudinary';
+import { isAuthenticated } from '@/lib/isAuthenticated';
+import { Auth } from '@/models/auth.model';
+import { asyncHandler } from '@/utils/asyncHandler';
+import { customError } from '@/utils/customError';
+import sendResponse from '@/utils/sendResponse';
+import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import next from "next";
-import { Sequelize } from "sequelize";
-import mysql2 from "mysql2"; // ✅ Use ES Module import
+import next from 'next';
+import { Sequelize } from 'sequelize';
+import mysql2 from 'mysql2'; // ✅ Use ES Module import
 
 export const GET = asyncHandler(async () => {
   await connectDb();
   const { user: userGet, accessToken } = await isAuthenticated();
-  const user = await Auth.findById(userGet?._id).select("-password");
-  if (!user) throw new customError(404, "User not found");
+  const user = await Auth.findById(userGet?._id).select('-password');
+  if (!user) throw new customError(404, 'User not found');
+  await connectCustomMySqll(String(user?._id)); // will throw if it can’t connect
+  console.log('hallo');
+
   // const res = NextResponse.json({ success: true, message: "User profile fetched successfully", user: user });
   // if (accessToken) res.cookies.set(getEnv("ACCESS_TOKEN_NAME"), accessToken, accessTokenOptions);
   // return res;
-  return sendResponse(NextResponse, "User profile fetched successfully", user, accessToken);
+  return sendResponse(NextResponse, 'User profile fetched successfully', user, accessToken);
 });
 
 export const PUT = asyncHandler(async (req) => {
   await connectDb();
   configureCloudinary();
   const { user: userGet, accessToken } = await isAuthenticated();
-  const user = await Auth.findById(userGet?._id).select("+password");
-  if (!user) throw new customError(404, "User not found");
+  const user = await Auth.findById(userGet?._id).select('+password');
+  if (!user) throw new customError(404, 'User not found');
   const formData = await req.formData();
   const allowedFields = [
-    "fullName",
-    "email",
-    "dob",
-    "phoneNumber",
-    "gender",
-    "nationality",
-    "image",
-    "interval",
-    "isCustomDb",
-    "customDbHost",
-    "customDbPassword",
-    "customDbUsername",
-    "customDbName",
-    "customDbPort",
-    "isCustomDbConnected",
-    "subscriptionId",
-    "oldPassword",
-    "newPassword"
+    'fullName',
+    'email',
+    'dob',
+    'phoneNumber',
+    'gender',
+    'nationality',
+    'image',
+    'interval',
+    'isCustomDb',
+    'customDbHost',
+    'customDbPassword',
+    'customDbUsername',
+    'customDbName',
+    'customDbPort',
+    'isCustomDbConnected',
+    'subscriptionId',
+    'oldPassword',
+    'newPassword',
   ];
 
   const updatePayload = {};
@@ -62,10 +70,10 @@ export const PUT = asyncHandler(async (req) => {
   // console.log("user",user);
 
   if (Object.keys(updatePayload).length === 0) {
-    throw new customError(400, "Please provide at least one field to update");
+    throw new customError(400, 'Please provide at least one field to update');
   }
-  const oldPassword = formData.get("oldPassword")
-  const newPassword = formData.get("newPassword")
+  const oldPassword = formData.get('oldPassword');
+  const newPassword = formData.get('newPassword');
 
   if (oldPassword && newPassword) {
     if (!user?.password) {
@@ -81,17 +89,16 @@ export const PUT = asyncHandler(async (req) => {
     await user.save();
   }
 
-
-  const newImage = formData.get("image");
-  if (newImage && typeof newImage === "object") {
+  const newImage = formData.get('image');
+  if (newImage && typeof newImage === 'object') {
     // Remove old image from Cloudinary if it exists
     if (user.image?.public_id) {
       await removeFromCloudinary(user.image.public_id);
     }
     // Upload new image
-    const cloudImage = await uploadOnCloudinary(newImage, "user_profiles");
+    const cloudImage = await uploadOnCloudinary(newImage, 'user_profiles');
     if (!cloudImage || !cloudImage.secure_url || !cloudImage.public_id) {
-      throw new customError(500, "Image upload failed");
+      throw new customError(500, 'Image upload failed');
     }
     updatePayload.image = {
       url: cloudImage.secure_url,
@@ -99,21 +106,17 @@ export const PUT = asyncHandler(async (req) => {
     };
   }
 
-
-
-
-
   /* 5. Custom‑DB credentials & validation ------------------------- */
-  const enableCustom = formData.get("isCustomDb") === 'true';
-  const disableCustom = formData.get("isCustomDb") === 'false';
+  const enableCustom = formData.get('isCustomDb') === 'true';
+  const disableCustom = formData.get('isCustomDb') === 'false';
   let credsChanged = false;
 
   if (enableCustom) {
-    const customDbHost = formData.get("customDbHost")
-    const customDbName = formData.get("customDbName")
-    const customDbUsername = formData.get("customDbUsername")
-    const customDbPassword = formData.get("customDbPassword")
-    const customDbPort = formData.get("customDbPort")
+    const customDbHost = formData.get('customDbHost');
+    const customDbName = formData.get('customDbName');
+    const customDbUsername = formData.get('customDbUsername');
+    const customDbPassword = formData.get('customDbPassword');
+    const customDbPort = formData.get('customDbPort');
 
     const hasAllCreds =
       customDbHost && customDbName && customDbUsername && customDbPassword && customDbPort;
@@ -127,7 +130,7 @@ export const PUT = asyncHandler(async (req) => {
         port: Number(customDbPort) || 3306,
         // dialect: 'mysql',
         logging: false,
-        dialect: "mysql",
+        dialect: 'mysql',
         dialectModule: mysql2,
       });
       await probe.authenticate();
@@ -173,22 +176,16 @@ export const PUT = asyncHandler(async (req) => {
     if (user.isCustomDb) credsChanged = true;
     user.isCustomDb = false;
   }
-  const userId = user?._id
+  const userId = user?._id;
   /* 6. Persist + clear cache if creds changed --------------------- */
   await user.save();
-  if (credsChanged) connectCustomMySqll.delete(String(userId));
+  if (credsChanged) clearCustomMySqlConnection(String(userId));
 
-  /* 7. (Re)connect ------------------------------------------------- */
-  await connectCustomMySqll(String(userId)); // will throw if it can’t connect
-
-
-
+  await connectCustomMySqll(String(userId));
   const updatedUser = await Auth.findByIdAndUpdate(userGet._id, updatePayload, {
     new: true,
     runValidators: true,
-  }).select("-password");
+  }).select('-password');
 
-
-
-  return sendResponse(NextResponse, "User profile fetched successfully", updatedUser, accessToken);
+  return sendResponse(NextResponse, 'User profile fetched successfully', updatedUser, accessToken);
 });

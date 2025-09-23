@@ -1,24 +1,24 @@
-import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
-import { imageSchema } from "./global.model";
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { imageSchema } from './global.model';
 
 const authSchema = new mongoose.Schema(
   {
     fullName: {
       type: String,
-      required: [true, "Full name is required"],
+      required: [true, 'Full name is required'],
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: [true, 'Email is required'],
     },
     password: {
       type: String,
       required: true,
       select: false,
-      minlength: [6, "Password must be at least 6 characters long"],
+      minlength: [6, 'Password must be at least 6 characters long'],
     },
-    role: { type: String, default: "user" },
+    role: { type: String, default: 'user' },
     dob: { type: String, default: null },
     phoneNumber: { type: String, default: null },
     gender: { type: String, default: null },
@@ -32,9 +32,9 @@ const authSchema = new mongoose.Schema(
     customDbName: { type: String, default: null },
     customDbPort: { type: Number, default: null },
     isCustomDbConnected: { type: Boolean, default: false },
-    subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: "Subscriber" },
+    subscriptionId: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscriber', default: null },
     isTrialDone: { type: Boolean, default: false },
-    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: "Auth", default: null },
+    creatorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Auth', default: null },
   },
   { timestamps: true }
 );
@@ -43,9 +43,9 @@ authSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-authSchema.pre("save", async function (next) {
+authSchema.pre('save', async function (next) {
   const user = this;
-  if (!user.isModified("password")) return next();
+  if (!user.isModified('password')) return next();
 
   try {
     const salt = await bcrypt.genSalt(10);
@@ -57,4 +57,4 @@ authSchema.pre("save", async function (next) {
   }
 });
 
-export const Auth = mongoose.models.Auth || mongoose.model("Auth", authSchema);
+export const Auth = mongoose.models.Auth || mongoose.model('Auth', authSchema);

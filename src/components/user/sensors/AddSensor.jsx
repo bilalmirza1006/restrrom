@@ -1,16 +1,16 @@
-"use client";
-import { useState } from "react";
-import Input from "@/components/global/small/Input";
-import Button from "@/components/global/small/Button";
-import { useCreateSensorMutation } from "@/features/sensor/sensorApi";
-import toast from "react-hot-toast";
-import Dropdown from "@/components/global/small/Dropdown";
+'use client';
+import { useState } from 'react';
+import Input from '@/components/global/small/Input';
+import Button from '@/components/global/small/Button';
+import { useCreateSensorMutation } from '@/features/sensor/sensorApi';
+import toast from 'react-hot-toast';
+import Dropdown from '@/components/global/small/Dropdown';
 
 const AddSensor = ({ onClose }) => {
   const [createSensor, { isLoading, isSuccess }] = useCreateSensorMutation();
   const [formData, setFormData] = useState({
-    name: "",
-    uniqueId: "",
+    name: '',
+    uniqueId: '',
     parameters: [],
   });
 
@@ -26,19 +26,16 @@ const AddSensor = ({ onClose }) => {
     e.preventDefault();
     try {
       const res = await createSensor(formData).unwrap();
-      toast.success(res.message || "Sensor created successfully");
+      toast.success(res.message || 'Sensor created successfully');
       onClose();
     } catch (error) {
-      toast.error(error.message || "Something went wrong");
-      console.error("Error creating sensor:", error);
+      toast.error(error.data.message || 'Something went wrong');
+      console.error('Error creating sensor:', error);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="grid grid-cols-1 lg:grid-cols-12 gap-4"
-    >
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
       <div className="lg:col-span-6">
         <Input
           label="Sensor Name"
@@ -51,20 +48,18 @@ const AddSensor = ({ onClose }) => {
       <div className="lg:col-span-6 mt-1">
         <Dropdown
           multi={true}
-          defaultText={"Select"}
+          defaultText={'Select'}
           initialValue={formData.parameters}
           options={[
-            { value: "temperature", option: "Temperature" },
-            { value: "humidity", option: "Humidity" },
-            { value: "co", option: "Co" },
-            { value: "co2", option: "Co2" },
-            { value: "ch", option: "Ch" },
-            { value: "tvoc", option: "Tvoc" },
+            { value: 'temperature', option: 'Temperature' },
+            { value: 'humidity', option: 'Humidity' },
+            { value: 'co', option: 'Co' },
+            { value: 'co2', option: 'Co2' },
+            { value: 'ch', option: 'Ch' },
+            { value: 'tvoc', option: 'Tvoc' },
           ]}
           label="Sensor Parameters"
-          onSelect={(values) =>
-            setFormData((prev) => ({ ...prev, parameters: values }))
-          }
+          onSelect={(values) => setFormData((prev) => ({ ...prev, parameters: values }))}
         />
       </div>
       <div className="lg:col-span-12">
@@ -78,16 +73,8 @@ const AddSensor = ({ onClose }) => {
       </div>
 
       <div className="lg:col-span-12 flex items-center justify-center gap-4 mt-4">
-        <Button
-          onClick={onClose}
-          text="Cancel"
-          cn="border-primary bg-transparent !text-primary"
-        />
-        <Button
-          type="submit"
-          text={isLoading ? "Adding..." : "Add Sensor"}
-          disabled={isLoading}
-        />
+        <Button onClick={onClose} text="Cancel" cn="border-primary bg-transparent !text-primary" />
+        <Button type="submit" text={isLoading ? 'Adding...' : 'Add Sensor'} disabled={isLoading} />
       </div>
     </form>
   );

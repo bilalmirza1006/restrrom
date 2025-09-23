@@ -8,6 +8,7 @@ import AuthGuard from '@/components/auth/AuthGuard';
 import Loader from '@/components/global/Loader';
 import { useRouter } from 'next/navigation';
 import { getRedirectPath, isProtectedRoute } from '@/utils/routingUtils';
+import { isEqual } from 'lodash';
 
 const ProtectedLayout = ({ children }) => {
   const dispatch = useDispatch();
@@ -15,6 +16,7 @@ const ProtectedLayout = ({ children }) => {
   const { data, isSuccess, isLoading, isError, isUninitialized } = useGetProfileQuery();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const isRedirectingRef = useRef(false);
+  console.log('datadatadatadata', data);
 
   // Helper to determine if redirection is crossing role boundaries
   const isCrossingRoleBoundaries = (currentPath, targetPath) => {
@@ -43,10 +45,11 @@ const ProtectedLayout = ({ children }) => {
 
       // Update Redux store if needed
       const userData = data.data;
-      const userId = userData._id || userData.id;
-      const storeUserId = user?.user?._id || user?.user?.id || user?._id || user?.id;
+      const storeUser = user?.user || user;
 
-      if (!storeUserId || storeUserId !== userId) {
+      // Compare entire objects
+      if (!storeUser || !isEqual(storeUser, userData)) {
+        console.log('dispatch setUser - user changed');
         dispatch(setUser(userData));
       }
 

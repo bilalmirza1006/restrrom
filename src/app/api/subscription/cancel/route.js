@@ -47,23 +47,27 @@ export const POST = asyncHandler(async (req) => {
 
   try {
     // Step 1: Delete subscription from MongoDB first
+    // Step 1: Delete subscription from MongoDB
     await Subscriber.findByIdAndDelete(subscription._id);
-    await Auth.findByIdAndUpdate(userId, { subscriptionId: null });
-    console.log('[Cancel Subscription] Deleted subscription from MongoDB');
 
-    // Step 2: Cancel in Stripe
+    // Step 2: Remove subscriptionId from Auth
+    // await Auth.findByIdAndUpdate(userId, { $unset: { subscriptionId: null } });
+    await Auth.findByIdAndUpdate(userId, { subscriptionId: null });
+
+    console.log('[Cancel Subscription] Deleted subscription + removed subscriptionId from Auth');
+
+    // Step 3: Cancel in Stripe
     const stripeSubscription = await cancelStripeSubscription(subscription.stripeSubscriptionId);
     console.log('[Cancel Subscription] Stripe subscription canceled:', stripeSubscription.status);
 
-    // Step 3: Log history
-    await createSubscriptionHistory(customer.metadata.userId, 'created', {
+    // Step 4: Log history (no `customer` or `event` here)
+    await createSubscriptionHistory(userId, 'canceled', {
       plan: subscription.plan,
-      priceAmount: subscription.priceAmount, // ✅ pass price
-      priceCurrency: subscription.priceCurrency, // ✅ pass currency
-      status: subscription.subscriptionStatus,
-      stripeCustomerId: customer.id,
-      stripeSubscriptionId: subscription.id,
-      metadata: { eventId: event.id },
+      priceAmount: subscription.priceAmount,
+      priceCurrency: subscription.priceCurrency,
+      status: 'canceled',
+      stripeCustomerId: subscription.stripeCustomerId,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
     });
 
     console.log('[Cancel Subscription] Success: Subscription canceled');
@@ -71,7 +75,7 @@ export const POST = asyncHandler(async (req) => {
     return NextResponse.json({
       success: true,
       message: 'Subscription canceled successfully',
-      subscriptionStatus: newStatus,
+      subscriptionStatus: stripeSubscription.status, // safer than hardcoding
     });
   } catch (error) {
     console.error('[Cancel Subscription] Error:', error);
