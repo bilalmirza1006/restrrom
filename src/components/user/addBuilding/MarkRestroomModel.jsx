@@ -1,15 +1,15 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import Cropper from "react-easy-crop";
-import { AiOutlineDelete } from "react-icons/ai";
-import { LiaDrawPolygonSolid } from "react-icons/lia";
-import { RiEditBoxFill } from "react-icons/ri";
-import { SlCursorMove } from "react-icons/sl";
-import { VscCopy } from "react-icons/vsc";
-import Modal from "@/components/global/Modal";
-import Input from "@/components/global/small/Input";
-import Dropdown from "@/components/global/small/Dropdown";
-import Button from "@/components/global/small/Button";
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import Cropper from 'react-easy-crop';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { LiaDrawPolygonSolid } from 'react-icons/lia';
+import { RiEditBoxFill } from 'react-icons/ri';
+import { SlCursorMove } from 'react-icons/sl';
+import { VscCopy } from 'react-icons/vsc';
+import Modal from '@/components/global/Modal';
+import Input from '@/components/global/small/Input';
+import Dropdown from '@/components/global/small/Dropdown';
+import Button from '@/components/global/small/Button';
 import {
   convertImageSrcToFile,
   drawCanvas,
@@ -29,7 +29,7 @@ import {
   polygonsLabelHandler,
   sensorInfoSubmitHandler,
   sensorInfoUpdateHandler,
-} from "@/utils/markRestroomFeatures";
+} from '@/utils/markRestroomFeatures';
 
 const MarkRestroomModel = ({
   restroomIndex,
@@ -40,6 +40,7 @@ const MarkRestroomModel = ({
   setPolygons,
   availableSensors,
   updateRestRoomHandler,
+  restoreSensor,
 }) => {
   const canvasRef = useRef(null);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
@@ -61,23 +62,28 @@ const MarkRestroomModel = ({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [sensorPopup, setSensorPopup] = useState(false);
   const [selectedPolygon, setSelectedPolygon] = useState(null);
-  const [sensorIdInput, setSensorIdInput] = useState("");
-  const [selectedSensor, setSelectedSensor] = useState("No sensor");
-  const [color, setColor] = useState("#A449EB");
+  const [sensorIdInput, setSensorIdInput] = useState('');
+  const [selectedSensor, setSelectedSensor] = useState('No sensor');
+  const [color, setColor] = useState('#A449EB');
   const [reEditModalOpen, setReEditModalOpen] = useState(false);
-  const [selectedPolygonId, setSelectedPolygonId] = useState("");
-  const [selectedPolygonSensor, setSelectedPolygonSensor] = useState("");
+  const [selectedPolygonId, setSelectedPolygonId] = useState('');
+  const [selectedPolygonSensor, setSelectedPolygonSensor] = useState('');
+  console.log('currentPolygon', currentPolygon);
+  console.log('selectedPolygon', selectedPolygon);
+  console.log('polygons', polygons);
 
   // Get filtered sensors - removing ones already used in this restroom or other restrooms
   const getFilteredSensors = () => {
-    const usedSensors = polygons.map((polygon) => polygon?.sensor).filter((sensor) => sensor && sensor !== "No sensor");
+    const usedSensors = polygons
+      .map((polygon) => polygon?.sensor)
+      .filter((sensor) => sensor && sensor !== 'No sensor');
     return availableSensors?.filter((sensor) => !usedSensors.includes(sensor?.value)) || [];
   };
 
   const openSensorPopup = (polygon) => {
     setSelectedPolygon(polygon);
     setSensorPopup(true);
-    setSensorIdInput("");
+    setSensorIdInput('');
   };
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
@@ -96,9 +102,9 @@ const MarkRestroomModel = ({
       setShowCropper(false);
       const file = await convertImageSrcToFile(croppedImage);
       setFile(file);
-      updateRestRoomHandler(restroomIndex, "restroomImage", file);
+      updateRestRoomHandler(restroomIndex, 'restroomImage', file);
     } catch (error) {
-      console.error("Crop failed:", error);
+      console.error('Crop failed:', error);
     }
   };
 
@@ -114,7 +120,7 @@ const MarkRestroomModel = ({
       path.moveTo(polygon.points[0].x, polygon.points[0].y);
       polygon.points.forEach((point) => path.lineTo(point.x, point.y));
       path.closePath();
-      return canvas.getContext("2d").isPointInPath(path, x, y);
+      return canvas.getContext('2d').isPointInPath(path, x, y);
     });
     if (selectedPolygon) setDraggedPolygon(selectedPolygon);
   };
@@ -134,8 +140,8 @@ const MarkRestroomModel = ({
         canvasRef,
         isDrawingEnabled,
         image,
-        polygons,
-        currentPolygon,
+        polygons: Array.isArray(polygons) ? polygons : [], // ✅ force array
+        currentPolygon: Array.isArray(currentPolygon) ? currentPolygon : [], // ✅ force array
         color,
       });
     }
@@ -143,13 +149,27 @@ const MarkRestroomModel = ({
 
   useEffect(() => {
     if (restroomImage) {
+      let imgSrc = restroomImage;
+
+      // If restroomImage is a File object, convert it
+      if (restroomImage instanceof File) {
+        imgSrc = URL.createObjectURL(restroomImage);
+      }
+
       const img = new Image();
       img.onload = () => {
         setImage(img);
         setIsDrawingEnabled(true);
       };
-      img.onerror = (err) => console.log("Image failed to load", err);
-      img.src = restroomImage;
+      img.onerror = (err) => console.log('Image failed to load', err);
+      img.src = imgSrc;
+
+      // cleanup object URL
+      return () => {
+        if (restroomImage instanceof File) {
+          URL.revokeObjectURL(imgSrc);
+        }
+      };
     }
   }, [restroomImage]);
 
@@ -157,7 +177,9 @@ const MarkRestroomModel = ({
     <div className="relative inline-block">
       {!isDrawingEnabled && (
         <BrowseFileBtn
-          onFileChange={(event) => handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)}
+          onFileChange={(event) =>
+            handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)
+          }
         />
       )}
 
@@ -187,6 +209,9 @@ const MarkRestroomModel = ({
             handleReEditPolygon,
             handlePolygonClick,
             selectedColor: color,
+            updateRestRoomHandler, // ✅ pass down
+            restroomIndex, // ✅ pass down
+            restoreSensor,
           })
         }
         onMouseDown={(event) =>
@@ -228,7 +253,7 @@ const MarkRestroomModel = ({
               })
             }
             className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isUpdateMode ? "bg-[#A449EB50] text-primary" : "bg-[#ACACAC40] text-[#11111180]"
+              isUpdateMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <RiEditBoxFill />
@@ -247,7 +272,7 @@ const MarkRestroomModel = ({
               })
             }
             className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isMoveMode ? "bg-[#A449EB50] text-primary" : "bg-[#ACACAC40] text-[#11111180]"
+              isMoveMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <SlCursorMove />
@@ -266,7 +291,7 @@ const MarkRestroomModel = ({
               })
             }
             className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isCopyMode ? "bg-[#A449EB50] text-primary" : "bg-[#ACACAC40] text-[#11111180]"
+              isCopyMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <VscCopy />
@@ -284,7 +309,7 @@ const MarkRestroomModel = ({
               })
             }
             className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isDeleteMode ? "bg-[#A449EB50] text-primary" : "bg-[#ACACAC40] text-[#11111180]"
+              isDeleteMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <AiOutlineDelete />
@@ -292,7 +317,7 @@ const MarkRestroomModel = ({
           </button>
           <button
             className={`flex items-center text-base md:text-lg font-medium rounded-md px-3 py-1 ${
-              isEditMode ? "bg-[#A449EB50] text-primary" : "bg-[#ACACAC40] text-[#11111180]"
+              isEditMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
             onClick={() => {
               setIsEditMode(true);
@@ -325,7 +350,16 @@ const MarkRestroomModel = ({
               />
             </div>
             <div className="flex items-center justify-end gap-3 mt-5">
-              <Button text="Cancel" onClick={() => setShowCropper(false)} cn="!bg-[#ACACAC40] !text-[#111111B2]" />
+              <Button
+                text="Cancel"
+                onClick={() => {
+                  setShowCropper(false),
+                    setImageSrc(null),
+                    setShowCropper(false),
+                    setIsDrawingEnabled(false);
+                }}
+                cn="!bg-[#ACACAC40] !text-[#111111B2]"
+              />
               <Button text="Crop Image" onClick={handleCropConfirm} />
             </div>
           </div>
@@ -349,7 +383,7 @@ const MarkRestroomModel = ({
                 options={
                   [...getFilteredSensors()].length > 0
                     ? [...getFilteredSensors()]
-                    : [{ value: "No sensor", label: "No sensor" }]
+                    : [{ value: 'No sensor', label: 'No sensor' }]
                 }
                 label="Attach Sensor"
                 placeholder="Select Sensor"
@@ -360,7 +394,7 @@ const MarkRestroomModel = ({
               <div>
                 <label className="block text-sm font-medium mb-2">Label Position</label>
                 <div className="flex items-center flex-wrap gap-2">
-                  {["left", "right", "top", "bottom"].map((point) => (
+                  {['left', 'right', 'top', 'bottom'].map((point) => (
                     <button
                       key={point}
                       onClick={() =>
@@ -374,8 +408,8 @@ const MarkRestroomModel = ({
                       }
                       className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point
-                          ? "bg-primary text-white"
-                          : "bg-[#ACACAC40] text-[#111111B2]"
+                          ? 'bg-primary text-white'
+                          : 'bg-[#ACACAC40] text-[#111111B2]'
                       }`}
                     >
                       {point} point
@@ -394,18 +428,19 @@ const MarkRestroomModel = ({
                 text="Cancel"
                 onClick={() =>
                   handleCancelPolygon(
-                    setSensorPopup,
+                    polygons,
                     setPolygons,
-                    selectedPolygon,
                     setCurrentPolygon,
-                    setSelectedPolygon
+                    setSelectedPolygon,
+                    setSensorPopup,
+                    setPolygonCount // ✅ now it will exist
                   )
                 }
                 cn="!bg-[#ACACAC40] !text-[#111111B2]"
               />
               <Button
                 text="Submit"
-                onClick={() =>
+                onClick={() => {
                   sensorInfoSubmitHandler(
                     sensorIdInput,
                     polygons,
@@ -413,9 +448,13 @@ const MarkRestroomModel = ({
                     selectedSensor,
                     color,
                     setPolygons,
-                    setSensorPopup
-                  )
-                }
+                    setSensorPopup,
+                    (newPolygons) => {
+                      // ✅ Sync to Redux
+                      updateRestRoomHandler(restroomIndex, 'restroomCoordinates', newPolygons);
+                    }
+                  );
+                }}
               />
             </div>
           </div>
@@ -437,9 +476,11 @@ const MarkRestroomModel = ({
 
               <Dropdown
                 options={[
-                  { option: "No sensor", value: "No sensor" },
-                  ...getFilteredSensors().filter((sensor) => sensor.value !== selectedPolygonSensor),
-                  ...(selectedPolygonSensor && selectedPolygonSensor !== "No sensor"
+                  { option: 'No sensor', value: 'No sensor' },
+                  ...getFilteredSensors().filter(
+                    (sensor) => sensor.value !== selectedPolygonSensor
+                  ),
+                  ...(selectedPolygonSensor && selectedPolygonSensor !== 'No sensor'
                     ? [
                         {
                           option: selectedPolygonSensor,
@@ -457,7 +498,7 @@ const MarkRestroomModel = ({
               <div>
                 <label className="block text-sm font-medium mb-2">Label Position</label>
                 <div className="flex items-center flex-wrap gap-2">
-                  {["left", "right", "top", "bottom"].map((point) => (
+                  {['left', 'right', 'top', 'bottom'].map((point) => (
                     <button
                       key={point}
                       onClick={() =>
@@ -471,8 +512,8 @@ const MarkRestroomModel = ({
                       }
                       className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point
-                          ? "bg-primary text-white"
-                          : "bg-[#ACACAC40] text-[#111111B2]"
+                          ? 'bg-primary text-white'
+                          : 'bg-[#ACACAC40] text-[#111111B2]'
                       }`}
                     >
                       {point} point
@@ -487,7 +528,11 @@ const MarkRestroomModel = ({
               </div>
             </div>
             <div className="flex items-center justify-end gap-3 mt-5">
-              <Button text="Cancel" onClick={() => setReEditModalOpen(false)} cn="!bg-[#ACACAC40] !text-[#111111B2]" />
+              <Button
+                text="Cancel"
+                onClick={() => setReEditModalOpen(false)}
+                cn="!bg-[#ACACAC40] !text-[#111111B2]"
+              />
               <Button
                 text="Update"
                 onClick={() =>

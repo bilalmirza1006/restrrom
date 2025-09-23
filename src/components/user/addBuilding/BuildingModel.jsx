@@ -33,6 +33,24 @@ const BuildingModel = ({ setCurrentStep }) => {
     }
   };
 
+  // Persist changes to redux when any local state changes
+  useEffect(() => {
+    if (buildingModelPreview !== null) {
+      dispatch(setBuilding({ buildingModelPreview: buildingModelPreview }));
+    }
+  }, [buildingModelPreview]);
+
+  useEffect(() => {
+    if (file) {
+      dispatch(setBuilding({ buildingModelImage: file }));
+    }
+  }, [file]);
+
+  const handlePolygonsChange = (newPolygons) => {
+    setPolygons(newPolygons);
+    dispatch(setBuilding({ buildingModelCoordinates: newPolygons }));
+  };
+
   useEffect(() => {
     if (building?.buildingModelPreview && building?.buildingModelCoordinates) {
       setBuildingModelPreview(building?.buildingModelPreview);
@@ -57,7 +75,7 @@ const BuildingModel = ({ setCurrentStep }) => {
           buildingModelImage={buildingModelPreview}
           setBuildingModelImage={setBuildingModelPreview}
           polygons={polygons}
-          setPolygons={setPolygons}
+          setPolygons={handlePolygonsChange}
         />
       </div>
 

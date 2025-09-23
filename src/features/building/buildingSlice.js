@@ -23,37 +23,12 @@ const buildingSlice = createSlice({
   initialState,
   reducers: {
     setBuilding: (state, action) => {
-      const {
-        buildingName,
-        buildingImage,
-        buildingThumbnail,
-        buildingType,
-        location,
-        area,
-        totalFloors,
-        totalRestrooms,
-        buildingManager,
-        phone,
-        buildingModelPreview,
-        buildingModelImage,
-        buildingModelCoordinates,
-        mapInfo,
-      } = action.payload;
-
-      state.buildingName = buildingName || state.buildingName;
-      state.buildingImage = buildingImage || state.buildingImage;
-      state.buildingThumbnail = buildingThumbnail || state.buildingThumbnail;
-      state.buildingType = buildingType || state.buildingType;
-      state.location = location || state.location;
-      state.area = area || state.area;
-      state.totalFloors = totalFloors || state.totalFloors;
-      state.totalRestrooms = totalRestrooms || state.totalRestrooms;
-      state.buildingManager = buildingManager || state.buildingManager;
-      state.phone = phone || state.phone;
-      state.buildingModelPreview = buildingModelPreview || state.buildingModelPreview;
-      state.buildingModelImage = buildingModelImage || state.buildingModelImage;
-      state.buildingModelCoordinates = buildingModelCoordinates || state.buildingModelCoordinates;
-      state.mapInfo = mapInfo || state.mapInfo;
+      const payload = action.payload || {};
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value !== undefined) {
+          state[key] = value;
+        }
+      });
     },
     addRestroom: (state, action) => {
       state.restrooms.push(action.payload);

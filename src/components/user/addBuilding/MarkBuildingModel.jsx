@@ -1,15 +1,15 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import Cropper from "react-easy-crop";
-import { AiOutlineDelete } from "react-icons/ai";
-import { LiaDrawPolygonSolid } from "react-icons/lia";
-import { RiEditBoxFill } from "react-icons/ri";
-import { SlCursorMove } from "react-icons/sl";
-import { VscCopy } from "react-icons/vsc";
-import Modal from "@/components/global/Modal";
-import Input from "@/components/global/small/Input";
-import Dropdown from "@/components/global/small/Dropdown";
-import Button from "@/components/global/small/Button";
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import Cropper from 'react-easy-crop';
+import { AiOutlineDelete } from 'react-icons/ai';
+import { LiaDrawPolygonSolid } from 'react-icons/lia';
+import { RiEditBoxFill } from 'react-icons/ri';
+import { SlCursorMove } from 'react-icons/sl';
+import { VscCopy } from 'react-icons/vsc';
+import Modal from '@/components/global/Modal';
+import Input from '@/components/global/small/Input';
+import Dropdown from '@/components/global/small/Dropdown';
+import Button from '@/components/global/small/Button';
 import {
   convertImageSrcToFile,
   drawCanvas,
@@ -29,9 +29,15 @@ import {
   polygonsLabelHandler,
   sensorInfoSubmitHandler,
   sensorInfoUpdateHandler,
-} from "@/utils/markBuildingFeatures";
+} from '@/utils/markBuildingFeatures';
 
-const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage, polygons, setPolygons }) => {
+const MarkBuildingModel = ({
+  setFile,
+  buildingModelImage,
+  setBuildingModelImage,
+  polygons,
+  setPolygons,
+}) => {
   const canvasRef = useRef(null);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
@@ -52,15 +58,15 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [sensorPopup, setSensorPopup] = useState(false);
   const [selectedPolygon, setSelectedPolygon] = useState(null);
-  const [floorIdInput, setFloorIdInput] = useState("");
-  const [color, setColor] = useState("#A449EB");
+  const [floorIdInput, setFloorIdInput] = useState('');
+  const [color, setColor] = useState('#A449EB');
   const [reEditModalOpen, setReEditModalOpen] = useState(false);
-  const [selectedPolygonId, setSelectedPolygonId] = useState("");
+  const [selectedPolygonId, setSelectedPolygonId] = useState('');
 
   const openSensorPopup = (polygon) => {
     setSelectedPolygon(polygon);
     setSensorPopup(true);
-    setFloorIdInput("");
+    setFloorIdInput('');
   };
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
@@ -80,7 +86,7 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
       const file = await convertImageSrcToFile(croppedImage);
       setFile(file);
     } catch (error) {
-      console.error("Crop failed:", error);
+      console.error('Crop failed:', error);
     }
   };
 
@@ -99,7 +105,7 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
       polygon.points.forEach((point) => path.lineTo(point.x, point.y));
       path.closePath();
 
-      return canvas.getContext("2d").isPointInPath(path, x, y);
+      return canvas.getContext('2d').isPointInPath(path, x, y);
     });
 
     if (selectedPolygon) {
@@ -135,7 +141,7 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
         setImage(img);
         setIsDrawingEnabled(true);
       };
-      img.onerror = (err) => console.log("Image failed to load", err);
+      img.onerror = (err) => console.log('Image failed to load', err);
       img.src = buildingModelImage;
     }
   }, [buildingModelImage]);
@@ -144,7 +150,9 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
     <div className="relative inline-block">
       {!isDrawingEnabled && (
         <BrowseFileBtn
-          onFileChange={(event) => handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)}
+          onFileChange={(event) =>
+            handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)
+          }
         />
       )}
 
@@ -214,10 +222,16 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
               onCropComplete={onCropComplete}
             />
             <div className="flex items-center gap-2 mt-4 z-[999] absolute bottom-6 right-6">
-              <button onClick={() => setShowCropper(false)} className="bg-gray-500 text-white px-4 py-2 rounded">
+              <button
+                onClick={() => setShowCropper(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
                 Cancel
               </button>
-              <button onClick={handleCropConfirm} className="bg-primary text-white px-4 py-2 rounded">
+              <button
+                onClick={handleCropConfirm}
+                className="bg-primary text-white px-4 py-2 rounded"
+              >
                 Crop
               </button>
             </div>
@@ -235,9 +249,11 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
                 setIsDeleteMode(false);
                 setIsUpdateMode(false);
               }}
-              className={`p-2 border rounded-md text-white ${isEditMode ? "border-primary" : "border-[#565656]"}`}
+              className={`p-2 border rounded-md text-white ${
+                isEditMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
-              <LiaDrawPolygonSolid fontSize={20} color={isEditMode ? "#A449EB" : "#565656"} />
+              <LiaDrawPolygonSolid fontSize={20} color={isEditMode ? '#A449EB' : '#565656'} />
             </button>
             <button
               onClick={() =>
@@ -251,9 +267,11 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isCopyMode ? "border-primary" : "border-[#565656]"}`}
+              className={`p-2 border rounded-md text-white ${
+                isCopyMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
-              <VscCopy fontSize={20} color={isCopyMode ? "#A449EB" : "#565656"} />
+              <VscCopy fontSize={20} color={isCopyMode ? '#A449EB' : '#565656'} />
             </button>
             <button
               onClick={() =>
@@ -267,9 +285,11 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isUpdateMode ? "border-primary" : "border-[#565656]"}`}
+              className={`p-2 border rounded-md text-white ${
+                isUpdateMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
-              <RiEditBoxFill fontSize={20} color={isUpdateMode ? "#A449EB" : "#565656"} />
+              <RiEditBoxFill fontSize={20} color={isUpdateMode ? '#A449EB' : '#565656'} />
             </button>
             <button
               onClick={() =>
@@ -283,9 +303,11 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isMoveMode ? "border-primary" : "border-[#565656]"}`}
+              className={`p-2 border rounded-md text-white ${
+                isMoveMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
-              <SlCursorMove fontSize={20} color={isMoveMode ? "#A449EB" : "#565656"} />
+              <SlCursorMove fontSize={20} color={isMoveMode ? '#A449EB' : '#565656'} />
             </button>
             <button
               onClick={() =>
@@ -298,9 +320,11 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isDeleteMode ? "border-primary" : "border-[#565656]"}`}
+              className={`p-2 border rounded-md text-white ${
+                isDeleteMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
-              <AiOutlineDelete fontSize={20} color={isDeleteMode ? "#A449EB" : "#565656"} />
+              <AiOutlineDelete fontSize={20} color={isDeleteMode ? '#A449EB' : '#565656'} />
             </button>
           </div>
         </>
@@ -317,12 +341,12 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
             />
 
             <Dropdown
-              defaultText={"first"}
+              defaultText={'first'}
               options={[
-                { option: "First-Point", value: "first" },
-                { option: "Second-Point", value: "second" },
-                { option: "Third-Point", value: "third" },
-                { option: "Fourth-Point", value: "fourth" },
+                { option: 'First-Point', value: 'first' },
+                { option: 'Second-Point', value: 'second' },
+                { option: 'Third-Point', value: 'third' },
+                { option: 'Fourth-Point', value: 'fourth' },
               ]}
               label="Label Positioning of polygon"
               onSelect={(selectedOption) =>
@@ -382,12 +406,12 @@ const MarkBuildingModel = ({ setFile, buildingModelImage, setBuildingModelImage,
             />
 
             <Dropdown
-              defaultText={"first"}
+              defaultText={'first'}
               options={[
-                { option: "First-Point", value: "first" },
-                { option: "Second-Point", value: "second" },
-                { option: "Third-Point", value: "third" },
-                { option: "Fourth-Point", value: "fourth" },
+                { option: 'First-Point', value: 'first' },
+                { option: 'Second-Point', value: 'second' },
+                { option: 'Third-Point', value: 'third' },
+                { option: 'Fourth-Point', value: 'fourth' },
               ]}
               label="Label Positioning of polygon"
               onSelect={(selectedOption) =>
@@ -429,7 +453,11 @@ const BrowseFileBtn = ({ onFileChange }) => {
   return (
     <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 cursor-pointer rounded-lg bg-primary text-white font-semibold">
       Browse File
-      <input type="file" className="absolute inset-0 cursor-pointer opacity-0" onChange={onFileChange} />
+      <input
+        type="file"
+        className="absolute inset-0 cursor-pointer opacity-0"
+        onChange={onFileChange}
+      />
     </button>
   );
 };

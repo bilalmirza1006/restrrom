@@ -1,17 +1,16 @@
 // Handle image upload and display on the canvas
-export const handleImageUpload = (event, setRestroomImage, setShowCropper, setIsDrawingEnabled) => {
+export const handleImageUpload = (event, setImageSrc, setShowCropper, setIsDrawingEnabled) => {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onload = () => {
-      setRestroomImage(reader.result);
+      setImageSrc(reader.result);
       setShowCropper(true);
       setIsDrawingEnabled(true);
     };
     reader.readAsDataURL(file);
   }
 };
-
 //  Draw Canvas Content
 export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, currentPolygon }) => {
   const canvas = canvasRef.current;
@@ -23,67 +22,68 @@ export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, curre
   if (image) {
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
   }
+  (Array.isArray(polygons) ? polygons : []).forEach((polygon) => {
+    polygons.forEach((polygon) => {
+      if (!polygon || !polygon.points) return;
 
-  polygons.forEach((polygon) => {
-    if (!polygon || !polygon.points) return;
+      // Start drawing polygon
+      context.beginPath();
+      context.moveTo(polygon.points[0].x, polygon.points[0].y);
+      polygon.points.forEach((point) => context.lineTo(point.x, point.y));
+      context.closePath();
 
-    // Start drawing polygon
-    context.beginPath();
-    context.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => context.lineTo(point.x, point.y));
-    context.closePath();
+      // Fill the polygon with the color
+      context.fillStyle = `${polygon.color}${90}` || '#A449EB60';
+      context.strokeStyle = polygon.fillColor || '#A449EB';
+      context.fill();
 
-    // Fill the polygon with the color
-    context.fillStyle = `${polygon.color}${90}` || '#A449EB60';
-    context.strokeStyle = polygon.fillColor || '#A449EB';
-    context.fill();
+      // Draw the border with the specified color
+      context.strokeStyle = polygon.fillColor || polygon.color || '#A449EB60';
+      context.lineWidth = 2;
+      context.stroke();
 
-    // Draw the border with the specified color
-    context.strokeStyle = polygon.fillColor || polygon.color || '#A449EB60';
-    context.lineWidth = 2;
-    context.stroke();
+      // Determine the label position based on `labelPoint`
+      let idX, idY;
+      if (polygon?.labelPoint === 'first' && polygon.points[0]) {
+        idX = polygon.points[0].x;
+        idY = polygon.points[0].y - 5;
+      } else if (polygon?.labelPoint === 'second' && polygon.points[1]) {
+        idX = polygon.points[1].x;
+        idY = polygon.points[1].y - 5;
+      } else if (polygon?.labelPoint === 'third' && polygon.points[2]) {
+        idX = polygon.points[2].x;
+        idY = polygon.points[2].y - 5;
+      } else if (polygon?.labelPoint === 'fourth' && polygon.points[3]) {
+        idX = polygon.points[3].x;
+        idY = polygon.points[3].y - 5;
+      }
 
-    // Determine the label position based on `labelPoint`
-    let idX, idY;
-    if (polygon?.labelPoint === 'first' && polygon.points[0]) {
-      idX = polygon.points[0].x;
-      idY = polygon.points[0].y - 5;
-    } else if (polygon?.labelPoint === 'second' && polygon.points[1]) {
-      idX = polygon.points[1].x;
-      idY = polygon.points[1].y - 5;
-    } else if (polygon?.labelPoint === 'third' && polygon.points[2]) {
-      idX = polygon.points[2].x;
-      idY = polygon.points[2].y - 5;
-    } else if (polygon?.labelPoint === 'fourth' && polygon.points[3]) {
-      idX = polygon.points[3].x;
-      idY = polygon.points[3].y - 5;
-    }
+      const padding = 4;
+      const text = polygon.id;
 
-    const padding = 4;
-    const text = polygon.id;
+      context.font = '12px Arial';
+      const textWidth = context.measureText(text).width;
+      const textHeight = 14;
+      const boxWidth = textWidth + padding * 2;
+      const boxHeight = textHeight + padding * 2;
+      const boxX = idX - padding;
+      const boxY = idY - textHeight - padding;
 
-    context.font = '12px Arial';
-    const textWidth = context.measureText(text).width;
-    const textHeight = 14;
-    const boxWidth = textWidth + padding * 2;
-    const boxHeight = textHeight + padding * 2;
-    const boxX = idX - padding;
-    const boxY = idY - textHeight - padding;
+      // Draw the box background
+      context.fillStyle = '#FFFFFF';
+      context.beginPath();
+      context.moveTo(boxX + 4, boxY);
+      context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, 4);
+      context.arcTo(boxX + boxWidth, boxY + boxHeight, boxX, boxY + boxHeight, 4);
+      context.arcTo(boxX, boxY + boxHeight, boxX, boxY, 4);
+      context.arcTo(boxX, boxY, boxX + boxWidth, boxY, 4);
+      context.closePath();
+      context.fill();
 
-    // Draw the box background
-    context.fillStyle = '#FFFFFF';
-    context.beginPath();
-    context.moveTo(boxX + 4, boxY);
-    context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, 4);
-    context.arcTo(boxX + boxWidth, boxY + boxHeight, boxX, boxY + boxHeight, 4);
-    context.arcTo(boxX, boxY + boxHeight, boxX, boxY, 4);
-    context.arcTo(boxX, boxY, boxX + boxWidth, boxY, 4);
-    context.closePath();
-    context.fill();
-
-    // Draw the text inside the box
-    context.fillStyle = '#000000';
-    context.fillText(text, boxX + padding, boxY + padding + textHeight - 4);
+      // Draw the text inside the box
+      context.fillStyle = '#000000';
+      context.fillText(text, boxX + padding, boxY + padding + textHeight - 4);
+    });
   });
 
   if (currentPolygon.length > 0) {
@@ -117,6 +117,9 @@ export const handleCanvasClick = ({
   handleReEditPolygon,
   handlePolygonClick,
   selectedColor,
+  updateRestRoomHandler,
+  restroomIndex,
+  restoreSensor,
 }) => {
   const canvas = canvasRef.current;
   const rect = canvas.getBoundingClientRect();
@@ -128,7 +131,16 @@ export const handleCanvasClick = ({
   }
 
   if (isDeleteMode) {
-    handleDeletePolygon(x, y, polygons, setPolygons, canvasRef);
+    handleDeletePolygon(
+      x,
+      y,
+      polygons,
+      setPolygons,
+      canvasRef,
+      updateRestRoomHandler,
+      restroomIndex,
+      restoreSensor
+    );
   } else if (isCopyMode && draggedPolygon) {
     // Handle copy-pasting of polygons
     const newPolygon = {
@@ -329,19 +341,53 @@ export const handleCanvasMouseDown = ({
   }
 };
 
-export const handleDeletePolygon = (x, y, polygons, setPolygons, canvasRef) => {
+export const handleDeletePolygon = (
+  x,
+  y,
+  polygons,
+  setPolygons,
+  canvasRef,
+  updateRestRoomHandler,
+  restroomIndex,
+  restoreSensor
+) => {
   const canvas = canvasRef.current;
   const context = canvas.getContext('2d');
+
+  let deletedPolygonId = null;
+  let deletedSensor = null;
 
   const filteredPolygons = polygons.filter((polygon) => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
     polygon.points.forEach((point) => path.lineTo(point.x, point.y));
     path.closePath();
-    return !context.isPointInPath(path, x, y);
+
+    if (context.isPointInPath(path, x, y)) {
+      deletedPolygonId = polygon.id;
+      deletedSensor = polygon.sensor || null; // ✅ keep track of removed sensor
+      return false; // remove this polygon
+    }
+    return true;
   });
 
   setPolygons(filteredPolygons);
+
+  // ✅ Sync polygons without the deleted one
+  if (typeof updateRestRoomHandler === 'function') {
+    updateRestRoomHandler(restroomIndex, 'restroomCoordinates', filteredPolygons);
+  }
+
+  // ✅ Return sensor to available list
+  if (deletedSensor && deletedSensor !== 'No sensor' && typeof restoreSensor === 'function') {
+    restoreSensor(deletedSensor);
+  }
+
+  console.log(
+    `Polygon ${deletedPolygonId} deleted. Sensor ${
+      deletedSensor || 'No sensor'
+    } restored to available sensors`
+  );
 };
 
 export const polygonsLabelHandler = (
@@ -379,7 +425,8 @@ export const sensorInfoSubmitHandler = (
   selectedSensor,
   color,
   setPolygons,
-  setSensorPopup
+  setSensorPopup,
+  syncRestroom // <-- new sync function to Redux
 ) => {
   const updatedPolygons = polygons.map((polygon) => {
     if (polygon.id === selectedPolygon.id) {
@@ -395,6 +442,12 @@ export const sensorInfoSubmitHandler = (
   });
 
   setPolygons(updatedPolygons);
+
+  // ✅ Sync back to Redux (Restrooms slice)
+  if (typeof syncRestroom === 'function') {
+    syncRestroom(updatedPolygons);
+  }
+
   setSensorPopup(false);
 };
 
@@ -441,16 +494,21 @@ export const sensorInfoUpdateHandler = (
 };
 
 export const handleCancelPolygon = (
-  setSensorPopup,
+  polygons,
   setPolygons,
-  selectedPolygon,
   setCurrentPolygon,
-  setSelectedPolygon
+  setSelectedPolygon,
+  setSensorPopup,
+  setPolygonCount // ✅ added
 ) => {
-  setSensorPopup(false);
-  setPolygons((prev) => prev.filter((p) => p.id !== selectedPolygon.id));
+  if (polygons.length > 0) {
+    const updated = polygons.slice(0, -1);
+    setPolygons(updated);
+    setPolygonCount((prev) => Math.max(1, prev - 1)); // ✅ now safe
+  }
   setCurrentPolygon([]);
   setSelectedPolygon(null);
+  setSensorPopup(false);
 };
 
 export const convertImageSrcToFile = async (imageSrc, fileName = 'image.png') => {

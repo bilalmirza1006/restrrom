@@ -21,6 +21,8 @@ const Mapping = ({ setCurrentStep }) => {
       ...prev,
       [name]: value,
     }));
+    const nextMapping = { ...mapping, [name]: value };
+    dispatch(setBuilding({ mapInfo: nextMapping }));
   };
 
   const nextBtnHandler = () => {
