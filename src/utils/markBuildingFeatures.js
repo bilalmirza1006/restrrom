@@ -1,4 +1,5 @@
 // Handle image upload and display on the canvas
+import { nanoid } from 'nanoid';
 export const handleImageUpload = (
   event,
   setBuildingModelImage,
@@ -122,6 +123,8 @@ export const handleCanvasClick = ({
   handleReEditPolygon,
   handlePolygonClick,
   selectedColor, // Pass selected color here
+  maxPolygons = Infinity,
+  onLimitReached,
 }) => {
   const canvas = canvasRef.current;
   const rect = canvas.getBoundingClientRect();
@@ -136,9 +139,16 @@ export const handleCanvasClick = ({
     handleDeletePolygon(x, y, polygons, setPolygons, canvasRef);
   } else if (isCopyMode && draggedPolygon) {
     // Handle copy-pasting of polygons
+    if (polygons.length >= maxPolygons) {
+      setDraggedPolygon(null);
+      if (typeof onLimitReached === 'function') onLimitReached();
+      return;
+    }
     const newPolygon = {
       ...draggedPolygon,
       id: `F1-PS${polygonCount}`,
+      polygonId: nanoid(),
+      restroomName: `Restroom ${polygons.length + 1}`,
       points: draggedPolygon.points.map((point) => ({
         x: point.x + (x - draggedPolygon.points[0].x),
         y: point.y + (y - draggedPolygon.points[0].y),
@@ -154,9 +164,17 @@ export const handleCanvasClick = ({
     setCurrentPolygon(newPolygon);
 
     if (newPolygon.length === 4) {
+      // enforce polygon limit
+      if (polygons.length >= maxPolygons) {
+        setCurrentPolygon([]);
+        if (typeof onLimitReached === 'function') onLimitReached();
+        return;
+      }
       const polygonWithId = {
         points: newPolygon,
         id: `F1-PS${polygonCount}`,
+        polygonId: nanoid(),
+        restroomName: `Restroom ${polygons.length + 1}`,
         color: selectedColor,
         fillColor: selectedColor,
       };
@@ -256,13 +274,11 @@ export const exportSVG = async ({ canvasRef, image, polygons }) => {
 
     svgContent += `<polygon points="${polygon.points
       .map((point) => `${point.x},${point.y}`)
-      .join(' ')}" id="${polygon.id}" sensorAttached="${
-      polygon.sensorAttached || ''
-    }" fill="${fillColor}" stroke="${strokeColor}" strokeWidth="2"/>`;
+      .join(' ')}" id="${polygon.id}" sensorAttached="${polygon.sensorAttached || ''
+      }" fill="${fillColor}" stroke="${strokeColor}" strokeWidth="2"/>`;
 
-    svgContent += `<text x="${polygon.points[0].x}" y="${
-      polygon.points[0].y - 10
-    }" font-size="12" fill="black">${polygon.id}</text>`;
+    svgContent += `<text x="${polygon.points[0].x}" y="${polygon.points[0].y - 10
+      }" font-size="12" fill="black">${polygon.id}</text>`;
   });
 
   svgContent += '</svg>';
@@ -304,7 +320,7 @@ export const updateSensorAttached = ({
   const updatedPolygons = polygons.map((polygon) => {
     return polygon?.id === polygonId
       ? // ? { ...polygon, sensorAttached: sensor }
-        { ...polygon, id: sensor, sensorAttached }
+      { ...polygon, id: sensor, sensorAttached }
       : polygon;
   });
   setPolygons(updatedPolygons);
@@ -425,13 +441,13 @@ export const sensorInfoSubmitHandler = (
     const updatedPolygons = polygons.map((polygon) =>
       polygon.id === selectedPolygon.id
         ? {
-            ...polygon,
-            id: sensorIdInput,
-            sensorAttached: selectedSensor || sensorIdInput,
-            color: color,
-            fillColor: color,
-            labelPoint: polygon.labelPoint || 'first',
-          }
+          ...polygon,
+          id: sensorIdInput,
+          sensorAttached: selectedSensor || sensorIdInput,
+          color: color,
+          fillColor: color,
+          labelPoint: polygon.labelPoint || 'first',
+        }
         : polygon
     );
     setPolygons(updatedPolygons);
@@ -471,14 +487,14 @@ export const sensorInfoUpdateHandler = (
     prevPolygons.map((polygon) =>
       polygon.id === selectedPolygon.id
         ? {
-            ...polygon,
-            id: selectedPolygonId,
-            sensorAttached: selectedPolygonSensor || selectedSensor,
-            color: selectedPolygonColor,
-            fillColor: selectedPolygonColor,
-            position: selectedPolygon.position,
-            labelPoint: selectedPolygon.labelPoint,
-          }
+          ...polygon,
+          id: selectedPolygonId,
+          sensorAttached: selectedPolygonSensor || selectedSensor,
+          color: selectedPolygonColor,
+          fillColor: selectedPolygonColor,
+          position: selectedPolygon.position,
+          labelPoint: selectedPolygon.labelPoint,
+        }
         : polygon
     )
   );

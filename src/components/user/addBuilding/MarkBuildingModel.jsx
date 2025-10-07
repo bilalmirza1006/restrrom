@@ -7,6 +7,8 @@ import { RiEditBoxFill } from 'react-icons/ri';
 import { SlCursorMove } from 'react-icons/sl';
 import { VscCopy } from 'react-icons/vsc';
 import Modal from '@/components/global/Modal';
+import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 import Input from '@/components/global/small/Input';
 import Dropdown from '@/components/global/small/Dropdown';
 import Button from '@/components/global/small/Button';
@@ -62,11 +64,25 @@ const MarkBuildingModel = ({
   const [color, setColor] = useState('#A449EB');
   const [reEditModalOpen, setReEditModalOpen] = useState(false);
   const [selectedPolygonId, setSelectedPolygonId] = useState('');
+  const [severityColors, setSeverityColors] = useState([
+    { level: 'empty Queue', min: '0', max: '0', color: '#000000' },
+    { level: 'average Queue', min: '', max: '', color: '#000000' },
+    { level: 'small Queue', min: '', max: '', color: '#000000' },
+    { level: 'large Queue', min: '', max: '', color: '#000000' },
+  ]);
+  console.log('severityColors', severityColors);
+
+  const totalRestrooms = useSelector((state) => parseInt(state.building?.totalRestrooms || '0'));
 
   const openSensorPopup = (polygon) => {
     setSelectedPolygon(polygon);
     setSensorPopup(true);
     setFloorIdInput('');
+  };
+  const handleSeverityChange = (level, field, value) => {
+    setSeverityColors((prev) =>
+      prev.map((item) => (item.level === level ? { ...item, [field]: value } : item))
+    );
   };
 
   const onCropComplete = (croppedArea, croppedAreaPixels) => {
@@ -129,10 +145,10 @@ const MarkBuildingModel = ({
         image,
         polygons,
         currentPolygon,
-        color,
+        severityColors,
       });
     }
-  }, [image, polygons, currentPolygon, canvasRef, color, isDrawingEnabled]);
+  }, [image, polygons, currentPolygon, canvasRef, severityColors, isDrawingEnabled]);
 
   useEffect(() => {
     if (buildingModelImage) {
@@ -181,7 +197,9 @@ const MarkBuildingModel = ({
             openSensorPopup,
             handleReEditPolygon,
             handlePolygonClick,
-            selectedColor: color,
+            selectedColor: severityColors,
+            maxPolygons: Number.isFinite(totalRestrooms) && totalRestrooms > 0 ? totalRestrooms : Infinity,
+            onLimitReached: () => toast.error('You cannot add more polygons than Total Restrooms'),
           })
         }
         onMouseDown={(event) =>
@@ -249,9 +267,8 @@ const MarkBuildingModel = ({
                 setIsDeleteMode(false);
                 setIsUpdateMode(false);
               }}
-              className={`p-2 border rounded-md text-white ${
-                isEditMode ? 'border-primary' : 'border-[#565656]'
-              }`}
+              className={`p-2 border rounded-md text-white ${isEditMode ? 'border-primary' : 'border-[#565656]'
+                }`}
             >
               <LiaDrawPolygonSolid fontSize={20} color={isEditMode ? '#A449EB' : '#565656'} />
             </button>
@@ -267,9 +284,8 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isCopyMode ? 'border-primary' : 'border-[#565656]'
-              }`}
+              className={`p-2 border rounded-md text-white ${isCopyMode ? 'border-primary' : 'border-[#565656]'
+                }`}
             >
               <VscCopy fontSize={20} color={isCopyMode ? '#A449EB' : '#565656'} />
             </button>
@@ -285,9 +301,8 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isUpdateMode ? 'border-primary' : 'border-[#565656]'
-              }`}
+              className={`p-2 border rounded-md text-white ${isUpdateMode ? 'border-primary' : 'border-[#565656]'
+                }`}
             >
               <RiEditBoxFill fontSize={20} color={isUpdateMode ? '#A449EB' : '#565656'} />
             </button>
@@ -303,9 +318,8 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isMoveMode ? 'border-primary' : 'border-[#565656]'
-              }`}
+              className={`p-2 border rounded-md text-white ${isMoveMode ? 'border-primary' : 'border-[#565656]'
+                }`}
             >
               <SlCursorMove fontSize={20} color={isMoveMode ? '#A449EB' : '#565656'} />
             </button>
@@ -320,9 +334,8 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${
-                isDeleteMode ? 'border-primary' : 'border-[#565656]'
-              }`}
+              className={`p-2 border rounded-md text-white ${isDeleteMode ? 'border-primary' : 'border-[#565656]'
+                }`}
             >
               <AiOutlineDelete fontSize={20} color={isDeleteMode ? '#A449EB' : '#565656'} />
             </button>
@@ -330,12 +343,12 @@ const MarkBuildingModel = ({
         </>
       )}
       {sensorPopup && selectedPolygon && (
-        <Modal title="Add Floor" isCrossShow={false} onClose={() => setSensorPopup(false)}>
+        <Modal title="Add Restroom" isCrossShow={false} onClose={() => setSensorPopup(false)}>
           <div className="flex flex-col gap-2">
             <Input
               type="text"
-              placeholder="Floor ID"
-              label="Floor ID"
+              placeholder="Restroom ID"
+              label="Restroom ID"
               value={floorIdInput}
               onChange={(e) => setFloorIdInput(e.target.value)}
             />
@@ -354,9 +367,49 @@ const MarkBuildingModel = ({
               }
             />
 
-            <div className="flex items-center gap-4">
-              <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+            <div className="flex flex-col  border p-2 rounded-xl border-[#66666659]">
+              {severityColors.map((sev, index) => (
+                <div key={sev.level} className="flex w-full flex-col items-center gap-4">
+                  <div className="flex flex-row w-full justify-center items-center px-2 gap-4">
+                    <div className="w-full">
+                      <span className="w-16 capitalize font-bold text-xs">{sev.level}</span>
+                    </div>
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        placeholder="Min"
+                        value={sev.min}
+                        readOnly={sev.level === 'empty'} // ✅ only "empty" is read-only
+                        onChange={(e) => handleSeverityChange(sev.level, 'min', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        placeholder="Max"
+                        value={sev.max}
+                        readOnly={sev.level === 'empty'} // ✅ only "empty" is read-only
+                        onChange={(e) => handleSeverityChange(sev.level, 'max', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="w-full">
+                      <Input
+                        className="w-full"
+                        type="color"
+                        value={sev.color}
+                        onChange={(e) => handleSeverityChange(sev.level, 'color', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ✅ Show divider except for last index */}
+                  {index < severityColors.length - 1 && (
+                    <div className="border-t-2 p-1 w-full border-[#66666659]"></div>
+                  )}
+                </div>
+              ))}
             </div>
 
             <div className="flex justify-center gap-3">
@@ -370,7 +423,7 @@ const MarkBuildingModel = ({
                     polygons,
                     selectedPolygon,
                     null, // No sensor for building model
-                    color,
+                    severityColors,
                     setPolygons,
                     setSensorPopup
                   );
@@ -419,10 +472,49 @@ const MarkBuildingModel = ({
               }
             />
 
-            <div className="flex items-center gap-4">
-              <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+            <div className="flex flex-col  border p-2 rounded-xl border-[#66666659]">
+              {severityColors.map((sev, index) => (
+                <div key={sev.level} className="flex w-full flex-col items-center gap-4">
+                  <div className="flex flex-row w-full justify-center items-center px-2 gap-4">
+                    <div className="w-full">
+                      <span className="w-16 capitalize font-bold text-xs">{sev.level}</span>
+                    </div>
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        placeholder="Min"
+                        value={sev.min}
+                        onChange={(e) => handleSeverityChange(sev.level, 'min', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="w-full">
+                      <Input
+                        type="number"
+                        placeholder="Max"
+                        value={sev.max}
+                        onChange={(e) => handleSeverityChange(sev.level, 'max', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="w-full">
+                      <Input
+                        className="w-full"
+                        type="color"
+                        value={sev.color}
+                        onChange={(e) => handleSeverityChange(sev.level, 'color', e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  {/* ✅ Show divider except for last index */}
+                  {index < severityColors.length - 1 && (
+                    <div className="border-t-2 p-1 w-full border-[#66666659]"></div>
+                  )}
+                </div>
+              ))}
             </div>
+
             <div className="flex justify-center">
               <Button
                 text="Update"
@@ -434,7 +526,7 @@ const MarkBuildingModel = ({
                     selectedPolygonId,
                     null, // No sensor for building model
                     null, // No new sensor
-                    color,
+                    severityColors,
                     setReEditModalOpen
                   )
                 }

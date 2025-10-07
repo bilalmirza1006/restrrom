@@ -370,11 +370,11 @@ const MarkRestroomModel = ({
       {sensorPopup && (
         <Modal isOpen={sensorPopup} onClose={() => setSensorPopup(false)}>
           <div className="w-full md:min-w-[500px] p-5">
-            <h5 className="text-lg font-semibold mb-6">Restroom Details</h5>
+            <h5 className="text-lg font-semibold mb-6">Add Sensor </h5>
             <div className="space-y-4">
               <Input
-                label="Restroom ID"
-                placeholder="Enter Restroom ID"
+                label="Sensor Name"
+                placeholder="Enter Sensor Name"
                 value={sensorIdInput}
                 onChange={(e) => setSensorIdInput(e.target.value)}
               />

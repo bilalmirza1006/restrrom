@@ -1,4 +1,5 @@
 // Handle image upload and display on the canvas
+import { nanoid } from 'nanoid';
 export const handleImageUpload = (event, setImageSrc, setShowCropper, setIsDrawingEnabled) => {
   const file = event.target.files[0];
   if (file) {
@@ -146,6 +147,7 @@ export const handleCanvasClick = ({
     const newPolygon = {
       ...draggedPolygon,
       id: `R-${polygonCount}`,
+      polygonId: nanoid(),
       points: draggedPolygon.points.map((point) => ({
         x: point.x + (x - draggedPolygon.points[0].x),
         y: point.y + (y - draggedPolygon.points[0].y),
@@ -164,6 +166,7 @@ export const handleCanvasClick = ({
       const polygonWithId = {
         points: newPolygon,
         id: `R-${polygonCount}`,
+        polygonId: nanoid(),
         color: selectedColor || '#A449EB',
         fillColor: selectedColor || '#A449EB',
       };
@@ -384,8 +387,7 @@ export const handleDeletePolygon = (
   }
 
   console.log(
-    `Polygon ${deletedPolygonId} deleted. Sensor ${
-      deletedSensor || 'No sensor'
+    `Polygon ${deletedPolygonId} deleted. Sensor ${deletedSensor || 'No sensor'
     } restored to available sensors`
   );
 };

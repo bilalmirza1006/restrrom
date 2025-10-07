@@ -44,7 +44,7 @@ export const DELETE = asyncHandler(async (req, { params }) => {
   const { user, accessToken } = await isAuthenticated();
   const { buildingId } = await params;
 
-console.log("6891d74878bf2c8a69875ead",buildingId);
+  console.log("6891d74878bf2c8a69875ead", buildingId);
 
   if (!isValidObjectId(buildingId)) throw new customError(400, "Invalid building id");
 
@@ -95,7 +95,7 @@ export const PUT = asyncHandler(async (req, { params }) => {
   const { user, accessToken } = await isAuthenticated();
   const formData = await req?.formData();
   if (!formData) throw new customError(400, "Please Add Fields For Building");
-  const { name, type, location, area, totalFloors, numberOfRooms, buildingManager, phone } =
+  const { name, type, location, area, totalFloors, numberOfRooms, buildingManager, phone, buildingCoordinates } =
     Object.fromEntries(formData);
   const thumbnailImage = formData.get("buildingThumbnail");
   const buildingModelImage = formData.get("buildingModelImage");
@@ -109,7 +109,8 @@ export const PUT = asyncHandler(async (req, { params }) => {
     !buildingManager &&
     !phone &&
     !thumbnailImage &&
-    !buildingModelImage
+    !buildingModelImage &&
+    !buildingCoordinates
   )
     throw new customError(400, "Please Provide Field For Update");
   const { buildingId } = await params;
@@ -125,6 +126,13 @@ export const PUT = asyncHandler(async (req, { params }) => {
   if (numberOfRooms) updates.numberOfRooms = numberOfRooms;
   if (buildingManager) updates.buildingManager = buildingManager;
   if (phone) updates.phone = phone;
+  if (buildingCoordinates) {
+    try {
+      updates.buildingCoordinates = JSON.parse(buildingCoordinates);
+    } catch {
+      throw new customError(400, "Invalid buildingCoordinates JSON");
+    }
+  }
   if (thumbnailImage) {
     if (building?.buildingThumbnail?.public_id) await removeFromCloudinary(building?.buildingThumbnail?.public_id);
     const thumbNailCloud = await uploadOnCloudinary(thumbnailImage, "building-thumbnails");

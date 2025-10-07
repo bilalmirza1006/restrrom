@@ -1,19 +1,20 @@
-"use client";
-import CustomDropdown from "@/components/global/CustomDropdown";
-import { useGetAllRestroomsQuery } from "@/features/restroom/restroomApi";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
-import { useSelector } from "react-redux";
-import BuildingCard from "./BuildingCard";
-import FloorList from "./FloorList";
-import MostUsedRooms from "./MostUsedRooms";
-import QueueingStatus from "./QueueingStatus";
-import { useState } from "react";
-import Modal from "@/components/global/Modal";
-import { useGetAllInspectorsQuery } from "@/features/inspection/inspectionApi";
-const FloorActivityChart = dynamic(() => import("./FloorActivityChart"), { ssr: false });
+'use client';
+import CustomDropdown from '@/components/global/CustomDropdown';
+import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { MdAdd, MdDelete, MdEdit } from 'react-icons/md';
+import { useSelector } from 'react-redux';
+import BuildingCard from './BuildingCard';
+import FloorList from './FloorList';
+import MostUsedRooms from './MostUsedRooms';
+import QueueingStatus from './QueueingStatus';
+import { useEffect, useState } from 'react';
+import Modal from '@/components/global/Modal';
+import { useGetAllInspectorsQuery } from '@/features/inspection/inspectionApi';
+import ShowCanvasData from './ShowCanvasData';
+const FloorActivityChart = dynamic(() => import('./FloorActivityChart'), { ssr: false });
 
 const BuildingDetail = ({ building }) => {
   const router = useRouter();
@@ -23,10 +24,27 @@ const BuildingDetail = ({ building }) => {
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
   const AddFloorHandle = () => router.push(`/user/floor/add-floor/${building?._id}`);
   const editBuildingHandle = () => router.push(`/user/buildings/edit-building/${building?._id}`);
+  const [polygons, setPolygons] = useState([]);
+  const [image, setImage] = useState('');
+  console.log('building', building);
+  useEffect(() => {
+    if (building) {
+      setImage(building?.buildingModelImage?.url || '');
+      setPolygons(building?.buildingCoordinates || []);
+    }
+  }, [building]);
+
+  useEffect(() => {
+    console.log('Updated polygons:', polygons);
+  }, [polygons]);
+
+  useEffect(() => {
+    console.log('Updated image:', image);
+  }, [image]);
 
   return (
     <div className="">
-      {user?.role === "user" && (
+      {user?.role === 'user' && (
         <div className="flex gap-4 justify-end my-2">
           <button
             onClick={() => setInspectorModel(true)}
@@ -64,15 +82,17 @@ const BuildingDetail = ({ building }) => {
       )}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 ">
         {/* <div className="lg:col-span-8 bg-white rounded-lg p-4 md:p-5">Building Details</div> */}
-        <div className="lg:col-span-8 bg-white rounded-lg p-4 md:p-5 ">
+        <div className="lg:col-span-8 flex items-center justify-center bg-white rounded-lg p-4 md:p-5 ">
           {building?.buildingModelImage?.url && (
-            <Image
-              src={building.buildingThumbnail.url}
-              height={400}
-              width={400}
-              className="w-full h-[400px] object-contain"
-              alt="Building Thumbnail"
-            />
+            // <Image
+            //   src={building.buildingThumbnail.url}
+            //   height={400}
+            //   width={400}
+            //   className="w-full h-[400px] object-contain"
+            //   alt="Building Thumbnail"
+            // />
+
+            <ShowCanvasData image={image} polygons={polygons} />
           )}
         </div>
         <div className="lg:col-span-4">
@@ -81,38 +101,38 @@ const BuildingDetail = ({ building }) => {
         <div className="lg:col-span-8">
           <div className="flex flex-wrap gap-4">
             <BuildingCard
-              title={"Total Floors"}
-              borderColor={"border-[#078E9B]"}
-              hoverColor={"hover:bg-[#078E9B15]"}
+              title={'Total Floors'}
+              borderColor={'border-[#078E9B]'}
+              hoverColor={'hover:bg-[#078E9B15]'}
               count={building?.totalFloors}
-              icon={"/svgs/user/green-step.svg"}
+              icon={'/svgs/user/green-step.svg'}
             />
             <BuildingCard
-              title={"Total Restrooms"}
-              borderColor={"border-[#A449EB]"}
-              hoverColor={"hover:bg-[#A449EB15]"}
+              title={'Total Restrooms'}
+              borderColor={'border-[#A449EB]'}
+              hoverColor={'hover:bg-[#A449EB15]'}
               count={building?.numberOfRooms}
-              icon={"/svgs/user/purple-restroom.svg"}
+              icon={'/svgs/user/purple-restroom.svg'}
             />
             <BuildingCard
-              title={"Restrooms In Use"}
-              borderColor={"border-[#FF9500]"}
-              hoverColor={"hover:bg-[#FF950015]"}
+              title={'Restrooms In Use'}
+              borderColor={'border-[#FF9500]'}
+              hoverColor={'hover:bg-[#FF950015]'}
               count={building?.totalFloors}
-              icon={"/svgs/user/yellow-toilet.svg"}
+              icon={'/svgs/user/yellow-toilet.svg'}
             />
             <BuildingCard
-              title={"Total Sensors"}
-              borderColor={"border-[#FF4D85]"}
-              hoverColor={"hover:bg-[#FF4D8515]"}
+              title={'Total Sensors'}
+              borderColor={'border-[#FF4D85]'}
+              hoverColor={'hover:bg-[#FF4D8515]'}
               count={building?.totalFloors}
-              icon={"/svgs/user/pink-buzzer.svg"}
+              icon={'/svgs/user/pink-buzzer.svg'}
             />
           </div>
           <div className="mt-5 bg-white p-5 rounded-xl">
             <div className="flex justify-between">
               <h1 className="text-[24px] font-semibold">Floors Activity</h1>
-              <CustomDropdown lists={["This Month", "This Week", "This Year"]} />
+              <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
             </div>
             <FloorActivityChart />
           </div>
@@ -129,7 +149,7 @@ const BuildingDetail = ({ building }) => {
           </div>
         </div>
       </section>
-      {/* {inspectorModel && (
+      {inspectorModel && (
         <Modal isOpen={inspectorModel} onClose={() => setInspectorModel(false)}>
           <div className="w-full md:min-w-[500px] p-5">
             {data?.data?.map((item, i) => (
@@ -137,13 +157,13 @@ const BuildingDetail = ({ building }) => {
             ))}
           </div>
         </Modal>
-      )} */}
+      )}
     </div>
   );
 };
 
 const InspectorCard = ({ data }) => {
-  return <div className="flex items-center gap-3 border-2 "></div>;
+  return <div className="flex items-center gap-3 border-2 ">{data}</div>;
 };
 
 export default BuildingDetail;
