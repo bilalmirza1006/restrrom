@@ -2,7 +2,7 @@
 import Button from "@/components/global/small/Button";
 import Input from "@/components/global/small/Input";
 import UploadBuildingImage from "@/components/user/addBuilding/UploadBuildingImage";
-import { useGetBuildingQuery, useUpdateBuildingMutation } from "@/features/building/buildingApi";
+import { useGetBuildingWithRestroomsQuery, useUpdateBuildingMutation } from "@/features/building/buildingApi";
 import { getFileCache, setFileCache } from "@/utils/fileStore";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 function EditBuildingById() {
   const params = useParams();
   const buildingId = params.buildingId;
-  const { data: buildingData } = useGetBuildingQuery(buildingId);
+  const { data: buildingWithRooms } = useGetBuildingWithRestroomsQuery(buildingId);
   const [updateBuilding, { isLoading }] = useUpdateBuildingMutation();
   const [image, setImage] = useState({ file: null, imagePreview: null });
   const [buildingInfo, setBuildingInfo] = useState({
@@ -65,8 +65,8 @@ function EditBuildingById() {
   };
 
   useEffect(() => {
-    if (buildingData?.data) {
-      const building = buildingData?.data;
+    if (buildingWithRooms?.data?.building) {
+      const building = buildingWithRooms?.data?.building;
       setBuildingInfo({
         buildingName: building?.name || "",
         buildingType: building?.type || "",
@@ -83,7 +83,9 @@ function EditBuildingById() {
         });
       }
     }
-  }, [buildingData?.data]);
+  }, [buildingWithRooms?.data?.building]);
+
+  // buildingWithRooms?.data?.restrooms is available here for later steps
 
   return (
     <div>

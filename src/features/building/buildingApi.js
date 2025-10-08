@@ -34,6 +34,13 @@ export const buildingApis = createApi({
       }),
       providesTags: ["building"],
     }),
+    getBuildingWithRestrooms: builder.query({
+      query: (buildingId) => ({
+        url: `/with-restrooms/${buildingId}`,
+        method: "GET",
+      }),
+      providesTags: ["building"],
+    }),
     updateBuilding: builder.mutation({
       query: ({ buildingId, data }) => ({
         url: `/single/${buildingId}`,
@@ -56,6 +63,7 @@ export const {
   useCreateBuildingMutation,
   useGetAllBuildingsQuery,
   useGetBuildingQuery,
+  useGetBuildingWithRestroomsQuery,
   useUpdateBuildingMutation,
   useDeleteBuildingMutation,
 } = buildingApis;
