@@ -39,6 +39,10 @@ const MarkBuildingModel = ({
   setBuildingModelImage,
   polygons,
   setPolygons,
+  onPolygonsChange,
+  onRestroomCountChange,
+  totalRestrooms,
+  // isEditMode = false,
 }) => {
   const canvasRef = useRef(null);
   const [isDrawingEnabled, setIsDrawingEnabled] = useState(false);
@@ -72,7 +76,10 @@ const MarkBuildingModel = ({
   ]);
   console.log('severityColors', severityColors);
 
-  const totalRestrooms = useSelector((state) => parseInt(state.building?.totalRestrooms || '0'));
+  const totalRestroomsFromState = useSelector((state) =>
+    parseInt(state.building?.totalRestrooms || '0')
+  );
+  const currentTotalRestrooms = totalRestrooms || totalRestroomsFromState;
 
   const openSensorPopup = (polygon) => {
     setSelectedPolygon(polygon);
@@ -150,6 +157,13 @@ const MarkBuildingModel = ({
     }
   }, [image, polygons, currentPolygon, canvasRef, severityColors, isDrawingEnabled]);
 
+  // Call onPolygonsChange when polygons change
+  useEffect(() => {
+    if (onPolygonsChange) {
+      onPolygonsChange(polygons);
+    }
+  }, [polygons, onPolygonsChange]);
+
   useEffect(() => {
     if (buildingModelImage) {
       const img = new Image();
@@ -190,7 +204,7 @@ const MarkBuildingModel = ({
             setPolygons,
             setPolygonCount,
             setDraggedPolygon,
-            isEditMode,
+            isEditMode: true,
             isUpdateMode,
             currentPolygon,
             setCurrentPolygon,
@@ -198,7 +212,10 @@ const MarkBuildingModel = ({
             handleReEditPolygon,
             handlePolygonClick,
             selectedColor: severityColors,
-            maxPolygons: Number.isFinite(totalRestrooms) && totalRestrooms > 0 ? totalRestrooms : Infinity,
+            maxPolygons:
+              Number.isFinite(currentTotalRestrooms) && currentTotalRestrooms > 0
+                ? currentTotalRestrooms
+                : Infinity,
             onLimitReached: () => toast.error('You cannot add more polygons than Total Restrooms'),
           })
         }

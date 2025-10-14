@@ -56,6 +56,13 @@ export const buildingApis = createApi({
       }),
       invalidatesTags: ["building"],
     }),
+    getBuildingEditData: builder.query({
+      query: (buildingId) => ({
+        url: `/edit-data/${buildingId}`,
+        method: "GET",
+      }),
+      providesTags: ["building"],
+    }),
   }),
 });
 
@@ -66,6 +73,7 @@ export const {
   useGetBuildingWithRestroomsQuery,
   useUpdateBuildingMutation,
   useDeleteBuildingMutation,
+  useGetBuildingEditDataQuery,
 } = buildingApis;
 
 export const resetBuildingApiState = buildingApis.util.resetApiState;

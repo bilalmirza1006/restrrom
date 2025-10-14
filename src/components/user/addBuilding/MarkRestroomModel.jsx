@@ -68,9 +68,10 @@ const MarkRestroomModel = ({
   const [reEditModalOpen, setReEditModalOpen] = useState(false);
   const [selectedPolygonId, setSelectedPolygonId] = useState('');
   const [selectedPolygonSensor, setSelectedPolygonSensor] = useState('');
-  console.log('currentPolygon', currentPolygon);
-  console.log('selectedPolygon', selectedPolygon);
-  console.log('polygons', polygons);
+  // console.log('currentPolygon', currentPolygon);
+  // console.log('selectedPolygon', selectedPolygon);
+  // console.log('polygons', polygons);
+  // console.log('restoreSensor', restoreSensor);
 
   // Get filtered sensors - removing ones already used in this restroom or other restrooms
   const getFilteredSensors = () => {

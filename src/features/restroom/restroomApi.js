@@ -43,16 +43,16 @@ export const restroomApis = createApi({
       providesTags: ["restroom"],
     }),
     updateRestroom: builder.mutation({
-      query: ({ buildingId, data }) => ({
-        url: `/single/${buildingId}`,
+      query: ({ restroomId, data }) => ({
+        url: `/single/${restroomId}`,
         method: "PUT",
         body: data,
       }),
       invalidatesTags: ["restroom"],
     }),
     deleteRestroom: builder.mutation({
-      query: (buildingId) => ({
-        url: `/single/${buildingId}`,
+      query: (restroomId) => ({
+        url: `/single/${restroomId}`,
         method: "DELETE",
       }),
       invalidatesTags: ["restroom"],
