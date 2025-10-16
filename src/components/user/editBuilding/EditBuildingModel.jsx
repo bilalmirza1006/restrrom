@@ -6,6 +6,7 @@ import { setBuilding, setModelEdited, setApiData } from '@/features/building/bui
 import { setFileCache } from '@/utils/fileStore';
 import toast from 'react-hot-toast';
 import { useGetBuildingWithRestroomsQuery } from '@/features/building/buildingApi';
+import { useDeleteRestroomMutation } from '@/features/restroom/restroomApi';
 
 const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
   const dispatch = useDispatch();
@@ -13,12 +14,15 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
   const [polygons, setPolygons] = useState([]);
   const [file, setFile] = useState(null);
   const building = useSelector((state) => state.building);
-  console.log('modelbuilding', building);
+  console.log('modelbuildingpolygons', polygons);
 
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
+  const [deleteRestroom, { isLoading }] = useDeleteRestroomMutation();
 
   const [existingApiPolygons, setExistingApiPolygons] = useState([]);
   const [apiNumberOfRooms, setApiNumberOfRooms] = useState(0);
+  const [restRoomId, setRestRoomId] = useState('');
+  // console.log('restRoomIdrestRoomIdrestRoomIdrestRoomIdrestRoomId', restRoomId);
 
   // 🟢 Load API data
   useEffect(() => {
@@ -26,7 +30,6 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
     if (editData?.data?.building) {
       const b = editData.data.building;
 
-      // Store API data in Redux
       dispatch(setApiData(editData.data));
 
       setApiNumberOfRooms(Number(b?.numberOfRooms || 0));
@@ -60,17 +63,44 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
       dispatch(setBuilding({ buildingModelImage: file }));
     }
   }, [file, dispatch]);
+  const handleDelete = async (id) => {
+    try {
+      await deleteRestroom(id).unwrap();
+      toast.success('Restroom deleted successfully!');
+    } catch (err) {
+      console.error('Delete failed:', err);
+      toast.error('Failed to delete restroom');
+    }
+  };
 
   // 🟣 Limit polygons to totalRestrooms
+  // 🟣 Compare restroom IDs difference on polygon change
   const handlePolygonsChange = (newPolygons) => {
     const totalRestrooms = Number(building?.totalRestrooms || 0);
     const existingCount = existingApiPolygons.length;
-    const allowedExtra = totalRestrooms - apiNumberOfRooms; // how many new polygons can be added
+    const allowedExtra = totalRestrooms - apiNumberOfRooms;
     const maxAllowed = existingCount + allowedExtra;
 
     if (newPolygons.length > maxAllowed) {
       toast.error(`You can only add ${allowedExtra} new restroom${allowedExtra !== 1 ? 's' : ''}.`);
       return;
+    }
+
+    // 🧩 Get previous and new restroom IDs
+    const prevIds = polygons.map((p) => p.restroomId).filter(Boolean);
+    const newIds = newPolygons.map((p) => p.restroomId).filter(Boolean);
+
+    // 🧠 Detect which restroom polygon was deleted
+    const deletedIds = prevIds.filter((id) => !newIds.includes(id));
+
+    if (deletedIds.length > 0) {
+      deletedIds.forEach((id) => {
+        toast.error(`🗑️ Restroom polygon with ID ${id} was deleted`);
+        console.log('Deleted restroom polygon ID:', id);
+
+        setRestRoomId(id);
+        handleDelete(id);
+      });
     }
 
     setPolygons(newPolygons);
@@ -106,40 +136,6 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
 
   return (
     <div>
-      {/* Display API Data */}
-      {building.apiData && (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h6 className="text-sm font-medium text-gray-700 mb-3">API Data Overview</h6>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <p><strong>Building:</strong> {building.apiData.building?.name || 'N/A'}</p>
-              <p><strong>Type:</strong> {building.apiData.building?.type || 'N/A'}</p>
-              <p><strong>Location:</strong> {building.apiData.building?.location || 'N/A'}</p>
-              <p><strong>Total Restrooms:</strong> {building.apiData.building?.numberOfRooms || 'N/A'}</p>
-            </div>
-            <div>
-              <p><strong>Latitude:</strong> {building.apiData.building?.latitude || 'N/A'}</p>
-              <p><strong>Longitude:</strong> {building.apiData.building?.longitude || 'N/A'}</p>
-              <p><strong>Total Floors:</strong> {building.apiData.building?.totalFloors || 'N/A'}</p>
-              <p><strong>Manager:</strong> {building.apiData.building?.buildingManager || 'N/A'}</p>
-            </div>
-          </div>
-          <div className="mt-3">
-            <p><strong>Restrooms Count:</strong> {building.apiData.restrooms?.length || 0}</p>
-            {building.apiData.restrooms?.length > 0 && (
-              <div className="mt-2">
-                <p className="text-xs font-medium">Restroom Details:</p>
-                {building.apiData.restrooms.map((restroom, idx) => (
-                  <div key={idx} className="text-xs text-gray-600 ml-2">
-                    {idx + 1}. {restroom.name || 'Unnamed'} - {restroom.type || 'No type'} - {restroom.status || 'No status'}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <h6 className="text-base text-primary font-medium">Building Model</h6>
       <p className="text-sm text-gray-600 mt-2">
         You can only create up to <b>{building?.totalRestrooms}</b> restrooms. ({apiNumberOfRooms}{' '}

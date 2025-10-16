@@ -1475,60 +1475,6 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
     <div>
       <h6 className="text-base text-primary font-medium">Restrooms</h6>
 
-      {/* Display API Data */}
-      {building.apiData && (
-        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-          <h6 className="text-sm font-medium text-gray-700 mb-3">API Data Overview</h6>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div>
-              <p>
-                <strong>Building:</strong> {building.apiData.building?.name || 'N/A'}
-              </p>
-              <p>
-                <strong>Type:</strong> {building.apiData.building?.type || 'N/A'}
-              </p>
-              <p>
-                <strong>Location:</strong> {building.apiData.building?.location || 'N/A'}
-              </p>
-              <p>
-                <strong>Total Restrooms:</strong>{' '}
-                {building.apiData.building?.numberOfRooms || 'N/A'}
-              </p>
-            </div>
-            <div>
-              <p>
-                <strong>Latitude:</strong> {building.apiData.building?.latitude || 'N/A'}
-              </p>
-              <p>
-                <strong>Longitude:</strong> {building.apiData.building?.longitude || 'N/A'}
-              </p>
-              <p>
-                <strong>Total Floors:</strong> {building.apiData.building?.totalFloors || 'N/A'}
-              </p>
-              <p>
-                <strong>Manager:</strong> {building.apiData.building?.buildingManager || 'N/A'}
-              </p>
-            </div>
-          </div>
-          <div className="mt-3">
-            <p>
-              <strong>Restrooms Count:</strong> {building.apiData.restrooms?.length || 0}
-            </p>
-            {building.apiData.restrooms?.length > 0 && (
-              <div className="mt-2">
-                <p className="text-xs font-medium">Restroom Details:</p>
-                {building.apiData.restrooms.map((restroom, idx) => (
-                  <div key={idx} className="text-xs text-gray-600 ml-2">
-                    {idx + 1}. {restroom.name || 'Unnamed'} - {restroom.type || 'No type'} -{' '}
-                    {restroom.status || 'No status'}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       <div className="mt-5 space-y-6">
         {restrooms.map((restroom, index) => (
           <div key={index} className="border border-gray-200 rounded-lg p-4">
