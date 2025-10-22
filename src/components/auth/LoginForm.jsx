@@ -1,3 +1,4 @@
+// app/login/page.js - UPDATED (No token handling needed)
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -15,7 +16,6 @@ const LoginForm = () => {
   const [login, { isLoading, isError }] = useLoginMutation();
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  console.log('login user', user);
 
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -34,31 +34,33 @@ const LoginForm = () => {
   };
 
   // Separate useEffect for handling redirection after successful login
+  // In your login form - UPDATE THE REDIRECTION LOGIC
   useEffect(() => {
     if (loginSuccess && userRole) {
-      let redirectPath = '/'; // Default path for any unspecified role
+      console.log('🔄 LOGIN FORM: Starting redirection process for role:', userRole);
 
-      // Determine redirect path based on role
-      if (userRole === 'admin') {
-        redirectPath = '/admin';
-      } else if (userRole === 'inspector') {
-        redirectPath = '/inspectionist';
-      } else if (userRole === 'user') {
-        redirectPath = '/user'; // Changed from '/' to '/user'
-      }
+      // Direct redirection based on role
+      const roleRedirects = {
+        super_admin: '/super-admin',
+        building_inspector: '/inspectionist',
+        admin: '/admin',
+        reporter_manager: '/admin',
+        subscription_manager: '/admin',
+        building_manager: '/admin',
+      };
 
-      console.log('LOGIN FORM: REDIRECTING TO:', redirectPath, 'ROLE:', userRole);
+      const redirectPath = roleRedirects[userRole] || '/admin';
 
-      // Force redirect with a slight delay to ensure state updates are complete
-      const timer = setTimeout(() => {
-        // router.push() is generally preferred in Next.js for client-side navigation
-        router.push(redirectPath);
-      }, 100); // Reduced delay as state updates should be quick here
+      console.log('🎯 LOGIN FORM: REDIRECTING TO:', redirectPath, 'FOR ROLE:', userRole);
 
-      return () => clearTimeout(timer);
+      // Immediate redirect without delay
+      console.log('🚀 LOGIN FORM: Executing redirect to', redirectPath);
+      router.push(redirectPath);
+
+      // Reset login success state
+      setLoginSuccess(false);
     }
   }, [loginSuccess, userRole, router]);
-
   // Handle form submission
   const handleForm = async (e) => {
     e.preventDefault();
@@ -67,39 +69,46 @@ const LoginForm = () => {
       return toast.error('Please provide email and password');
 
     try {
+      console.log('📤 LOGIN FORM: Attempting login with:', formData.email);
       const res = await login(formData).unwrap();
 
       // Log the entire response for debugging
-      console.log('LOGIN FORM: Full login response:', JSON.stringify(res));
+      console.log('✅ LOGIN FORM: Full login response:', JSON.stringify(res, null, 2));
 
       if (res?.success) {
-        const { data } = res;
+        const { data } = res; // No token in response - it's in cookies
 
         // Debug the data structure in more detail
-        console.log('LOGIN FORM: Login response data:', data);
+        console.log('📊 LOGIN FORM: Login response data:', data);
         if (data) {
-          console.log('LOGIN FORM: Data properties:', Object.keys(data));
-          console.log('LOGIN FORM: Data role:', data.role);
+          console.log('🔍 LOGIN FORM: Data properties:', Object.keys(data));
+          console.log('🎭 LOGIN FORM: Data role:', data.role);
+          console.log('👤 LOGIN FORM: Full user data:', data);
         }
 
         // Dispatch user data to Redux
         if (data && data.role) {
           // Ensure data and data.role exist
           dispatch(setUser(data));
+
           toast.success(res?.message || 'User logged in successfully');
 
           // Set role and login success state for redirection
+          console.log('🎯 LOGIN FORM: Setting user role for redirect:', data.role);
           setUserRole(data.role);
           setLoginSuccess(true);
         } else {
-          console.error('LOGIN FORM: Data or data.role is missing in response', data);
+          console.error('❌ LOGIN FORM: Data or data.role is missing in response', data);
           toast.error(
             'Login successful but user data is incomplete or role is missing. Please contact support.'
           );
         }
+      } else {
+        console.error('❌ LOGIN FORM: Login response indicates failure:', res);
+        toast.error(res?.message || 'Login failed. Please try again.');
       }
     } catch (error) {
-      console.error('LOGIN FORM: Login error:', error);
+      console.error('💥 LOGIN FORM: Login error:', error);
       toast.error(error?.data?.message || 'Something went wrong during login.');
     }
   };
@@ -117,6 +126,7 @@ const LoginForm = () => {
             type="email"
             value={formData.email}
             onChange={handleInputChange}
+            required
           />
         </div>
         <div className="relative">
@@ -126,7 +136,8 @@ const LoginForm = () => {
             type={showPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={handleInputChange}
-            autoComplete="new-password"
+            autoComplete="current-password"
+            required
           />
           <div
             className="absolute top-0 right-3 flex items-center gap-2 cursor-pointer text-sm lg:text-lg text-[#666666CC]"
@@ -136,7 +147,7 @@ const LoginForm = () => {
           </div>
         </div>
         <Button
-          text="Login"
+          text={isLoading ? 'Logging in...' : 'Login'}
           type="submit"
           disabled={isLoading}
           cn={`${isLoading && 'opacity-60 cursor-not-allowed'}`}

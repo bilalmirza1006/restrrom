@@ -16,12 +16,10 @@ import {
 const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
   const dispatch = useDispatch();
   const building = useSelector((state) => state.building);
-  // const { data: editData } = useGetBuildingEditDataQuery(buildingId);
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
-  console.log('generalbuilding', building);
-  console.log('building.isGeneralEdit', building.isGeneralEdit);
 
   const [image, setImage] = useState({ file: null, imagePreview: null });
+  const [minRestroomCount, setMinRestroomCount] = useState(0); // 🆕 new state
   const [buildingInfo, setBuildingInfo] = useState({
     buildingName: '',
     buildingType: '',
@@ -33,8 +31,22 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
     phone: '',
   });
 
+  // 🆕 Modified handler
   const buildingInfoChangeHandler = (e) => {
     const { name, value } = e.target;
+
+    // Restrict only for restroom field
+    if (name === 'totalRestrooms') {
+      const numVal = parseInt(value, 10) || 0;
+
+      // Prevent decrease below minRestroomCount
+      if (numVal < minRestroomCount) return;
+
+      // Allow increase only
+      setBuildingInfo((prev) => ({ ...prev, [name]: numVal.toString() }));
+      return;
+    }
+
     setBuildingInfo((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -61,12 +73,14 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
   // Load existing building data
   useEffect(() => {
     if (building.isGeneralEdit === true) return;
-    console.log('api data');
 
     if (editData?.data?.building) {
       const buildingData = editData.data.building;
 
-      // Store API data in Redux
+      // 🆕 Get restroom polygons count from API
+      const restroomCount = buildingData?.restrooms?.length || 0;
+      setMinRestroomCount(restroomCount);
+
       dispatch(setApiData(editData.data));
 
       setBuildingInfo({
@@ -75,7 +89,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
         location: buildingData.location || '',
         area: buildingData.area || '',
         totalFloors: buildingData.totalFloors?.toString() || '',
-        totalRestrooms: buildingData.numberOfRooms?.toString() || '2',
+        totalRestrooms: buildingData.numberOfRooms?.toString() || restroomCount.toString() || '2',
         buildingManager: buildingData.buildingManager || '',
         phone: buildingData.phone || '',
       });
@@ -87,7 +101,6 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
         });
       }
 
-      // Initialize building state with existing data
       dispatch(
         setBuilding({
           buildingName: buildingData.name || '',
@@ -95,7 +108,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
           location: buildingData.location || '',
           area: buildingData.area || '',
           totalFloors: buildingData.totalFloors?.toString() || '',
-          totalRestrooms: buildingData.numberOfRooms?.toString() || '2',
+          totalRestrooms: buildingData.numberOfRooms?.toString() || restroomCount.toString() || '2',
           buildingManager: buildingData.buildingManager || '',
           phone: buildingData.phone || '',
           buildingImage: buildingData.buildingThumbnail?.url || '',
@@ -108,10 +121,22 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
     }
   }, [editData, dispatch, buildingId]);
 
+  // 🆕 Update when restroom polygons change in redux (step 2 deletes one)
+  useEffect(() => {
+    if (building.apiData?.restrooms) {
+      const count = building.apiData.restrooms.length;
+      setMinRestroomCount(count);
+
+      // Ensure input value is never below polygon count
+      setBuildingInfo((prev) => ({
+        ...prev,
+        totalRestrooms: Math.max(parseInt(prev.totalRestrooms || 0), count).toString(),
+      }));
+    }
+  }, [building.apiData?.restrooms]);
+
   // Load redux values
   useEffect(() => {
-    console.log('building.isGeneralEdit');
-
     if (building && building.isEditMode) {
       setBuildingInfo({
         buildingName: building.buildingName || '',
@@ -185,14 +210,18 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
             value={buildingInfo.totalFloors}
             onChange={buildingInfoChangeHandler}
           />
+
+          {/* 🆕 Only increase possible, no decrease below minRestroomCount */}
           <Input
             type="number"
             name="totalRestrooms"
-            label="Total Restrooms"
+            label={`Total Restrooms (min ${minRestroomCount})`}
             placeholder="Total Restrooms"
             value={buildingInfo.totalRestrooms}
             onChange={buildingInfoChangeHandler}
+            min={minRestroomCount}
           />
+
           <Input
             type="text"
             name="buildingManager"

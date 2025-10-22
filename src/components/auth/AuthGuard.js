@@ -1,3 +1,4 @@
+// components/auth/AuthGuard.js - UPDATED
 'use client';
 
 import { useSelector } from 'react-redux';
@@ -5,12 +6,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 import Loader from '@/components/global/Loader';
 import toast from 'react-hot-toast';
-import { getRedirectPath, hasRouteAccess, getDefaultRouteForRole } from '@/utils/routingUtils';
+import { getRedirectPath, hasRouteAccess, isProtectedRoute } from '@/utils/routingUtils';
 
-/**
- * AuthGuard component for protecting routes based on user roles
- * Uses centralized route configuration for consistent access control
- */
 const AuthGuard = ({ children }) => {
   const auth = useSelector((state) => state.auth);
   const router = useRouter();
@@ -19,112 +16,116 @@ const AuthGuard = ({ children }) => {
   const [isChecking, setIsChecking] = useState(true);
   const isRedirectingRef = useRef(false);
 
-  // Helper to determine if redirection is crossing role boundaries
-  const isCrossingRoleBoundaries = (currentPath, targetPath) => {
-    // Extract the role segment from path
-    const getRoleFromPath = (path) => {
-      if (path.startsWith('/admin')) return 'admin';
-      if (path.startsWith('/inspectionist') || path.startsWith('/inspector')) return 'inspector';
-      if (path.startsWith('/user')) return 'user';
-      return null;
+  // Normalize user role to match routingUtils.js
+  const getUserRole = () => {
+    const user = auth?.user || {};
+    const role = user.role || user.user?.role;
+
+    // Normalize role names to match routingUtils.js
+    const roleMap = {
+      reporter: 'report_manager',
+      reporter_manager: 'report_manager',
+      subscription: 'subscription_manager',
+      subscription_manager: 'subscription_manager',
+      building_inspector: 'building_inspector',
+      admin: 'admin',
+      building_manager: 'building_manager',
+      super_admin: 'super_admin',
     };
 
-    const currentRole = getRoleFromPath(currentPath);
-    const targetRole = getRoleFromPath(targetPath);
-
-    return currentRole !== targetRole && currentRole !== null && targetRole !== null;
+    return roleMap[role] || role;
   };
 
+  console.log('🛡️ AuthGuard - State:', {
+    pathname,
+    isAuthenticated: auth?.isAuthenticated,
+    userRole: getUserRole(),
+    isChecking,
+    isAuthorized,
+  });
+
   useEffect(() => {
-    // Debug the auth state
-    console.log('Auth state in AuthGuard:', auth);
+    if (isRedirectingRef.current) return;
 
-    // Return if a redirect is already in progress
-    if (isRedirectingRef.current) {
-      console.log('Redirect already in progress, skipping auth check');
-      return;
-    }
+    const checkAuthorization = async () => {
+      const isAuthenticated = auth?.isAuthenticated || false;
+      const userRole = getUserRole();
 
-    // Extract user and authentication status safely
-    const isAuthenticated = auth?.isAuthenticated || false;
-    const user = auth?.user || null;
+      console.log(
+        `🔍 AuthGuard Check: path=${pathname}, authenticated=${isAuthenticated}, role=${userRole}`
+      );
 
-    // Handle non-authenticated users
-    if (!isAuthenticated || !user) {
-      console.log('User not authenticated, redirecting to login');
-      isRedirectingRef.current = true;
-      router.replace('/login');
-      if (isChecking) setIsChecking(false);
-      if (isAuthorized) setIsAuthorized(false);
-      return;
-    }
-
-    // Get user role with proper null checks
-    let role = null;
-
-    // Try different paths to find the role
-    if (user.role) {
-      role = user.role;
-    } else if (user.user && user.user.role) {
-      role = user.user.role;
-    }
-
-    if (!role) {
-      console.error('No role found in user object:', user);
-      toast.error('User role not found. Please log in again.');
-      isRedirectingRef.current = true;
-      router.replace('/login');
-      if (isChecking) setIsChecking(false);
-      if (isAuthorized) setIsAuthorized(false);
-      return;
-    }
-
-    console.log('Current role:', role, 'Current path:', pathname);
-
-    // Use centralized utility to determine if redirection is needed
-    const redirectPath = getRedirectPath(pathname, role);
-
-    if (redirectPath) {
-      console.log('Redirecting from', pathname, 'to', redirectPath);
-
-      // Only show toast error if redirecting due to unauthorized access, not for convenience redirects
-      if (pathname !== '/' && !pathname.includes('/login') && !pathname.includes('/signup')) {
-        toast.error('You are not authorized to access this page');
+      // Case 1: Not authenticated and trying to access protected route
+      if (!isAuthenticated && isProtectedRoute(pathname)) {
+        console.log('🚫 AuthGuard: Not authenticated for protected route, redirecting to login');
+        isRedirectingRef.current = true;
+        toast.error('Please log in to access this page');
+        router.replace('/login');
+        return;
       }
 
-      isRedirectingRef.current = true;
-
-      // Determine if this redirect crosses role boundaries
-      if (isCrossingRoleBoundaries(pathname, redirectPath)) {
-        console.log('Cross-role redirect - using hard refresh');
-        // Use window.location for a full page refresh when crossing role boundaries
-        window.location.href = redirectPath;
-      } else {
-        // Use Next.js router for same-role navigation
-        router.replace(redirectPath);
+      // Case 2: Authenticated but accessing public routes - redirect to appropriate dashboard
+      if (isAuthenticated && !isProtectedRoute(pathname)) {
+        const defaultRoute = getDefaultRouteForRole(userRole);
+        console.log(`🔀 AuthGuard: Authenticated on public route, redirecting to: ${defaultRoute}`);
+        isRedirectingRef.current = true;
+        router.replace(defaultRoute);
+        return;
       }
 
-      if (isAuthorized) setIsAuthorized(false);
-      if (isChecking) setIsChecking(false);
-      return;
-    }
+      // Case 3: Authenticated but no user role
+      if (isAuthenticated && !userRole) {
+        console.error('❌ AuthGuard: Authenticated but no role found');
+        toast.error('User role not found. Please log in again.');
+        isRedirectingRef.current = true;
+        router.replace('/login');
+        return;
+      }
 
-    // If we get here, the user is allowed to access this route
-    console.log('Access allowed to', pathname);
-    if (!isAuthorized) setIsAuthorized(true);
-    if (isChecking) setIsChecking(false);
+      // Case 4: Check route access for authenticated users
+      if (isAuthenticated && userRole) {
+        const hasAccess = hasRouteAccess(pathname, userRole);
 
-    // Reset the redirect flag
-    isRedirectingRef.current = false;
-  }, [auth, pathname, router, isAuthorized, isChecking]);
+        if (!hasAccess) {
+          console.log(
+            `🚫 AuthGuard: No access to ${pathname} for role ${userRole}, redirecting to unauthorized`
+          );
+          isRedirectingRef.current = true;
+          toast.error('You are not authorized to access this page');
+          router.replace('/unauthorized');
+          return;
+        }
 
-  // Show loader while checking authorization
+        // Case 5: User is authorized for current route
+        console.log('✅ AuthGuard: User authorized for current route');
+        setIsAuthorized(true);
+        setIsChecking(false);
+        isRedirectingRef.current = false;
+        return;
+      }
+
+      // Case 6: Public route for non-authenticated users
+      console.log('🔓 AuthGuard: Public route access granted');
+      setIsAuthorized(true);
+      setIsChecking(false);
+      isRedirectingRef.current = false;
+    };
+
+    checkAuthorization();
+  }, [auth, pathname, router]);
+
   if (isChecking) {
+    console.log('⏳ AuthGuard showing loader');
     return <Loader />;
   }
 
-  // Only render children if user is authorized
-  return isAuthorized ? children : null;
+  if (isAuthorized) {
+    console.log('✅ AuthGuard rendering children');
+    return children;
+  }
+
+  console.log('❌ AuthGuard not rendering - unauthorized');
+  return null;
 };
 
 export default AuthGuard;

@@ -1,3 +1,5 @@
+'use client';
+import withPageGuard from '@/components/auth/withPageGuard';
 import React from 'react';
 
 function FloorDetail({ params }) {
@@ -9,4 +11,5 @@ function FloorDetail({ params }) {
   return <div>FloorDetail</div>;
 }
 
-export default FloorDetail;
+// export default FloorDetail;
+export default withPageGuard(FloorDetail, '/admin/floor/floor-detail/[floorById]');

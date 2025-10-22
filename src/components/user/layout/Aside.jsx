@@ -12,49 +12,85 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React, { useState } from 'react';
 import { FaArrowCircleRight } from 'react-icons/fa';
+import { useSelector } from 'react-redux';
 
+// Define pages with role-based access - UPDATED
 const pages = [
   {
     id: 1,
     title: 'Dashboard',
-    link: ['/user'],
+    link: ['/admin'],
     icon: <DashboardIcon />,
+    // All roles can access dashboard
+    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
   },
   {
     id: 2,
-    title: 'Buildings',
-    link: ['/user/buildings', '/user/add-building'],
+    title: 'Users',
+    link: ['/admin/all-managers'],
     icon: <BuildingIcon />,
+    // Only admin and building_manager can access all-managers
+    roles: ['admin', 'building_manager'], // FIXED: Changed from string to array
   },
   {
     id: 3,
+    title: 'Buildings',
+    link: ['/admin/buildings', '/admin/add-building'],
+    icon: <BuildingIcon />,
+    // Admin and building-related roles
+    roles: ['admin', 'building_manager'],
+  },
+  {
+    id: 4,
     title: 'Sensors',
-    link: ['/user/sensors'],
+    link: ['/admin/sensors'],
     icon: <SensorsIcon />,
-  },
-  {
-    id: 4,
-    title: 'Reports',
-    link: ['/user/reports'],
-    icon: <ReportsIcon />,
-  },
-  {
-    id: 4,
-    title: 'Plans',
-    link: ['/user/plans'],
-    icon: <PlansIcon />,
+    // Admin and building-related roles
+    roles: ['admin', 'building_manager'],
   },
   {
     id: 5,
+    title: 'Reports',
+    link: ['/admin/reports'],
+    icon: <ReportsIcon />,
+    // Admin, report_manager, and building_inspector
+    roles: ['admin', 'report_manager'],
+  },
+  {
+    id: 6,
+    title: 'Plans',
+    link: ['/admin/plans'],
+    icon: <PlansIcon />,
+    // Only admin and subscription manager
+    roles: ['admin', 'subscription_manager'],
+  },
+  {
+    id: 7,
     title: 'Settings',
-    link: ['/user/settings'],
+    link: ['/admin/settings'],
     icon: <SettingIcon />,
+    // All manager roles can access settings
+    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
   },
 ];
 
 const Aside = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useSelector((state) => state.auth);
+
+  // Get user role from Redux state - enhanced with better fallback
+  const userRole = user?.role || user?.user?.role || 'user';
+
+  // Filter pages based on user role - with better debugging
+  const filteredPages = pages.filter((page) => {
+    const hasAccess = page.roles.includes(userRole);
+    console.log(`🔐 ${page.title}: ${hasAccess ? '✅' : '❌'} Access for ${userRole}`);
+    return hasAccess;
+  });
+
+  console.log('🔄 Sidebar - User Role:', userRole, 'Filtered Pages:', filteredPages.length);
+
   return (
     <aside
       className={`relative transition-all duration-300 hidden xl:block ${
@@ -81,6 +117,16 @@ const Aside = () => {
           alt="logo"
           className="mx-auto"
         />
+
+        {/* User Role Badge */}
+        {!isMenuOpen && (
+          <div className="mt-2 text-center">
+            <span className="inline-block bg-white/20 text-white text-xs px-2 py-1 rounded-full capitalize">
+              {userRole.replace(/_/g, ' ')} {/* Fixed: replaced hyphen with underscore */}
+            </span>
+          </div>
+        )}
+
         <div className="mt-5 lg:mt-10">
           <h4
             className={`text-xs text-white/60 font-medium ${isMenuOpen ? 'text-center' : 'pl-2'}`}
@@ -88,11 +134,19 @@ const Aside = () => {
             MENU
           </h4>
           <div className="mt-3 flex flex-col gap-4">
-            {pages.map((page, i) => (
+            {filteredPages.map((page, i) => (
               <LinkItem key={i} page={page} pathname={pathname} isMenuOpen={isMenuOpen} />
             ))}
           </div>
         </div>
+
+        {/* Debug info - remove in production */}
+        {process.env.NODE_ENV === 'development' && !isMenuOpen && (
+          <div className="mt-auto p-2 bg-black/20 rounded text-xs text-white/60">
+            <div>Role: {userRole}</div>
+            <div>Pages: {filteredPages.length}</div>
+          </div>
+        )}
       </div>
     </aside>
   );
@@ -102,6 +156,7 @@ export default Aside;
 
 const LinkItem = ({ page, pathname, isMenuOpen }) => {
   const isLinkActive = page?.link.some((item) => item === pathname);
+
   return (
     <Link
       href={page?.link[0]}

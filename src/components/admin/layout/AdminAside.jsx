@@ -17,39 +17,39 @@ const pages = [
   {
     id: 1,
     title: 'Dashboard',
-    link: ['/admin'],
+    link: ['/super-admin'],
     icon: <DashboardIcon />,
   },
   {
     id: 2,
     title: 'Buildings',
-    link: ['/admin/buildings'],
+    link: ['/super-admin/buildings'],
     icon: <BuildingIcon />,
   },
 
   {
     id: 3,
     title: 'Sensors',
-    link: ['/admin/sensors'],
+    link: ['/super-admin/sensors'],
     icon: <SensorsIcon />,
   },
   {
     id: 4,
     title: 'Reports',
-    link: ['/admin/reports'],
+    link: ['/super-admin/reports'],
     icon: <ReportsIcon />,
   },
 
   {
     id: 5,
     title: 'Plans',
-    link: ['/admin/plans'],
+    link: ['/super-admin/plans'],
     icon: <PlansIcon />,
   },
   {
     id: 6,
     title: 'Settings',
-    link: ['/admin/settings'],
+    link: ['/super-admin/settings'],
     icon: <SettingIcon />,
   },
 ];

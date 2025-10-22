@@ -5,11 +5,11 @@ import InspectionsHeader from '@/components/inspectionist/layout/InspectionsHead
 import { useSelector } from 'react-redux';
 import InspectionsAside from '@/components/inspectionist/layout/InspectionsAside';
 
-const InspectionistLayout = ({ children }) => {
+const inspector = ({ children }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   // Only show the layout if the user is authenticated and has the correct role
-  if (!isAuthenticated || !user || user.role !== 'inspector') return <Loader />;
+  if (!isAuthenticated || !user || user.role !== 'building_inspector') return <Loader />;
 
   return (
     <section className="bg-[#F5F2FF] w-screen h-screen grid place-items-center overflow-hidden">
@@ -26,4 +26,4 @@ const InspectionistLayout = ({ children }) => {
   );
 };
 
-export default InspectionistLayout;
+export default inspector;

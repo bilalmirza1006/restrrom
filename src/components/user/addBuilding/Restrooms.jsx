@@ -220,7 +220,7 @@ const Restrooms = ({ setCurrentStep }) => {
       // ✅ Redirect user
       if (user?.role === 'user') {
         setTimeout(() => {
-          router.push('/user/buildings');
+          router.push('/admin/buildings');
           dispatch(removeBuilding());
         }, 1500);
       }

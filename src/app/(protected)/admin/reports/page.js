@@ -1,7 +1,9 @@
+'use client';
 import React from 'react';
 import AllReports from '@/components/user/reports/AllReports';
+import withPageGuard from '@/components/auth/withPageGuard';
 
-function AdminReports() {
+function UserReports() {
   return (
     <div>
       <AllReports />
@@ -9,4 +11,5 @@ function AdminReports() {
   );
 }
 
-export default AdminReports;
+// export default UserReports;
+export default withPageGuard(UserReports, '/admin/reports');

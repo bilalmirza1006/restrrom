@@ -22,11 +22,12 @@ const BuildingDetail = ({ building }) => {
   const { data } = useGetAllInspectorsQuery();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
-  const AddFloorHandle = () => router.push(`/user/floor/add-floor/${building?._id}`);
-  const editBuildingHandle = () => router.push(`/user/buildings/edit-building/${building?._id}`);
+  const AddFloorHandle = () => router.push(`/admin/floor/add-floor/${building?._id}`);
+  const editBuildingHandle = () => router.push(`/admin/buildings/edit-building/${building?._id}`);
   const [polygons, setPolygons] = useState([]);
   const [image, setImage] = useState('');
   console.log('building', building);
+  console.log('data', data);
   useEffect(() => {
     if (building) {
       setImage(building?.buildingModelImage?.url || '');
@@ -44,7 +45,7 @@ const BuildingDetail = ({ building }) => {
 
   return (
     <div className="">
-      {user?.role === 'user' && (
+      {user?.role === 'admin' && (
         <div className="flex gap-4 justify-end my-2">
           <button
             onClick={() => setInspectorModel(true)}
@@ -150,7 +151,11 @@ const BuildingDetail = ({ building }) => {
         </div>
       </section>
       {inspectorModel && (
-        <Modal isOpen={inspectorModel} onClose={() => setInspectorModel(false)}>
+        <Modal
+          title={'Add Inspector'}
+          isOpen={inspectorModel}
+          onClose={() => setInspectorModel(false)}
+        >
           <div className="w-full md:min-w-[500px] p-5">
             {data?.data?.map((item, i) => (
               <InspectorCard key={i} data={item} />
@@ -163,7 +168,14 @@ const BuildingDetail = ({ building }) => {
 };
 
 const InspectorCard = ({ data }) => {
-  return <div className="flex items-center gap-3 border-2 ">{data}</div>;
+  return (
+    <div className="flex items-center gap-3 border-2 ">
+      <div className="h-[200px]">
+        <div className="bg-red-500 text-green-500">{data?.fullName}</div>;
+      </div>
+      ;
+    </div>
+  );
 };
 
 export default BuildingDetail;

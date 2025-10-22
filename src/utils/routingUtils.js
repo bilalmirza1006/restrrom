@@ -1,144 +1,163 @@
+// utils/routingUtils.js - FIXED VERSION
 /**
  * Centralized routing utility for role-based access control
  */
 
-// Define route configurations with role permissions
+// Define route configurations with role permissions - UPDATED
 export const ROUTE_CONFIG = {
-  // User routes
-  '/': { roles: ['user'], exactMatch: true, redirectTo: (role) => getDefaultRouteForRole(role) },
-  '/user': { roles: ['user'], exactMatch: false },
+  // Super Admin routes (ONLY super_admin can access)
+  '/super-admin': {
+    roles: ['super_admin'],
+    exactMatch: false,
+  },
 
-  // Admin routes
-  '/admin': { roles: ['admin'], exactMatch: false },
+  // Inspection routes (building_inspector can access)
+  '/inspectionist': {
+    roles: ['building_inspector'],
+    exactMatch: false,
+  },
 
-  // Inspector routes
-  '/inspectionist': { roles: ['inspector'], exactMatch: false },
-  '/inspector': { roles: ['inspector'], exactMatch: false },
+  // Admin routes - accessible to admin and all manager roles
+  '/admin': {
+    roles: ['admin', 'subscription_manager', 'building_manager', 'report_manager'],
+    exactMatch: false, // Allow all nested routes under /admin
+  },
 
-  // Shared routes (authenticated users)
-  '/profile': { roles: ['user', 'admin', 'inspector'], exactMatch: true },
-
-  // Public routes (no auth required)
+  // Public routes
   '/login': { roles: [], exactMatch: true, public: true },
   '/signup': { roles: [], exactMatch: true, public: true },
   '/register': { roles: [], exactMatch: true, public: true },
   '/forgot-password': { roles: [], exactMatch: true, public: true },
+  '/unauthorized': { roles: [], exactMatch: true, public: true },
 };
 
 /**
  * Gets the appropriate route an authenticated user should be redirected to
- * @param {string} currentPath - Current route user is trying to access
- * @param {string} role - User role
- * @returns {string|null} - Redirect path or null if no redirect needed
  */
 export const getRedirectPath = (currentPath, role) => {
   if (!role) return '/login';
 
-  // If user is trying to access public route while authenticated
-  const matchedRoute = Object.entries(ROUTE_CONFIG).find(([path, config]) => {
+  console.log(`🔍 getRedirectPath: currentPath=${currentPath}, role=${role}`);
+
+  // Handle root path - redirect to role-specific page
+  if (currentPath === '/' || currentPath === '/dashboard') {
+    const defaultRoute = getDefaultRouteForRole(role);
+    console.log(`🏠 Root path redirect: ${currentPath} -> ${defaultRoute}`);
+    return defaultRoute;
+  }
+
+  // Check if current path is public and user is authenticated
+  const isPublicRoute = Object.entries(ROUTE_CONFIG).some(([route, config]) => {
     if (config.public) {
-      return (
-        (config.exactMatch && currentPath === path) ||
-        (!config.exactMatch && currentPath.startsWith(path))
-      );
+      return config.exactMatch ? currentPath === route : currentPath.startsWith(route);
     }
     return false;
   });
 
-  if (matchedRoute) {
-    // Redirect authenticated users away from public routes
-    return getDefaultRouteForRole(role);
+  if (isPublicRoute) {
+    console.log(`🌐 Public route access granted: ${currentPath}`);
+    return null; // No redirect needed for public routes
   }
 
   // Check if user has access to current path
-  const hasAccess = hasRouteAccess(currentPath, { role }, true);
+  const hasAccess = hasRouteAccess(currentPath, role);
 
   if (!hasAccess) {
-    // Send to role-specific home if no access
-    return getDefaultRouteForRole(role);
+    const defaultRoute = getDefaultRouteForRole(role);
+    console.log(`❌ No access to ${currentPath}, redirecting to: ${defaultRoute}`);
+    return defaultRoute;
   }
 
-  // Special case for root path - redirect to role-specific dashboard
-  if (currentPath === '/' && getDefaultRouteForRole(role) !== '/') {
-    return getDefaultRouteForRole(role);
-  }
-
-  // No redirect needed
-  return null;
+  console.log(`✅ Access granted to: ${currentPath}`);
+  return null; // No redirect needed
 };
 
 /**
  * Checks if user has access to a specific route based on their role
- * @param {string} pathname - Current route path
- * @param {object} user - User object containing role information
- * @param {boolean} isAuthenticated - Authentication status
- * @returns {boolean} - Whether user has access to route
  */
-export const hasRouteAccess = (pathname, user, isAuthenticated) => {
-  // Public routes are accessible without authentication
-  const matchedPublicRoute = Object.entries(ROUTE_CONFIG).find(([route, config]) => {
-    return (
-      config.public &&
-      ((config.exactMatch && pathname === route) ||
-        (!config.exactMatch && pathname.startsWith(route)))
-    );
+export const hasRouteAccess = (pathname, role) => {
+  if (!role) return false;
+
+  console.log(`🔐 Checking access for path: ${pathname}, role: ${role}`);
+
+  // Public routes are accessible to all
+  const isPublicRoute = Object.entries(ROUTE_CONFIG).some(([route, config]) => {
+    if (config.public) {
+      return config.exactMatch ? pathname === route : pathname.startsWith(route);
+    }
+    return false;
   });
 
-  if (matchedPublicRoute) {
+  if (isPublicRoute) {
+    console.log(`🌐 Public route access granted: ${pathname}`);
     return true;
   }
 
-  // If not authenticated, deny access to protected routes
-  if (!isAuthenticated || !user || !user.role) {
-    return false;
-  }
+  // Sort routes by specificity (longer paths first) to match most specific route
+  const sortedRoutes = Object.entries(ROUTE_CONFIG)
+    .filter(([_, config]) => !config.public)
+    .sort(([routeA], [routeB]) => routeB.length - routeA.length);
 
-  // Find matching route configuration
-  for (const [route, config] of Object.entries(ROUTE_CONFIG)) {
-    const pathMatches = config.exactMatch ? pathname === route : pathname.startsWith(route);
+  // Find the most specific matching route
+  for (const [route, config] of sortedRoutes) {
+    let pathMatches = false;
+
+    if (config.exactMatch) {
+      pathMatches = pathname === route;
+    } else {
+      // For non-exact matches, check if pathname starts with route
+      pathMatches = pathname.startsWith(route);
+    }
 
     if (pathMatches) {
-      // If route requires roles and user has one of them, grant access
-      return !config.roles.length || config.roles.includes(user.role);
+      const hasRoleAccess = config.roles.includes(role);
+      console.log(
+        `📊 Route ${route} (exact: ${config.exactMatch}) - Access ${
+          hasRoleAccess ? 'granted' : 'denied'
+        } for role ${role}`
+      );
+      return hasRoleAccess;
     }
   }
 
-  // Default to denying access
+  // Deny access to unknown routes
+  console.log(`🚫 Unknown route, access denied: ${pathname}`);
   return false;
 };
 
 /**
  * Gets default route for a user based on their role
- * @param {string} role - User role
- * @returns {string} - Default route for role
  */
 export const getDefaultRouteForRole = (role) => {
-  switch (role) {
-    case 'admin':
-      return '/admin';
-    case 'inspector':
-      return '/inspectionist';
-    case 'user':
-      return '/user';
-    default:
-      return '/login';
-  }
+  const defaultRoutes = {
+    super_admin: '/super-admin',
+    building_inspector: '/inspectionist',
+    admin: '/admin',
+    subscription_manager: '/admin',
+    building_manager: '/admin',
+    report_manager: '/admin',
+  };
+
+  const route = defaultRoutes[role] || '/admin';
+  console.log(`🎯 Default route for ${role}: ${route}`);
+  return route;
 };
 
 /**
  * Determine if a path should be protected by authentication
- * @param {string} pathname - Current path
- * @returns {boolean} - Whether path requires authentication
  */
 export const isProtectedRoute = (pathname) => {
   // Check if path matches any public route
   for (const [route, config] of Object.entries(ROUTE_CONFIG)) {
     if (config.public) {
       const pathMatches = config.exactMatch ? pathname === route : pathname.startsWith(route);
-      if (pathMatches) return false;
+      if (pathMatches) {
+        console.log(`🔓 Public route: ${pathname}`);
+        return false;
+      }
     }
   }
 
-  // All non-public routes require authentication
+  console.log(`🔒 Protected route: ${pathname}`);
   return true;
 };
