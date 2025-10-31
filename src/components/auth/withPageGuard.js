@@ -20,6 +20,10 @@ export const PAGE_PERMISSIONS = {
     roles: ['admin', 'building_manager'],
     exact: false, // Matches /admin/buildings and all sub-routes
   },
+  '/admin/floor/floor-detail/[floorById]': {
+    roles: ['admin', 'building_manager'],
+    exact: false,
+  },
   '/admin/add-building': {
     roles: ['admin', 'building_manager'],
     exact: false,

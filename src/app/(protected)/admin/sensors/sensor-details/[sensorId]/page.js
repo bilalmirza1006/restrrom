@@ -8,4 +8,4 @@ const SensorViewPage = async ({ params }) => {
 };
 
 // export default SensorViewPage;
-export default withPageGuard(SensorViewPage, '/admin/sensors/[sensorId]');
+export default withPageGuard(SensorViewPage, '/admin/sensors/sensor-details/[sensorId]');

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import Link from "next/link";
-import { useSelector } from "react-redux";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useSelector } from 'react-redux';
 
 const FloorList = ({ data, buildingId }) => {
   const { user } = useSelector((state) => state.auth);
@@ -10,12 +10,12 @@ const FloorList = ({ data, buildingId }) => {
 
   const getRouteByRole = (role, buildingId, floorId) => {
     switch (role) {
-      case "admin":
-        return `/admin/floor/floor-detail/${buildingId}--${floorId}`;
-      case "user":
-        return `/user/floor/floor-detail/${buildingId}--${floorId}`;
+      case 'admin':
+        return `/admin/floor/floor-detail/${floorId}`;
+      case 'user':
+        return `/user/floor/floor-detail/${floorId}`;
       default:
-        return ""; // Unknown or unauthorized role
+        return ''; // Unknown or unauthorized role
     }
   };
 
@@ -38,7 +38,11 @@ const FloorList = ({ data, buildingId }) => {
           <Image src="/svgs/user/basement.svg" width={18} height={18} alt="icon" />
           <p className="text-sm font-semibold text-[#414141]">Basement Floor</p>
         </div>
-        <List icon="/svgs/user/total-restrooms.svg" title="Total Toilets" value={data?.numOfToilets} />
+        <List
+          icon="/svgs/user/total-restrooms.svg"
+          title="Total Toilets"
+          value={data?.numOfToilets}
+        />
       </div>
 
       <List icon="/svgs/user/occupied.svg" title="Occupied Restrooms" value={1} />
@@ -47,7 +51,10 @@ const FloorList = ({ data, buildingId }) => {
 
       <div className="mt-4 md:mt-6 flex items-center justify-center">
         {route ? (
-          <Link href={route} className="bg-[#EED8FF] py-2 px-5 rounded-lg underline text-primary text-sm font-bold">
+          <Link
+            href={route}
+            className="bg-[#EED8FF] py-2 px-5 rounded-lg underline text-primary text-sm font-bold"
+          >
             View Details
           </Link>
         ) : (

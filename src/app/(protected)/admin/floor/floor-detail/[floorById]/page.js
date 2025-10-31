@@ -1,5 +1,6 @@
 'use client';
 import withPageGuard from '@/components/auth/withPageGuard';
+import RestRoomDetails from '@/components/user/restrooms/RestRoomDetails';
 import React from 'react';
 
 function FloorDetail({ params }) {
@@ -8,7 +9,11 @@ function FloorDetail({ params }) {
 
   console.log('Building ID:', buildingId);
   console.log('Floor ID:', floorId);
-  return <div>FloorDetail</div>;
+  return (
+    <div>
+      <RestRoomDetails restRoom={[]} />
+    </div>
+  );
 }
 
 // export default FloorDetail;
