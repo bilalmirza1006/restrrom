@@ -7,7 +7,7 @@ import {
 } from '@/lib/stripe/subscriptionService';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 

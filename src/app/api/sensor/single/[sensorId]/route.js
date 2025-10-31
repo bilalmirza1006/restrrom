@@ -2,7 +2,7 @@ import { connectDb } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Sensor } from '@/models/sensor.model';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { isValidObjectId } from 'mongoose';
 import { turborepoTraceAccess } from 'next/dist/build/turborepo-access-trace';

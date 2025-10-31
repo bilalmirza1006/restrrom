@@ -3,7 +3,7 @@
 
 import { useSelector } from 'react-redux';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Loader from '@/components/global/Loader';
 import toast from 'react-hot-toast';
 import { getRedirectPath, hasRouteAccess, isProtectedRoute } from '@/utils/routingUtils';
@@ -17,11 +17,10 @@ const AuthGuard = ({ children }) => {
   const isRedirectingRef = useRef(false);
 
   // Normalize user role to match routingUtils.js
-  const getUserRole = () => {
+  const getUserRole = useCallback(() => {
     const user = auth?.user || {};
     const role = user.role || user.user?.role;
 
-    // Normalize role names to match routingUtils.js
     const roleMap = {
       reporter: 'report_manager',
       reporter_manager: 'report_manager',
@@ -34,7 +33,7 @@ const AuthGuard = ({ children }) => {
     };
 
     return roleMap[role] || role;
-  };
+  }, [auth]);
 
   console.log('🛡️ AuthGuard - State:', {
     pathname,
@@ -112,7 +111,7 @@ const AuthGuard = ({ children }) => {
     };
 
     checkAuthorization();
-  }, [auth, pathname, router]);
+  }, [auth, pathname, router, getUserRole]);
 
   if (isChecking) {
     console.log('⏳ AuthGuard showing loader');

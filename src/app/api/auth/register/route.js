@@ -2,7 +2,7 @@
 // import { Auth } from '@/models/auth.model';
 // import { sendToken } from '@/services/auth/sendToken';
 // import { asyncHandler } from '@/utils/asyncHandler';
-// import { customError } from '@/utils/customError';
+// import customError from '@/utils/customError';
 // import { NextResponse } from 'next/server';
 
 // export const POST = asyncHandler(async (req) => {
@@ -56,7 +56,7 @@ import { connectDb } from '@/configs/connectDb';
 import { Auth } from '@/models/auth.model';
 import { sendToken } from '@/services/auth/sendToken';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 import { getLoggedInUser } from '@/lib/getLoggedInUser';
 

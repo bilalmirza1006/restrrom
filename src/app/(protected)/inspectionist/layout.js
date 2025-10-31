@@ -5,7 +5,7 @@ import InspectionsHeader from '@/components/inspectionist/layout/InspectionsHead
 import { useSelector } from 'react-redux';
 import InspectionsAside from '@/components/inspectionist/layout/InspectionsAside';
 
-const inspector = ({ children }) => {
+const Inspector = ({ children }) => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   // Only show the layout if the user is authenticated and has the correct role
@@ -26,4 +26,4 @@ const inspector = ({ children }) => {
   );
 };
 
-export default inspector;
+export default Inspector;

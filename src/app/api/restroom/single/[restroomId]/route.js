@@ -4,7 +4,7 @@ import { isAuthenticated } from '@/lib/isAuthenticated';
 import { RestRoom } from '@/models/restroom.model';
 import { Sensor } from '@/models/sensor.model';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { isValidObjectId } from 'mongoose';
 import { NextResponse } from 'next/server';

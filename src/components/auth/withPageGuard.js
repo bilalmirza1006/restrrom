@@ -91,7 +91,7 @@ const withPageGuard = (WrappedComponent, requiredPath) => {
           console.log(`✅ HOC Guard: ${userRole} can access ${requiredPath}`);
         }
       }
-    }, [isAuthenticated, userRole, requiredPath, router]);
+    }, [isAuthenticated, userRole, router]);
 
     // Show loader while checking permissions
     if (!isAuthenticated || !user) {

@@ -223,7 +223,7 @@ function AllMangers() {
             responsive
             noDataComponent={
               <div className="py-8 text-center text-gray-500">
-                No users found. Click "Add User" to create one.
+                No users found. Click Add User to create one.
               </div>
             }
           />

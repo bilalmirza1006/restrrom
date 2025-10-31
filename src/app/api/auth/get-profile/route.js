@@ -10,7 +10,7 @@ import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from '@
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Auth } from '@/models/auth.model';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';

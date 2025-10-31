@@ -7,7 +7,7 @@ import {
   handleCheckoutEvent,
 } from '@/lib/stripe/webhookService';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { customError } from '@/utils/customError';
+import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 
 // Ensure Node.js runtime (required for Stripe's signature verification)

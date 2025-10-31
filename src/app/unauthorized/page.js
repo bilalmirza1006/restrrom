@@ -57,7 +57,7 @@ export default function UnauthorizedPage() {
 
         <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Access Denied</h1>
         <p className="text-gray-600 mb-6 text-center">
-          You don't have permission to access this page with your current role.
+          You don&apos;t have permission to access this page with your current role.
         </p>
 
         {/* Current Role Info */}

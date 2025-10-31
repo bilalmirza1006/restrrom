@@ -1,18 +1,18 @@
-import { connectDb } from "@/configs/connectDb";
-import { configureCloudinary, uploadOnCloudinary } from "@/lib/cloudinary";
-import { isAuthenticated } from "@/lib/isAuthenticated";
-import { Building } from "@/models/building.model";
-import { asyncHandler } from "@/utils/asyncHandler";
-import { customError } from "@/utils/customError";
-import sendResponse from "@/utils/sendResponse";
-import { NextResponse } from "next/server";
+import { connectDb } from '@/configs/connectDb';
+import { configureCloudinary, uploadOnCloudinary } from '@/lib/cloudinary';
+import { isAuthenticated } from '@/lib/isAuthenticated';
+import { Building } from '@/models/building.model';
+import { asyncHandler } from '@/utils/asyncHandler';
+import customError from '@/utils/customError';
+import sendResponse from '@/utils/sendResponse';
+import { NextResponse } from 'next/server';
 
 export const POST = asyncHandler(async (req) => {
   await connectDb();
   await configureCloudinary();
   const { user, accessToken } = await isAuthenticated();
   const formData = await req?.formData();
-  if (!formData) throw new customError(400, "Please Add Fields For Building");
+  if (!formData) throw new customError(400, 'Please Add Fields For Building');
   const {
     name,
     type,
@@ -40,19 +40,20 @@ export const POST = asyncHandler(async (req) => {
     !longitude ||
     !buildingCoordinates
   )
-    throw new customError(400, "Please provide all fields");
-  const thumbnailImage = formData.get("buildingThumbnail");
-  const buildingModelImage = formData.get("buildingModelImage");
-  if (!thumbnailImage || !buildingModelImage) throw new customError(400, "Please provide all fields");
+    throw new customError(400, 'Please provide all fields');
+  const thumbnailImage = formData.get('buildingThumbnail');
+  const buildingModelImage = formData.get('buildingModelImage');
+  if (!thumbnailImage || !buildingModelImage)
+    throw new customError(400, 'Please provide all fields');
   const coordinates = JSON.parse(buildingCoordinates);
   const [thumbNailCloud, buildingCloud] = await Promise.all([
-    uploadOnCloudinary(thumbnailImage, "building-thumbnails"),
-    uploadOnCloudinary(buildingModelImage, "building-models"),
+    uploadOnCloudinary(thumbnailImage, 'building-thumbnails'),
+    uploadOnCloudinary(buildingModelImage, 'building-models'),
   ]);
   if (!thumbNailCloud?.public_id || !thumbNailCloud?.secure_url)
-    throw new customError(400, "Error while uploading thumbnail image");
+    throw new customError(400, 'Error while uploading thumbnail image');
   if (!buildingCloud?.public_id || !buildingCloud?.secure_url)
-    throw new customError(400, "Error while uploading building model image");
+    throw new customError(400, 'Error while uploading building model image');
   const building = await Building.create({
     ownerId: user?._id,
     buildingThumbnail: {
@@ -75,5 +76,5 @@ export const POST = asyncHandler(async (req) => {
       url: buildingCloud.secure_url,
     },
   });
-  return sendResponse(NextResponse, "Building created successfully", building?._id, accessToken);
+  return sendResponse(NextResponse, 'Building created successfully', building?._id, accessToken);
 });
