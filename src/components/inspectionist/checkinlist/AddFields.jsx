@@ -1,80 +1,63 @@
-import Input from "@/components/global/small/Input";
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 
-function App({ tableId, restroom }) {
-  const [input, setInput] = useState({});
+const InputFields = ({ tableId, restroom, onCustomChange }) => {
   const [components, setComponents] = useState([]);
 
-  function MyComponent() {
-    const [showInputs, setShowInputs] = useState(true);
-    const [value, setValue] = useState({
-      name: "",
-      desc: "",
-    });
-    return (
-      <div>
-        {showInputs && (
-          <div className="my-3 px-4">
-            <div className="flex justify-between items-center">
-              <div className="basis-[49%]">
-                <label className="text-sm lg:text-base text-[#666666]" htmlFor="name">
-                  Name
-                </label>
-                <input
-                  onChange={(e) => setValue({ ...value, name: e.target.value })}
-                  value={value.name}
-                  className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full text-sm lg:text-base text-[#3a3a3a]"
-                  id="name"
-                  placeholder="Enter Name"
-                  type="text"
-                />
-              </div>
-              <div className="basis-[49%]">
-                <label className="text-sm lg:text-base text-[#666666]" htmlFor="Description">
-                  Description
-                </label>
-                <input
-                  value={value.desc}
-                  onChange={(e) => setValue({ ...value, desc: e.target.value })}
-                  className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full text-sm lg:text-base text-[#3a3a3a]"
-                  id="Description"
-                  placeholder="Enter Description"
-                  type="text"
-                />
-              </div>
-            </div>
-            <div className="mt-3 flex justify-end">
-              <button
-                onClick={() => setShowInputs(false)}
-                className="bg-[#FF8080] py-1.5 px-4 rounded-[4px] text-white"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
   const addComponent = () => {
-    setComponents([...components, <MyComponent key={components.length} />]);
+    setComponents((prev) => [...prev, { id: prev.length, name: '', desc: '' }]);
   };
 
+  const handleChange = (id, field, value) => {
+    setComponents((prev) => prev.map((c) => (c.id === id ? { ...c, [field]: value } : c)));
+  };
+
+  // whenever components change, inform parent
+  useEffect(() => {
+    onCustomChange(components.filter((c) => c.name || c.desc));
+  }, [components]);
+
+  if (tableId !== restroom?._id) return null;
+
   return (
-    <div>
-      {tableId === restroom?._id && (
-        <>
-          <div className="mx-3 my-3">
-            <button className="text-[#05004E] text-[18px]" onClick={addComponent}>
-              + Add more
-            </button>
+    <div className="mx-3 my-3">
+      <button className="text-[#05004E] text-[18px] mb-3" onClick={addComponent}>
+        + Add More
+      </button>
+
+      {components.map((component) => (
+        <div key={component.id} className="my-3 px-4">
+          <div className="flex justify-between items-center gap-4">
+            <div className="basis-[49%]">
+              <label className="text-sm text-[#666666]" htmlFor={`name-${component.id}`}>
+                Name
+              </label>
+              <input
+                id={`name-${component.id}`}
+                type="text"
+                placeholder="Enter Name"
+                value={component.name}
+                onChange={(e) => handleChange(component.id, 'name', e.target.value)}
+                className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
+              />
+            </div>
+            <div className="basis-[49%]">
+              <label className="text-sm text-[#666666]" htmlFor={`desc-${component.id}`}>
+                Description
+              </label>
+              <input
+                id={`desc-${component.id}`}
+                type="text"
+                placeholder="Enter Description"
+                value={component.desc}
+                onChange={(e) => handleChange(component.id, 'desc', e.target.value)}
+                className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
+              />
+            </div>
           </div>
-          <div>{components.map((component) => component)}</div>
-        </>
-      )}
+        </div>
+      ))}
     </div>
   );
-}
+};
 
-export default App;
+export default InputFields;

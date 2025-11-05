@@ -1,6 +1,8 @@
+// app/api/inspector/assigned-buildings/route.js
 import { connectDb } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { BuildingForInspection } from '@/models/buildingForInspection.model';
+import { RestRoom } from '@/models/restroom.model';
 import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
@@ -10,9 +12,33 @@ export const GET = asyncHandler(async (req) => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');
+
   const buildingsForInspection = await BuildingForInspection.find({
-    inspectorId: user?._id,
-  }).populate('buildingId');
-  if (!buildingsForInspection) throw new customError(400, 'Inspection not Found');
-  return sendResponse(NextResponse, '', buildingsForInspection, accessToken);
+    inspectorId: user._id,
+    isCompleted: false, // Only show pending inspections
+  })
+    .populate('buildingId')
+    .populate('ownerId', 'fullName email phoneNumber')
+    .sort({ createdAt: -1 });
+
+  // Get restrooms for each building
+  const buildingsWithRestrooms = await Promise.all(
+    buildingsForInspection.map(async (assignment) => {
+      const restrooms = await RestRoom.find({
+        buildingId: assignment.buildingId._id,
+      }).select('name type status area numOfToilets sensors');
+
+      return {
+        ...assignment.toObject(),
+        restrooms,
+      };
+    })
+  );
+
+  return sendResponse(
+    NextResponse,
+    'Assigned buildings with restrooms fetched successfully',
+    buildingsWithRestrooms,
+    accessToken
+  );
 });

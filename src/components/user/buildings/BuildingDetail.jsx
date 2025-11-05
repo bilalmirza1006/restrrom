@@ -1,4 +1,4 @@
-'use client';
+// 'use client';
 import CustomDropdown from '@/components/global/CustomDropdown';
 import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import dynamic from 'next/dynamic';
@@ -12,22 +12,32 @@ import MostUsedRooms from './MostUsedRooms';
 import QueueingStatus from './QueueingStatus';
 import { useEffect, useState } from 'react';
 import Modal from '@/components/global/Modal';
-import { useGetAllInspectorsQuery } from '@/features/inspection/inspectionApi';
+import {
+  useGetAllInspectorsQuery,
+  useAssignBuildingToInspectorMutation,
+  useUnAssignBuildingToInspectorMutation,
+} from '@/features/inspection/inspectionApi';
 import ShowCanvasData from './ShowCanvasData';
+import Button from '@/components/global/small/Button';
+// import { toast } from 'react-toastify';
+
 const FloorActivityChart = dynamic(() => import('./FloorActivityChart'), { ssr: false });
 
 const BuildingDetail = ({ building }) => {
   const router = useRouter();
   const [inspectorModel, setInspectorModel] = useState(false);
-  const { data } = useGetAllInspectorsQuery();
+  const { data: inspectorsData, isLoading: inspectorsLoading } = useGetAllInspectorsQuery();
+  const [assignBuilding, { isLoading: isAssigning }] = useAssignBuildingToInspectorMutation();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
   const AddFloorHandle = () => router.push(`/admin/floor/add-floor/${building?._id}`);
   const editBuildingHandle = () => router.push(`/admin/buildings/edit-building/${building?._id}`);
   const [polygons, setPolygons] = useState([]);
   const [image, setImage] = useState('');
-  console.log('building', building);
-  console.log('data', data);
+
+  console.log('buildingbuilding', building);
+  console.log('inspectors data', inspectorsData?.data);
+
   useEffect(() => {
     if (building) {
       setImage(building?.buildingModelImage?.url || '');
@@ -35,13 +45,22 @@ const BuildingDetail = ({ building }) => {
     }
   }, [building]);
 
-  useEffect(() => {
-    console.log('Updated polygons:', polygons);
-  }, [polygons]);
+  const handleAssignInspector = async (inspectorId) => {
+    try {
+      const assignmentData = {
+        inspectorId: inspectorId,
+        buildingId: building?._id,
+      };
 
-  useEffect(() => {
-    console.log('Updated image:', image);
-  }, [image]);
+      const result = await assignBuilding(assignmentData).unwrap();
+
+      toast.success(`Inspector ${inspectorName} assigned successfully!`);
+      setInspectorModel(false);
+    } catch (error) {
+      console.error('Failed to assign inspector:', error);
+      toast.error(error?.data?.message || 'Failed to assign inspector');
+    }
+  };
 
   return (
     <div className="">
@@ -82,17 +101,8 @@ const BuildingDetail = ({ building }) => {
         </div>
       )}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 ">
-        {/* <div className="lg:col-span-8 bg-white rounded-lg p-4 md:p-5">Building Details</div> */}
         <div className="lg:col-span-8 flex items-center justify-center bg-white rounded-lg p-4 md:p-5 ">
           {building?.buildingModelImage?.url && (
-            // <Image
-            //   src={building.buildingThumbnail.url}
-            //   height={400}
-            //   width={400}
-            //   className="w-full h-[400px] object-contain"
-            //   alt="Building Thumbnail"
-            // />
-
             <ShowCanvasData image={image} polygons={polygons} />
           )}
         </div>
@@ -144,22 +154,40 @@ const BuildingDetail = ({ building }) => {
         <div className="lg:col-span-12 bg-white p-5 rounded-xl">
           <h6 className="text-lg md:text-2xl font-semibold text-black mb-6">All Floors</h6>
           <div className="flex flex-col gap-5">
-            {restroom?.data?.map((item, i) => (
+            {restroom?.data?.restRooms?.map((item, i) => (
               <FloorList key={i} data={item} buildingId={building?._id} />
             ))}
           </div>
         </div>
       </section>
+
+      {/* Inspector Assignment Modal */}
       {inspectorModel && (
         <Modal
-          title={'Add Inspector'}
+          title={'Assign Inspector'}
           isOpen={inspectorModel}
           onClose={() => setInspectorModel(false)}
         >
-          <div className="w-full md:min-w-[500px] p-5">
-            {data?.data?.map((item, i) => (
-              <InspectorCard key={i} data={item} />
-            ))}
+          <div className="w-full md:min-w-[500px] max-h-[600px] overflow-y-auto p-5">
+            {inspectorsLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : inspectorsData?.data?.length > 0 ? (
+              <div className="grid gap-4">
+                {inspectorsData.data.map((inspector, i) => (
+                  <InspectorCard
+                    key={inspector._id}
+                    data={inspector}
+                    onAssign={handleAssignInspector}
+                    isAssigning={isAssigning}
+                    buildingId={building?._id}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">No inspectors available</div>
+            )}
           </div>
         </Modal>
       )}
@@ -167,13 +195,110 @@ const BuildingDetail = ({ building }) => {
   );
 };
 
-const InspectorCard = ({ data }) => {
+// Enhanced InspectorCard Component
+const InspectorCard = ({ data, onAssign, buildingId }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [unAssignBuilding] = useUnAssignBuildingToInspectorMutation();
+
+  // Check if building is already assigned
+  const isAlreadyAssigned = data?.assignedBuildings?.includes(buildingId);
+
+  const handleAssignClick = async () => {
+    if (!buildingId) {
+      toast.error('Building ID is missing');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await onAssign(data._id); // this triggers assign mutation
+      toast.success('Building assigned successfully!');
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to assign building');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUnassignClick = async () => {
+    if (!buildingId) {
+      toast.error('Building ID is missing');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await unAssignBuilding({ inspectorId: data._id, buildingId }).unwrap();
+      toast.success('Building unassigned successfully!');
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to unassign building');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-3 border-2 ">
-      <div className="h-[200px]">
-        <div className="bg-red-500 text-green-500">{data?.fullName}</div>;
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-semibold text-sm">
+                {data?.fullName?.charAt(0) || 'I'}
+              </span>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-gray-900 text-lg">
+                {data?.fullName || 'Unknown Inspector'}
+              </h3>
+              {/* <div className="flex items-center gap-2 mt-1">
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    data?.status === 'active'
+                      ? 'bg-green-100 text-green-800'
+                      : data?.status === 'busy'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {data?.status || 'Unknown'}
+                </span>
+                {data?.experience && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {data.experience}+ years
+                  </span>
+                )}
+              </div> */}
+              <div className="space-y-1">
+                {/* <p className="text-xs text-gray-500">Email</p> */}
+                <p className="text-sm font-medium text-gray-900 truncate">{data?.email || 'N/A'}</p>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs text-gray-500">Assigned Buildings</p>
+            <p className="text-sm font-medium text-gray-900">
+              {data?.assignedBuildings?.length || 0}
+            </p>
+          </div>
+          {/* Assign / Unassign Button */}
+          <div>
+            <Button
+              onClick={isAlreadyAssigned ? handleUnassignClick : handleAssignClick}
+              disabled={isLoading}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 min-w-[100px] ${
+                isLoading
+                  ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                  : isAlreadyAssigned
+                  ? 'bg-red-600 hover:bg-red-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+              text={isLoading ? 'Please wait...' : isAlreadyAssigned ? 'Unassign' : 'Assign'}
+            />
+          </div>
+        </div>
       </div>
-      ;
     </div>
   );
 };

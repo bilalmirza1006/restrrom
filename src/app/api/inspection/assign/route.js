@@ -1,6 +1,7 @@
 import { connectDb } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Building } from '@/models/building.model';
+import { Auth } from '@/models/auth.model';
 import { BuildingForInspection } from '@/models/buildingForInspection.model';
 import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
@@ -11,24 +12,54 @@ export const POST = asyncHandler(async (req) => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');
+
   const { buildingId, inspectorId } = await req.json();
+
   if (!inspectorId) throw new customError(400, 'Please provide inspectorId');
   if (!buildingId) throw new customError(400, 'Please provide buildingId');
+
+  // ✅ Verify building ownership
   const building = await Building.findOne({ _id: buildingId, ownerId: user._id });
   if (!building) throw new customError(400, 'You are not owner of this building');
-  const isAssignedForInspection = await BuildingForInspection.findOne({ buildingId });
-  if (isAssignedForInspection)
-    throw new customError(400, 'You are already assigned for this building');
+
+  // ✅ Verify inspector exists and belongs to this creator
+  const inspector = await Auth.findOne({
+    _id: inspectorId,
+    role: 'building_inspector',
+    creatorId: user._id,
+  });
+  if (!inspector) throw new customError(400, 'Inspector not found or not authorized');
+
+  // ✅ Check if already assigned
+  const existingAssignment = await BuildingForInspection.findOne({
+    buildingId,
+    inspectorId,
+  });
+  if (existingAssignment) {
+    throw new customError(400, 'This building is already assigned to this inspector');
+  }
+
+  // ✅ Create assignment
   const buildingForInspection = await BuildingForInspection.create({
     buildingId,
-    inspectorId: inspectorId,
-    ownerId: user?._id,
+    inspectorId,
+    ownerId: user._id,
     isCompleted: false,
   });
-  if (!buildingForInspection) throw new customError(400, 'Inspection not created');
+
+  if (!buildingForInspection)
+    throw new customError(400, 'Failed to assign building for inspection');
+
+  // ✅ Also add buildingId to inspector.assignedBuildings if not already present
+  await Auth.findByIdAndUpdate(
+    inspectorId,
+    { $addToSet: { assignedBuildings: buildingId } }, // prevents duplicates
+    { new: true }
+  );
+
   return sendResponse(
     NextResponse,
-    'Building Assigned to Inspection Successfully',
+    'Building assigned to inspector successfully',
     buildingForInspection,
     accessToken
   );

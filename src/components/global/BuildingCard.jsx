@@ -1,20 +1,21 @@
 /* eslint-disable react/prop-types */
-import Image from "next/image";
-import { IoLocationSharp } from "react-icons/io5";
+import Image from 'next/image';
+import { IoLocationSharp } from 'react-icons/io5';
 
 const BuildingCard = ({ data }) => {
   const getButtonColor = (type) => {
     switch (type?.toLowerCase()) {
-      case "public":
-        return "bg-green-500";
-      case "private":
-        return "bg-red-500";
-      case "commercial":
-        return "bg-yellow-800";
+      case 'public':
+        return 'bg-green-500';
+      case 'private':
+        return 'bg-red-500';
+      case 'commercial':
+        return 'bg-yellow-800';
       default:
-        return "bg-blue-500";
+        return 'bg-blue-500';
     }
   };
+  console.log('datadata', data);
 
   return (
     <div className=" rounded-[20px] overflow-hidden">
@@ -41,13 +42,13 @@ const BuildingCard = ({ data }) => {
 
           <div
             className={`${
-              data?.type == "Commercial"
-                ? "bg-secondary"
-                : data?.type === "Private"
-                ? "bg-red-600"
-                : data?.type === "Public"
-                ? "bg-yellow-600"
-                : ""
+              data?.type == 'Commercial'
+                ? 'bg-secondary'
+                : data?.type === 'Private'
+                ? 'bg-red-600'
+                : data?.type === 'Public'
+                ? 'bg-yellow-600'
+                : ''
             }  w-fit px-4 py-2 capitalize text-white text-sm rounded-[11px]`}
           >
             {data?.type}
