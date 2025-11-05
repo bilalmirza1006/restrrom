@@ -1,76 +1,102 @@
-'use client';
+"use client";
 import {
   BuildingIcon,
   DashboardIcon,
+  History,
   PlansIcon,
   ReportsIcon,
   SensorsIcon,
   SettingIcon,
-} from '@/assets/icon';
-import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
-import { FaArrowCircleRight } from 'react-icons/fa';
-import { useSelector } from 'react-redux';
+} from "@/assets/icon";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import React, { useState } from "react";
+import { FaArrowCircleRight } from "react-icons/fa";
+import { LiaHistorySolid } from "react-icons/lia";
+import { useSelector } from "react-redux";
 
 // Define pages with role-based access - UPDATED
 const pages = [
   {
     id: 1,
-    title: 'Dashboard',
-    link: ['/admin'],
+    title: "Dashboard",
+    link: ["/admin"],
     icon: <DashboardIcon />,
     // All roles can access dashboard
-    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
+    roles: [
+      "admin",
+      "report_manager",
+      "subscription_manager",
+      "building_manager",
+    ],
   },
   {
     id: 2,
-    title: 'Users',
-    link: ['/admin/all-managers'],
+    title: "Users",
+    link: ["/admin/all-managers"],
     icon: <BuildingIcon />,
     // Only admin and building_manager can access all-managers
-    roles: ['admin', 'building_manager'], // FIXED: Changed from string to array
+    roles: ["admin", "building_manager"], // FIXED: Changed from string to array
   },
   {
     id: 3,
-    title: 'Buildings',
-    link: ['/admin/buildings', '/admin/add-building'],
+    title: "Buildings",
+    link: ["/admin/buildings", "/admin/add-building"],
     icon: <BuildingIcon />,
     // Admin and building-related roles
-    roles: ['admin', 'building_manager'],
+    roles: ["admin", "building_manager"],
   },
   {
     id: 4,
-    title: 'Sensors',
-    link: ['/admin/sensors'],
+    title: "Sensors",
+    link: ["/admin/sensors"],
     icon: <SensorsIcon />,
     // Admin and building-related roles
-    roles: ['admin', 'building_manager'],
+    roles: ["admin", "building_manager"],
   },
   {
     id: 5,
-    title: 'Reports',
-    link: ['/admin/reports'],
+    title: "Reports",
+    link: ["/admin/reports"],
     icon: <ReportsIcon />,
     // Admin, report_manager, and building_inspector
-    roles: ['admin', 'report_manager'],
+    roles: ["admin", "report_manager"],
   },
   {
     id: 6,
-    title: 'Plans',
-    link: ['/admin/plans'],
+    title: "Plans",
+    link: ["/admin/plans"],
     icon: <PlansIcon />,
     // Only admin and subscription manager
-    roles: ['admin', 'subscription_manager'],
+    roles: ["admin", "subscription_manager"],
   },
   {
     id: 7,
-    title: 'Settings',
-    link: ['/admin/settings'],
+    title: "Settings",
+    link: ["/admin/settings"],
     icon: <SettingIcon />,
     // All manager roles can access settings
-    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
+    roles: [
+      "admin",
+      "report_manager",
+      "subscription_manager",
+      "building_manager",
+    ],
+  },
+  {
+    id: 8,
+    title: "History",
+    link: ["/admin/history"],
+    icon: <LiaHistorySolid size={20} />,
+    // icon: <History />,
+    // All manager roles can access settings
+    roles: [
+      "admin",
+      "report_manager",
+      "subscription_manager",
+      "building_manager",
+    ],
   },
 ];
 
@@ -80,27 +106,34 @@ const Aside = () => {
   const { user } = useSelector((state) => state.auth);
 
   // Get user role from Redux state - enhanced with better fallback
-  const userRole = user?.role || user?.user?.role || 'user';
+  const userRole = user?.role || user?.user?.role || "user";
 
   // Filter pages based on user role - with better debugging
   const filteredPages = pages.filter((page) => {
     const hasAccess = page.roles.includes(userRole);
-    console.log(`🔐 ${page.title}: ${hasAccess ? '✅' : '❌'} Access for ${userRole}`);
+    console.log(
+      `🔐 ${page.title}: ${hasAccess ? "✅" : "❌"} Access for ${userRole}`
+    );
     return hasAccess;
   });
 
-  console.log('🔄 Sidebar - User Role:', userRole, 'Filtered Pages:', filteredPages.length);
+  console.log(
+    "🔄 Sidebar - User Role:",
+    userRole,
+    "Filtered Pages:",
+    filteredPages.length
+  );
 
   return (
     <aside
       className={`relative transition-all duration-300 hidden xl:block ${
-        isMenuOpen ? 'w-[84px]' : 'w-[246px]'
+        isMenuOpen ? "w-[84px]" : "w-[246px]"
       }`}
     >
       {/* Arrow icon */}
       <div
         className={`bg-white rounded-full p-1 absolute top-[37px] -right-[10px] cursor-pointer z-50 transition-all duration-300 hidden xl:block ${
-          isMenuOpen ? 'rotate-0' : 'rotate-180'
+          isMenuOpen ? "rotate-0" : "rotate-180"
         }`}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
@@ -108,10 +141,14 @@ const Aside = () => {
       </div>
       <div
         className="w-full h-full bg-aside-grad rounded-lg px-[11px] py-5 overflow-y-auto overflow-x-hidden scroll-0 flex flex-col relative"
-        style={{ boxShadow: '0px 4px 14px 0px #3582E729' }}
+        style={{ boxShadow: "0px 4px 14px 0px #3582E729" }}
       >
         <Image
-          src={isMenuOpen ? '/images/default/logo-icon.png' : '/images/default/logo.png'}
+          src={
+            isMenuOpen
+              ? "/images/default/logo-icon.png"
+              : "/images/default/logo.png"
+          }
           width={isMenuOpen ? 35 : 170}
           height={isMenuOpen ? 35 : 40}
           alt="logo"
@@ -122,26 +159,34 @@ const Aside = () => {
         {!isMenuOpen && (
           <div className="mt-2 text-center">
             <span className="inline-block bg-white/20 text-white text-xs px-2 py-1 rounded-full capitalize">
-              {userRole.replace(/_/g, ' ')} {/* Fixed: replaced hyphen with underscore */}
+              {userRole.replace(/_/g, " ")}{" "}
+              {/* Fixed: replaced hyphen with underscore */}
             </span>
           </div>
         )}
 
         <div className="mt-5 lg:mt-10">
           <h4
-            className={`text-xs text-white/60 font-medium ${isMenuOpen ? 'text-center' : 'pl-2'}`}
+            className={`text-xs text-white/60 font-medium ${
+              isMenuOpen ? "text-center" : "pl-2"
+            }`}
           >
             MENU
           </h4>
           <div className="mt-3 flex flex-col gap-4">
             {filteredPages.map((page, i) => (
-              <LinkItem key={i} page={page} pathname={pathname} isMenuOpen={isMenuOpen} />
+              <LinkItem
+                key={i}
+                page={page}
+                pathname={pathname}
+                isMenuOpen={isMenuOpen}
+              />
             ))}
           </div>
         </div>
 
         {/* Debug info - remove in production */}
-        {process.env.NODE_ENV === 'development' && !isMenuOpen && (
+        {process.env.NODE_ENV === "development" && !isMenuOpen && (
           <div className="mt-auto p-2 bg-black/20 rounded text-xs text-white/60">
             <div>Role: {userRole}</div>
             <div>Pages: {filteredPages.length}</div>
@@ -161,25 +206,32 @@ const LinkItem = ({ page, pathname, isMenuOpen }) => {
     <Link
       href={page?.link[0]}
       className={`flex items-center py-[10px] px-[13px] rounded-lg text-sm font-medium ${
-        isMenuOpen ? 'gap-0 justify-center' : 'gap-3'
-      } ${isLinkActive ? 'bg-[#e8f2ffaf] text-primary' : 'text-white bg-[#e8f2ff1c]'}`}
+        isMenuOpen ? "gap-0 justify-center" : "gap-3"
+      } ${
+        isLinkActive
+          ? "bg-[#e8f2ffaf] text-primary"
+          : "text-white bg-[#e8f2ff1c]"
+      }`}
     >
       {React.cloneElement(page?.icon, { isLinkActive })}
       <span
         className={`transition-all duration-300 text-nowrap ${
-          isMenuOpen ? 'opacity-0 scale-x-0 w-0 h-0' : 'opacity-100 scale-x-100 h-auto w-auto'
+          isMenuOpen
+            ? "opacity-0 scale-x-0 w-0 h-0"
+            : "opacity-100 scale-x-100 h-auto w-auto"
         }`}
       >
         {page?.title}
       </span>
-      {!isMenuOpen && (page?.title === 'Notification' || page?.title === 'Messages') && (
-        <span className="flex-1 flex justify-end">
-          <div className="bg-[#FF2F00] w-[27px] h-[18px] rounded-[31px] grid place-items-center text-[10px] font-semibold text-white">
-            {page?.title === 'Notification' && '21'}
-            {page?.title === 'Messages' && '3'}
-          </div>
-        </span>
-      )}
+      {!isMenuOpen &&
+        (page?.title === "Notification" || page?.title === "Messages") && (
+          <span className="flex-1 flex justify-end">
+            <div className="bg-[#FF2F00] w-[27px] h-[18px] rounded-[31px] grid place-items-center text-[10px] font-semibold text-white">
+              {page?.title === "Notification" && "21"}
+              {page?.title === "Messages" && "3"}
+            </div>
+          </span>
+        )}
     </Link>
   );
 };
