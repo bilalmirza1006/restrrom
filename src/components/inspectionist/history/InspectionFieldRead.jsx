@@ -1,13 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import styles from '@/components/inspectionist/checkinlist/CheckInCard.module.css';
 
-function InspectionFields({ onChange, prefillData = {} }) {
-  const handleChange = (field, value) => {
+function InspectionFieldRead({ onChange, prefillData = {} }) {
+  const [waterLeakage, setWaterLeakage] = useState('');
+  const [queuingStatus, setQueuingStatus] = useState('');
+  const [odorStatus, setOdorStatus] = useState('');
+
+  useEffect(() => {
+    if (prefillData) {
+      if (prefillData.waterLeakage) setWaterLeakage(prefillData.waterLeakage);
+      if (prefillData.queuingStatus) setQueuingStatus(prefillData.queuingStatus);
+      if (prefillData.odorStatus) setOdorStatus(prefillData.odorStatus);
+    }
+  }, [prefillData]);
+
+  const handleChange = (setter, field, value) => {
+    setter(value);
     onChange(field, value);
   };
 
-  const renderRow = (icon, label, field, value) => (
+  const renderRow = (icon, label, field, value, setter) => (
     <div className="bg-white rounded-md py-2 px-3 shadow-md mb-3">
       <div className="bg-[#A449EB0F] flex justify-between py-4 px-4 rounded-md">
         <div className="flex gap-2 items-center">
@@ -20,8 +33,9 @@ function InspectionFields({ onChange, prefillData = {} }) {
                 type="radio"
                 value={opt}
                 checked={value === opt}
-                onChange={(e) => handleChange(field, e.target.value)}
+                onChange={(e) => handleChange(setter, field, e.target.value)}
                 name={field}
+                readOnly
               />
             </div>
           ))}
@@ -46,22 +60,27 @@ function InspectionFields({ onChange, prefillData = {} }) {
         '/svgs/inspertionist/water.svg',
         'Water Leakage',
         'waterLeakage',
-        prefillData.waterLeakage || ''
+        waterLeakage,
+        setWaterLeakage
       )}
       {renderRow(
         '/svgs/inspertionist/queu.svg',
         'Queuing Status',
         'queuingStatus',
-        prefillData.queuingStatus || ''
+        queuingStatus,
+        setQueuingStatus
       )}
       {renderRow(
         '/svgs/inspertionist/odor.svg',
         'Odor Status',
         'odorStatus',
-        prefillData.odorStatus || ''
+        odorStatus,
+        setOdorStatus
       )}
     </div>
   );
 }
 
-export default InspectionFields;
+export default InspectionFieldRead;
+
+// export default InspectionFieldRead

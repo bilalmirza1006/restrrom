@@ -5,10 +5,14 @@ import Image from 'next/image';
 import { FaCaretDown } from 'react-icons/fa';
 import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import { useCreateBuildingInspectionMutation } from '@/features/inspection/inspectionApi';
-import InspectionFields from './InspectionFields';
-import InputFields from './AddFields';
+import InspectionFields from '../checkinlist/InspectionFields';
+import InputFields from '../checkinlist/AddFields';
+import AddInput from './AddInput';
+import InspectionFieldRead from './InspectionFieldRead';
+// import InspectionFields from './InspectionFields';
+// import InputFields from './AddFields';
 
-const CheckInCard = ({ buildingId }) => {
+const HistoryCard = ({ buildingId, restroom }) => {
   const { data } = useGetAllRestroomsQuery(buildingId);
   const [tableId, setTableId] = useState(null);
   const [inspectionData, setInspectionData] = useState({});
@@ -16,6 +20,7 @@ const CheckInCard = ({ buildingId }) => {
   const [createInspection, { isLoading }] = useCreateBuildingInspectionMutation();
 
   const toggleTable = (id) => setTableId((prev) => (prev === id ? null : id));
+  console.log('inspectionDatainspectionData', inspectionData);
 
   // collect main inspection data (radio fields)
   const handleInspectionChange = (restroomId, field, value) => {
@@ -28,6 +33,8 @@ const CheckInCard = ({ buildingId }) => {
     }));
   };
 
+  console.log('restroomrestroom', restroom);
+
   // collect custom fields
   const handleCustomFields = (restroomId, extraDetails) => {
     setInspectionData((prev) => ({
@@ -39,45 +46,15 @@ const CheckInCard = ({ buildingId }) => {
     }));
   };
 
-  // Add custom field inputs
-  const handleAddCustomField = (restroomId) => {
-    setInspectionData((prev) => {
-      const currentFields = prev[restroomId]?.customFields || [];
-      return {
-        ...prev,
-        [restroomId]: {
-          ...prev[restroomId],
-          customFields: [...currentFields, { id: Date.now() + Math.random(), name: '', desc: '' }],
-        },
-      };
-    });
-  };
-
-  // Update custom field
-  const handleCustomFieldChange = (restroomId, fieldId, field, value) => {
-    setInspectionData((prev) => ({
-      ...prev,
-      [restroomId]: {
-        ...prev[restroomId],
-        customFields:
-          prev[restroomId]?.customFields?.map((item) =>
-            item.id === fieldId ? { ...item, [field]: value } : item
-          ) || [],
-      },
-    }));
-  };
-
   const handleSubmit = async () => {
     const restroomInspections = Object.entries(inspectionData).map(([restroomId, details]) => ({
       restroomId,
       ...details,
-      // Use customFields for the extra details
-      extraDetails: (details.customFields || [])
-        .filter((field) => field.name || field.desc)
-        .map((field) => ({
-          title: field.name,
-          description: field.desc,
-        })),
+      extraDetails:
+        details.extraDetails?.map((d) => ({
+          title: d.name,
+          description: d.desc,
+        })) || [],
     }));
 
     const payload = {
@@ -101,32 +78,25 @@ const CheckInCard = ({ buildingId }) => {
 
   return (
     <div className="mt-3 flex flex-col gap-4">
-      {data?.data?.restRooms?.map((restroom) => (
+      {restroom?.restroomInspections?.map((restroom) => (
         <div
-          key={restroom?._id}
+          key={restroom?.restroomId}
           className="bg-white overflow-auto w-[700px] sm:w-full shadow-sm rounded-lg flex flex-col"
         >
           <div className="flex items-center justify-between py-2 px-3">
             <div className="flex items-center gap-3">
               <Image src="/svgs/user/total-restrooms.svg" width={30} height={34} alt="icon" />
-              <h1 className="text-[#05004E] text-[20px] font-semibold">{restroom?.name}</h1>
+              <h1 className="text-[#05004E] text-[20px] font-semibold">{restroom?.restroomName}</h1>
             </div>
 
             <div className="flex items-center gap-4">
-              <p
-                className={`inline-block capitalize px-4 py-1.5 rounded-[8px] text-white ${
-                  restroom?.status === 'Active' ? 'bg-[#61CA94]' : 'bg-[#FF8080]'
-                }`}
-              >
-                {restroom?.status}
-              </p>
               <button
-                onClick={() => toggleTable(restroom?._id)}
+                onClick={() => toggleTable(restroom?.restroomId)}
                 className="p-2 rounded-[8px] bg-[#ccbfd696] border border-[#A449EB96]"
               >
                 <FaCaretDown
                   className={
-                    tableId === restroom._id
+                    tableId === restroom.restroomId
                       ? 'ease-in transition-transform duration-300 transform rotate-180'
                       : 'transition-transform duration-300'
                   }
@@ -136,20 +106,18 @@ const CheckInCard = ({ buildingId }) => {
             </div>
           </div>
 
-          {tableId === restroom?._id && (
+          {tableId === restroom?.restroomId && (
             <div className="px-3 pb-4">
-              <InspectionFields
-                onChange={(field, value) => handleInspectionChange(restroom._id, field, value)}
-                prefillData={inspectionData[restroom._id] || {}}
+              <InspectionFieldRead
+                prefillData={restroom}
+                onChange={(field, value) =>
+                  handleInspectionChange(restroom.restroomId, field, value)
+                }
               />
-              <InputFields
+              <AddInput
                 restroom={restroom}
                 tableId={tableId}
-                customFields={inspectionData[restroom._id]?.customFields || []}
-                onAddField={() => handleAddCustomField(restroom._id)}
-                onFieldChange={(fieldId, field, value) =>
-                  handleCustomFieldChange(restroom._id, fieldId, field, value)
-                }
+                onCustomChange={(custom) => handleCustomFields(restroom.restroomId, custom)}
               />
             </div>
           )}
@@ -159,21 +127,17 @@ const CheckInCard = ({ buildingId }) => {
       {/* Summary + Submit */}
       <div className="mt-6 flex flex-col gap-3">
         <textarea
-          value={summary}
+          value={restroom?.summary}
           onChange={(e) => setSummary(e.target.value)}
           placeholder="Add overall inspection summary..."
           className="border border-gray-300 rounded-lg p-3 h-28 w-[700px]"
+          readOnly
         />
-        <button
-          disabled={isLoading}
-          onClick={handleSubmit}
-          className="bg-[#A449EB] hover:bg-[#922cd8] text-white px-6 py-2 rounded-lg w-[200px]"
-        >
-          {isLoading ? 'Submitting...' : 'Submit Inspection'}
-        </button>
       </div>
     </div>
   );
 };
 
-export default CheckInCard;
+export default HistoryCard;
+
+// export default HistoryCard;

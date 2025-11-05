@@ -47,6 +47,7 @@ export const GET = asyncHandler(async (req) => {
       restroomName: r.restroomName,
       cleanliness: r.cleanliness,
       waterLeakage: r.waterLeakage,
+      queuingStatus: r.queuingStatus,
       odorStatus: r.odorStatus,
       lightingCondition: r.lightingCondition,
       suppliesAvailable: r.suppliesAvailable,
