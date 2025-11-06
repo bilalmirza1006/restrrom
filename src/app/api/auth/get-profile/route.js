@@ -18,14 +18,25 @@ import { Sequelize } from 'sequelize';
 import mysql2 from 'mysql2';
 
 export const GET = asyncHandler(async () => {
-  await connectDb();
-  const { user: userGet, accessToken } = await isAuthenticated();
-  const user = await Auth.findById(userGet?._id).select('-password');
-  if (!user) throw new customError(404, 'User not found');
-  await connectCustomMySqll(String(user?._id));
-  console.log('hallo');
+  try {
+    await connectDb();
+    const { user: userGet, accessToken } = await isAuthenticated();
+    const user = await Auth.findById(userGet?._id).select('-password');
+    if (!user) throw new customError(404, 'User not found');
 
-  return sendResponse(NextResponse, 'User profile fetched successfully', user, accessToken);
+    try {
+      await connectCustomMySqll(String(user?._id));
+      console.log('✅ Custom DB connected successfully');
+    } catch (err) {
+      console.error('❌ Custom DB connection failed:', err.message);
+      throw new customError(500, `Custom DB connection failed: ${err.message}`);
+    }
+
+    return sendResponse(NextResponse, 'User profile fetched successfully', user, accessToken);
+  } catch (err) {
+    console.error('🔥 API runtime error:', err);
+    throw err; // important to bubble it up to asyncHandler
+  }
 });
 
 export const PUT = asyncHandler(async (req) => {
