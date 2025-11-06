@@ -14,7 +14,6 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import next from 'next';
 import { Sequelize } from 'sequelize';
 import mysql2 from 'mysql2';
 
