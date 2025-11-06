@@ -30,12 +30,13 @@ function InspectionFieldRead({ onChange, prefillData = {} }) {
           {['good', 'bad', 'excellent', 'malfunctioned', 'not_checked'].map((opt) => (
             <div key={opt} className="w-[20%] text-center">
               <input
+                style={{ cursor: 'not-allowed' }}
                 type="radio"
                 value={opt}
                 checked={value === opt}
-                onChange={(e) => handleChange(setter, field, e.target.value)}
                 name={field}
                 readOnly
+                disabled
               />
             </div>
           ))}

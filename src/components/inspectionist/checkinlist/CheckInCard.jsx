@@ -162,7 +162,7 @@ const CheckInCard = ({ buildingId }) => {
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           placeholder="Add overall inspection summary..."
-          className="border border-gray-300 rounded-lg p-3 h-28 w-[700px]"
+          className="border border-gray-300 rounded-lg p-3 h-28 "
         />
         <button
           disabled={isLoading}

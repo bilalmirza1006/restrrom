@@ -10,6 +10,7 @@ import { NextResponse } from 'next/server';
 
 export const POST = asyncHandler(async (req) => {
   await connectDb();
+
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');
 
@@ -50,17 +51,30 @@ export const POST = asyncHandler(async (req) => {
   if (!buildingForInspection)
     throw new customError(400, 'Failed to assign building for inspection');
 
-  // ✅ Also add buildingId to inspector.assignedBuildings if not already present
+  // ✅ Add buildingId to inspector.assignedBuildings
   await Auth.findByIdAndUpdate(
     inspectorId,
-    { $addToSet: { assignedBuildings: buildingId } }, // prevents duplicates
+    { $addToSet: { assignedBuildings: buildingId } },
     { new: true }
   );
+
+  // ✅ NEW: Add inspectorId to building.inspectors array
+  await Building.findByIdAndUpdate(
+    buildingId,
+    { $addToSet: { inspectors: inspectorId } },
+    { new: true }
+  );
+
+  // ✅ Populate full building data before sending response
+  const populatedAssignment = await BuildingForInspection.findById(buildingForInspection._id)
+    .populate('buildingId')
+    .populate('inspectorId', 'name email role')
+    .lean();
 
   return sendResponse(
     NextResponse,
     'Building assigned to inspector successfully',
-    buildingForInspection,
+    populatedAssignment,
     accessToken
   );
 });

@@ -47,6 +47,13 @@ export const DELETE = asyncHandler(async (req) => {
     { new: true }
   );
 
+  // ✅ NEW: Remove inspectorId from building.inspectors
+  await Building.findByIdAndUpdate(
+    buildingId,
+    { $pull: { inspectors: inspectorId } },
+    { new: true }
+  );
+
   return sendResponse(
     NextResponse,
     'Building unassigned from inspector successfully',

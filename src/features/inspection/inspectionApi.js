@@ -64,6 +64,20 @@ export const inspectionApis = createApi({
       },
       providesTags: ['inspections'],
     }),
+    getAllAssignBuildingStatus: builder.query({
+      query: () => ({
+        url: `/get-all-building-status`,
+        method: 'GET',
+      }),
+      providesTags: ['inspections'],
+    }),
+    getInspectionById: builder.query({
+      query: (id) => ({
+        url: `/get-inpection-by-id?id=${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['inspections'],
+    }),
   }),
 });
 
@@ -74,6 +88,8 @@ export const {
   useCreateBuildingInspectionMutation,
   useUnAssignBuildingToInspectorMutation,
   useGetAllInspectionHistoryQuery,
+  useGetAllAssignBuildingStatusQuery,
+  useGetInspectionByIdQuery,
 } = inspectionApis;
 
 export const resetRestroomApiState = inspectionApis.util.resetApiState;

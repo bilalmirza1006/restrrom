@@ -44,7 +44,7 @@ const AddInput = ({ tableId, restroom, onCustomChange }) => {
                 placeholder="Enter Name"
                 value={component.name}
                 onChange={(e) => handleChange(component.id, 'name', e.target.value)}
-                className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
+                className="mt-2 outline-none cursor-not-allowed px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
                 readOnly
               />
             </div>
@@ -58,7 +58,7 @@ const AddInput = ({ tableId, restroom, onCustomChange }) => {
                 placeholder="Enter Description"
                 value={component.desc}
                 onChange={(e) => handleChange(component.id, 'desc', e.target.value)}
-                className="mt-2 outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
+                className="mt-2 outline-none cursor-not-allowed px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full"
                 readOnly
               />
             </div>

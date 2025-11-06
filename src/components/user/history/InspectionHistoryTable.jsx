@@ -1,66 +1,291 @@
-"use client";
+// 'use client';
 
-import React from "react";
-import DataTable from "react-data-table-component";
-import { useRouter } from "next/navigation";
+// import React from 'react';
+// import DataTable from 'react-data-table-component';
+// import { useRouter } from 'next/navigation';
+// import {
+//   useGetAllAssignBuildingStatusQuery,
+//   useUnAssignBuildingToInspectorMutation,
+// } from '@/features/inspection/inspectionApi';
+// import toast from 'react-hot-toast';
 
-// If you use shadcn/ui, you can import its Button, otherwise use a normal button
-// import { Button } from "@/components/ui/button";
-// OR replace with a Tailwind button if not using shadcn:
-// const Button = ({ children, ...props }) => (
-//   <button
-//     {...props}
-//     className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-//   >
-//     {children}
-//   </button>
-// );
+// // Helper function to format date
+// const formatDate = (dateString) => {
+//   if (!dateString) return '-';
+//   const date = new Date(dateString);
+//   return date.toLocaleString('en-US', {
+//     year: 'numeric',
+//     month: 'short',
+//     day: '2-digit',
+//     hour: '2-digit',
+//     minute: '2-digit',
+//   });
+// };
+
+// const InspectionHistoryTable = () => {
+//   const router = useRouter();
+//   const { data: status, isLoading, isError, isFetching } = useGetAllAssignBuildingStatusQuery();
+//   const [unAssignBuilding] = useUnAssignBuildingToInspectorMutation();
+
+//   if (isLoading || isFetching) return <p>Loading...</p>;
+//   if (isError) return <p>Error loading inspection data.</p>;
+
+//   const buildings = status?.data || [];
+
+//   const handleUnassignClick = async ({ inspectorId, buildingId }) => {
+//     console.log('inspectorId', inspectorId);
+//     console.log('buildingId', buildingId);
+
+//     if (!buildingId) {
+//       toast.error('Building ID is missing');
+//       return;
+//     }
+
+//     // setIsLoading(true);
+//     try {
+//       await unAssignBuilding({ inspectorId: inspectorId, buildingId }).unwrap();
+//       toast.success('Building unassigned successfully!');
+//     } catch (error) {
+//       toast.error(error?.data?.message || 'Failed to unassign building');
+//     } finally {
+//       // setIsLoading(false);
+//     }
+//   };
+
+//   const columns = [
+//     {
+//       name: 'Building Name',
+//       selector: (row) => row?.buildingId?.name || '-',
+//       sortable: true,
+//       wrap: true,
+//     },
+//     {
+//       name: 'Building Type',
+//       selector: (row) => row?.buildingId?.type || '-',
+//       sortable: true,
+//     },
+//     {
+//       name: 'Owner Email',
+//       selector: (row) => row?.ownerId?.email || '-',
+//       sortable: true,
+//     },
+//     {
+//       name: 'Inspector Email',
+//       selector: (row) => row?.inspectorId?.email || '-',
+//       sortable: true,
+//     },
+//     {
+//       name: 'Status',
+//       cell: (row) => (
+//         <span className={`${row.isCompleted ? 'text-green-600' : 'text-yellow-600'} font-medium`}>
+//           {row.isCompleted ? 'Completed' : 'Pending'}
+//         </span>
+//       ),
+//       sortable: true,
+//     },
+//     {
+//       name: 'Created At',
+//       selector: (row) => formatDate(row.createdAt),
+//       sortable: true,
+//       wrap: true,
+//     },
+//     {
+//       name: 'Updated At',
+//       selector: (row) => formatDate(row.updatedAt),
+//       sortable: true,
+//       wrap: true,
+//     },
+//     {
+//       name: 'Action',
+//       cell: (row) => (
+//         <>
+//           {row.isCompleted ? (
+//             <button
+//               onClick={() => router.push(`/admin/inspection-details/${row.inspectionId}`)}
+//               className="px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+//             >
+//               View
+//             </button>
+//           ) : (
+//             <button
+//               onClick={() =>
+//                 handleUnassignClick({
+//                   inspectorId: row?.inspectorId?._id,
+//                   buildingId: row?.buildingId?._id,
+//                 })
+//               }
+//               className="px-2 py-1 text-sm bg-red-500 hover:bg-red-600 text-white rounded-md"
+//             >
+//               Unassign
+//             </button>
+//           )}
+//         </>
+//       ),
+//       ignoreRowClick: true,
+//       allowOverflow: true,
+//       button: true,
+//     },
+//   ];
+
+//   return (
+//     <div className="w-full bg-white rounded-xl shadow-md p-4">
+//       <h2 className="text-lg font-semibold mb-3">Inspection History</h2>
+
+//       <div className="overflow-x-auto">
+//         <DataTable
+//           columns={columns}
+//           data={buildings}
+//           pagination
+//           responsive
+//           highlightOnHover
+//           customStyles={{
+//             headCells: {
+//               style: {
+//                 fontWeight: 'bold',
+//                 fontSize: '14px',
+//               },
+//             },
+//             cells: {
+//               style: {
+//                 fontSize: '14px',
+//               },
+//             },
+//           }}
+//         />
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default InspectionHistoryTable;
+'use client';
+
+import React, { useState } from 'react';
+import DataTable from 'react-data-table-component';
+import { useRouter } from 'next/navigation';
+import {
+  useGetAllAssignBuildingStatusQuery,
+  useUnAssignBuildingToInspectorMutation,
+} from '@/features/inspection/inspectionApi';
+import toast from 'react-hot-toast';
+import Button from '@/components/global/small/Button';
+
+// Helper function to format date
+const formatDate = (dateString) => {
+  if (!dateString) return '-';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
 
 const InspectionHistoryTable = () => {
   const router = useRouter();
+  const { data: status, isLoading, isError, refetch } = useGetAllAssignBuildingStatusQuery();
+  const [unAssignBuilding] = useUnAssignBuildingToInspectorMutation();
 
-  // Example data
-  const data = [
-    { id: "B-001", status: "Active" },
-    { id: "B-002", status: "Inactive" },
-    { id: "B-003", status: "Under Inspection" },
-  ];
+  // Track which row is being unassigned
+  const [loadingRowId, setLoadingRowId] = useState(null);
 
-  // Columns
+  if (isLoading) return <p>Loading...</p>;
+  if (isError) return <p>Error loading inspection data.</p>;
+
+  const buildings = status?.data || [];
+
+  const handleUnassignClick = async ({ inspectorId, buildingId }) => {
+    if (!buildingId) {
+      toast.error('Building ID is missing');
+      return;
+    }
+
+    setLoadingRowId(buildingId);
+    try {
+      await unAssignBuilding({ inspectorId, buildingId }).unwrap();
+      toast.success('Building unassigned successfully!');
+      refetch();
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to unassign building');
+    } finally {
+      setLoadingRowId(null);
+    }
+  };
+
   const columns = [
     {
-      name: "Building ID",
-      selector: (row) => row.id,
+      name: 'Building Name',
+      selector: (row) => row?.buildingId?.name || '-',
       sortable: true,
       wrap: true,
     },
     {
-      name: "Status",
-      selector: (row) => row.status,
+      name: 'Building Type',
+      selector: (row) => row?.buildingId?.type || '-',
       sortable: true,
-      cell: (row) => (
-        <span
-          className={`${
-            row.status === "Active"
-              ? "text-green-600"
-              : row.status === "Inactive"
-              ? "text-red-500"
-              : "text-yellow-500"
-          } font-medium`}
-        >
-          {row.status}
-        </span>
-      ),
     },
     {
-      name: "Action",
+      name: 'Owner Email',
+      selector: (row) => row?.ownerId?.email || '-',
+      sortable: true,
+    },
+    {
+      name: 'Inspector Email',
+      selector: (row) => row?.inspectorId?.email || '-',
+      sortable: true,
+    },
+    {
+      name: 'Status',
       cell: (row) => (
-        <button
-          onClick={() => router.push(`/inspection/${row.id}`)}
-          className="text-sm"
-        >
-          View
-        </button>
+        <span className={`${row.isCompleted ? 'text-green-600' : 'text-yellow-600'} font-medium`}>
+          {row.isCompleted ? 'Completed' : 'Pending'}
+        </span>
+      ),
+      sortable: true,
+    },
+    {
+      name: 'Created At',
+      selector: (row) => formatDate(row.createdAt),
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: 'Updated At',
+      selector: (row) => formatDate(row.updatedAt),
+      sortable: true,
+      wrap: true,
+    },
+    {
+      name: 'Action',
+      cell: (row) => (
+        <>
+          {row.isCompleted ? (
+            <Button
+              onClick={() => router.push(`/admin/inspection-details/${row.inspectionId}`)}
+              className={'w-full text-sm  !py-2 !px-2 !h-auto'}
+              text="View"
+            />
+          ) : (
+            <Button
+              onClick={() =>
+                handleUnassignClick({
+                  inspectorId: row?.inspectorId?._id,
+                  buildingId: row?.buildingId?._id,
+                })
+              }
+              disabled={loadingRowId === row?.buildingId?._id}
+              className={'w-full text-sm  !py-2 !px-2 !h-auto'}
+              // className={`px-2 py-1 text-sm rounded-md text-white ${
+              //   loadingRowId === row?.buildingId?._id
+              //     ? 'bg-gray-400 cursor-not-allowed'
+              //     : 'bg-red-500 hover:bg-red-600'
+              // }`}
+              text={loadingRowId === row?.buildingId?._id ? 'UnAssigning' : 'Unassign'}
+            />
+          )}
+        </>
       ),
       ignoreRowClick: true,
       allowOverflow: true,
@@ -72,24 +297,23 @@ const InspectionHistoryTable = () => {
     <div className="w-full bg-white rounded-xl shadow-md p-4">
       <h2 className="text-lg font-semibold mb-3">Inspection History</h2>
 
-      {/* makes table scrollable on mobile */}
       <div className="overflow-x-auto">
         <DataTable
           columns={columns}
-          data={data}
+          data={buildings}
           pagination
           responsive
           highlightOnHover
           customStyles={{
             headCells: {
               style: {
-                fontWeight: "bold",
-                fontSize: "14px",
+                fontWeight: 'bold',
+                fontSize: '14px',
               },
             },
             cells: {
               style: {
-                fontSize: "14px",
+                fontSize: '14px',
               },
             },
           }}

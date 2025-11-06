@@ -125,12 +125,12 @@ const HistoryCard = ({ buildingId, restroom }) => {
       ))}
 
       {/* Summary + Submit */}
-      <div className="mt-6 flex flex-col gap-3">
+      <div className="mt-6 flex flex-col gap-3 bg-white">
         <textarea
           value={restroom?.summary}
           onChange={(e) => setSummary(e.target.value)}
           placeholder="Add overall inspection summary..."
-          className="border border-gray-300 rounded-lg p-3 h-28 w-[700px]"
+          className="border cursor-not-allowed w-full border-gray-300 rounded-lg p-3 h-28 "
           readOnly
         />
       </div>
