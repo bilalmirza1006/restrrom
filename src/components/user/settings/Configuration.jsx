@@ -1,25 +1,25 @@
-"use client";
-import Modal from "@/components/global/Modal";
-import Button from "@/components/global/small/Button";
-import Dropdown from "@/components/global/small/Dropdown";
-import Input from "@/components/global/small/Input";
-import { useUpdateProfileMutation } from "@/features/auth/authApi";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useSelector } from "react-redux";
+'use client';
+import Modal from '@/components/global/Modal';
+import Button from '@/components/global/small/Button';
+import Dropdown from '@/components/global/small/Dropdown';
+import Input from '@/components/global/small/Input';
+import { useUpdateProfileMutation } from '@/features/auth/authApi';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
 const intervalTimesInSeconds = [
-  { option: "3 minutes", value: "180000" },
-  { option: "2 minutes", value: "120000" },
-  { option: "1 minutes", value: "60000" },
-  { option: "10 seconds", value: "10000" },
-  { option: "30 seconds", value: "30000" },
-  { option: "5 seconds", value: "5000" },
+  { option: '3 minutes', value: '180000' },
+  { option: '2 minutes', value: '120000' },
+  { option: '1 minutes', value: '60000' },
+  { option: '10 seconds', value: '10000' },
+  { option: '30 seconds', value: '30000' },
+  { option: '5 seconds', value: '5000' },
 ];
 
 const Configuration = () => {
   const [modal, setModal] = useState(false);
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
 
   const [selectedOption, setSelectedOption] = useState();
   const [pendingOption, setPendingOption] = useState('');
@@ -28,26 +28,25 @@ const Configuration = () => {
   const [timeInterval, setTimeInterval] = useState('180000'); // 3 min (ms)
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
 
-
   const [formValues, setFormValues] = useState({
-    timeInterval: "",
-    dbName: "",
-    portNumber: "",
-    userName: "",
-    password: "",
-    hostName: "",
+    timeInterval: '',
+    dbName: '',
+    portNumber: '',
+    userName: '',
+    password: '',
+    hostName: '',
   });
   // console.log("user", user?.user);
 
-  const handleChange = (event) => {
+  const handleChange = event => {
     const { name, value } = event.target;
-    setFormValues((prevValues) => ({
+    setFormValues(prevValues => ({
       ...prevValues,
       [name]: value,
     }));
   };
 
-  const handleRadioChange = (event) => {
+  const handleRadioChange = event => {
     setPendingOption(event.target.value);
     setModal(true);
   };
@@ -55,75 +54,73 @@ const Configuration = () => {
 
   const handleConfirmChange = () => {
     setSelectedOption(pendingOption);
-    console.log("pendingOption", pendingOption);
+    console.log('pendingOption', pendingOption);
     if (pendingOption === 'Local Database') {
-
-      setFormValues((prevValues) => ({
+      setFormValues(prevValues => ({
         ...prevValues, // keep timeInterval and any other existing values
-        dbName: "",
-        portNumber: "",
-        userName: "",
-        password: "",
-        hostName: "",
+        dbName: '',
+        portNumber: '',
+        userName: '',
+        password: '',
+        hostName: '',
       }));
     }
 
     setModal(false);
   };
 
-  console.log("formvalue", formValues);
+  console.log('formvalue', formValues);
 
+  const handleSubmit = async e => {
+    e.preventDefault();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+    try {
+      const formData = new FormData();
 
-  try {
-    const formData = new FormData();
+      const { dbName, hostName, portNumber, userName, password, timeInterval } = formValues;
 
-    const { dbName, hostName, portNumber, userName, password, timeInterval } = formValues;
+      if (selectedOption === 'Remote Database') {
+        // Validate remote DB fields
+        if (!dbName || !hostName || !portNumber || !userName || !password) {
+          toast.error('Please fill all the fields for the remote database.');
+          return;
+        }
 
-    if (selectedOption === 'Remote Database') {
-      // Validate remote DB fields
-      if (!dbName || !hostName || !portNumber || !userName || !password) {
-        toast.error('Please fill all the fields for the remote database.');
-        return;
+        formData.append('isCustomDb', 'true');
+        formData.append('customDbHost', hostName);
+        formData.append('customDbPort', portNumber);
+        formData.append('customDbUsername', userName);
+        formData.append('customDbPassword', password);
+        formData.append('customDbName', dbName);
       }
 
-      formData.append('isCustomDb', 'true');
-      formData.append('customDbHost', hostName);
-      formData.append('customDbPort', portNumber);
-      formData.append('customDbUsername', userName);
-      formData.append('customDbPassword', password);
-      formData.append('customDbName', dbName);
-    }
+      if (selectedOption === 'Local Database') {
+        // No validation required, but still send null or empty values to reset
+        formData.append('isCustomDb', 'false');
+        formData.append('customDbHost', hostName || '');
+        formData.append('customDbPort', portNumber || '');
+        formData.append('customDbUsername', userName || '');
+        formData.append('customDbPassword', password || '');
+        formData.append('customDbName', dbName || '');
+      }
 
-    if (selectedOption === 'Local Database') {
-      // No validation required, but still send null or empty values to reset
-      formData.append('isCustomDb', 'false');
-      formData.append('customDbHost', hostName || '');
-      formData.append('customDbPort', portNumber || '');
-      formData.append('customDbUsername', userName || '');
-      formData.append('customDbPassword', password || '');
-      formData.append('customDbName', dbName || '');
-    }
+      // Add time interval if exists
+      if (timeInterval) {
+        formData.append('interval', timeInterval);
+      }
 
-    // Add time interval if exists
-    if (timeInterval) {
-      formData.append('interval', timeInterval);
-    }
+      const response = await updateProfile(formData).unwrap();
 
-    const response = await updateProfile(formData).unwrap();
-
-    if (response?.success) {
-      toast.success(response?.message);
-      // Optionally re-fetch user data
-      // await refetch(); // Uncomment if needed
+      if (response?.success) {
+        toast.success(response?.message);
+        // Optionally re-fetch user data
+        // await refetch(); // Uncomment if needed
+      }
+    } catch (error) {
+      toast.error(error?.data?.message || 'Error while updating profile');
+      console.error('Error while updating profile:', error);
     }
-  } catch (error) {
-    toast.error(error?.data?.message || 'Error while updating profile');
-    console.error('Error while updating profile:', error);
-  }
-};
+  };
 
   // useEffect(() => {
 
@@ -163,53 +160,56 @@ const Configuration = () => {
   //   }
   // }, [user?.user]);
 
-useEffect(() => {
-  if (user?.user) {
-    const { customDbHost, customDbPort, customDbUsername, customDbPassword, customDbName, interval, isCustomDb } = user.user;
-    
-    setFormValues({
-      hostName: customDbHost || '',
-      portNumber: customDbPort || '',
-      userName: customDbUsername || '',
-      password: customDbPassword || '',
-      dbName: customDbName || '',
-      timeInterval: interval ? String(interval) : '180000',
-    });
+  useEffect(() => {
+    if (user?.user) {
+      const {
+        customDbHost,
+        customDbPort,
+        customDbUsername,
+        customDbPassword,
+        customDbName,
+        interval,
+        isCustomDb,
+      } = user.user;
 
-    setSelectedOption(isCustomDb ? 'Remote Database' : 'Local Database');
+      setFormValues({
+        hostName: customDbHost || '',
+        portNumber: customDbPort || '',
+        userName: customDbUsername || '',
+        password: customDbPassword || '',
+        dbName: customDbName || '',
+        timeInterval: interval ? String(interval) : '180000',
+      });
 
-    const match = intervalTimesInSeconds.find((item) => item.value === String(interval));
-    setDefaultTextForInterval(match?.option || '3 minutes');
-    setTimeInterval(String(interval) || '180000');
-  }
+      setSelectedOption(isCustomDb ? 'Remote Database' : 'Local Database');
 
-  // Force 3-minute interval for unsubscribed users
-  if (!hasSubscription) {
-    setDefaultTextForInterval('3 minutes');
-    setTimeInterval('180000');
-    setFormValues((prev) => ({ ...prev, timeInterval: '180000' }));
-  }
-}, [user?.user]);
+      const match = intervalTimesInSeconds.find(item => item.value === String(interval));
+      setDefaultTextForInterval(match?.option || '3 minutes');
+      setTimeInterval(String(interval) || '180000');
+    }
 
+    // Force 3-minute interval for unsubscribed users
+    if (!hasSubscription) {
+      setDefaultTextForInterval('3 minutes');
+      setTimeInterval('180000');
+      setFormValues(prev => ({ ...prev, timeInterval: '180000' }));
+    }
+  }, [user?.user]);
 
-
-
-  console.log("setSelectedOption",selectedOption);
+  console.log('setSelectedOption', selectedOption);
 
   return (
     <section>
-      <h3 className="text-lg md:text-xl font-[500] mb-4">
-        Pull Request Intervals
-      </h3>
+      <h3 className="mb-4 text-lg font-[500] md:text-xl">Pull Request Intervals</h3>
       <form onSubmit={handleSubmit}>
-        <div className="pl-0 md:pl-8 mt-4 md:mt-6">
+        <div className="mt-4 pl-0 md:mt-6 md:pl-8">
           {hasSubscription ? (
             <Dropdown
               label="Select Time Intervals"
               defaultText={defaultTextForInterval}
               options={intervalTimesInSeconds}
-              onSelect={(option) =>
-                setFormValues((prevValues) => ({
+              onSelect={option =>
+                setFormValues(prevValues => ({
                   ...prevValues,
                   timeInterval: option,
                 }))
@@ -222,9 +222,7 @@ useEffect(() => {
             </p>
           )}
 
-          <h3 className="text-sm md:text-base font-medium mb-2 mt-4 md:mt-6">
-            Database Type
-          </h3>
+          <h3 className="mt-4 mb-2 text-sm font-medium md:mt-6 md:text-base">Database Type</h3>
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-1 text-sm">
               <input
@@ -232,7 +230,7 @@ useEffect(() => {
                 name="database"
                 value="Local Database"
                 onChange={handleRadioChange}
-                checked={selectedOption === "Local Database"}
+                checked={selectedOption === 'Local Database'}
               />
               Local Database
             </label>
@@ -242,15 +240,15 @@ useEffect(() => {
                 name="database"
                 value="Remote Database"
                 onChange={handleRadioChange}
-                checked={selectedOption === "Remote Database"}
+                checked={selectedOption === 'Remote Database'}
               />
               Remote Database
             </label>
           </div>
 
           <div className="mt-4">
-            {selectedOption === "Remote Database" && (
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            {selectedOption === 'Remote Database' && (
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-6">
                   <Input
                     type="number"
@@ -299,7 +297,7 @@ useEffect(() => {
               </div>
             )}
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="mt-4 flex justify-end">
             <Button text="Save" width="!w-[150px]" type="submit" />
           </div>
         </div>
@@ -310,10 +308,7 @@ useEffect(() => {
           title="Database Storage Confirmation"
           width="w-[320px] md:w-[450px]"
         >
-          <ConfirmationModal
-            onClose={() => setModal(false)}
-            onConfirm={handleConfirmChange}
-          />
+          <ConfirmationModal onClose={() => setModal(false)} onConfirm={handleConfirmChange} />
         </Modal>
       )}
     </section>
@@ -325,7 +320,7 @@ export default Configuration;
 const ConfirmationModal = ({ onClose, onConfirm }) => {
   return (
     <div>
-      <h6 className="text-sm md:text-base text-gray-400 font-medium">
+      <h6 className="text-sm font-medium text-gray-400 md:text-base">
         Do you want to store your data in a local database?
       </h6>
       <div className="mt-12 flex justify-end">

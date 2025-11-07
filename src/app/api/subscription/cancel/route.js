@@ -11,7 +11,7 @@ import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
 
   // Authenticate user

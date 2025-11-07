@@ -1,5 +1,5 @@
-import Layout from "@/components/auth/Layout";
-import LoginForm from "@/components/auth/LoginForm";
+import Layout from '@/components/auth/Layout';
+import LoginForm from '@/components/auth/LoginForm';
 
 const Login = () => {
   return (
@@ -14,4 +14,3 @@ const Login = () => {
 };
 
 export default Login;
-  

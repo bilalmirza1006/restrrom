@@ -123,12 +123,12 @@ function AddUsers({ onClose, data }) {
     role: '',
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleAddUser = async (e) => {
+  const handleAddUser = async e => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.email || !formData.password || !formData.role) {
@@ -185,7 +185,7 @@ function AddUsers({ onClose, data }) {
         label="Select Role"
         defaultText="Select Role"
         options={roleOptions}
-        onSelect={(value) => setFormData((prev) => ({ ...prev, role: value }))}
+        onSelect={value => setFormData(prev => ({ ...prev, role: value }))}
         required
       />
       <Input

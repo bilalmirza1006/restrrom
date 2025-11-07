@@ -1,8 +1,8 @@
-import { LogoIcon } from "@/assets/icon";
+import { LogoIcon } from '@/assets/icon';
 
 const Loader = () => {
   return (
-    <div className="fixed inset-0 z-[998] w-screen h-screen bg-white text-black font-bold grid place-items-center">
+    <div className="fixed inset-0 z-[998] grid h-screen w-screen place-items-center bg-white font-bold text-black">
       <div className="animate-ping">
         <LogoIcon />
       </div>

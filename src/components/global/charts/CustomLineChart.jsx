@@ -17,10 +17,10 @@ function CustomTooltip({ active, payload, label }) {
 
   const currentValue = payload[0].value;
   return (
-    <div className="bg-white border border-gray-300 rounded-md p-2 text-xs shadow-md">
-      <p className="text-gray-700 font-semibold mb-1">{label} May 2024</p>
+    <div className="rounded-md border border-gray-300 bg-white p-2 text-xs shadow-md">
+      <p className="mb-1 font-semibold text-gray-700">{label} May 2024</p>
       <div className="flex items-center gap-1">
-        <span className="text-[#A449EB] font-bold">{currentValue}%</span>
+        <span className="font-bold text-[#A449EB]">{currentValue}%</span>
         <AiOutlineArrowUp className="text-green-500" />
       </div>
     </div>
@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function CustomAreaChart({ type = 'monotone', height = 300, data, xaxis, yaxis }) {
   return (
-    <div className="bg-white w-full">
+    <div className="w-full bg-white">
       <ResponsiveContainer width="100%" height={height}>
         <AreaChart data={data} margin={{ top: 20, right: 0, left: -25, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#f0f0f0" />
@@ -48,7 +48,7 @@ export default function CustomAreaChart({ type = 'monotone', height = 300, data,
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12, fill: '#888' }}
-              tickFormatter={(val) => `${val}%`}
+              tickFormatter={val => `${val}%`}
             />
           )}
 

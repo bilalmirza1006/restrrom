@@ -13,7 +13,7 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
   const [buildingModelPreview, setBuildingModelPreview] = useState(null);
   const [polygons, setPolygons] = useState([]);
   const [file, setFile] = useState(null);
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   console.log('modelbuildingpolygons', polygons);
 
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
@@ -63,7 +63,7 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
       dispatch(setBuilding({ buildingModelImage: file }));
     }
   }, [file, dispatch]);
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
       await deleteRestroom(id).unwrap();
       toast.success('Restroom deleted successfully!');
@@ -75,7 +75,7 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
 
   // 🟣 Limit polygons to totalRestrooms
   // 🟣 Compare restroom IDs difference on polygon change
-  const handlePolygonsChange = (newPolygons) => {
+  const handlePolygonsChange = newPolygons => {
     const totalRestrooms = Number(building?.totalRestrooms || 0);
     const existingCount = existingApiPolygons.length;
     const allowedExtra = totalRestrooms - apiNumberOfRooms;
@@ -87,14 +87,14 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
     }
 
     // 🧩 Get previous and new restroom IDs
-    const prevIds = polygons.map((p) => p.restroomId).filter(Boolean);
-    const newIds = newPolygons.map((p) => p.restroomId).filter(Boolean);
+    const prevIds = polygons.map(p => p.restroomId).filter(Boolean);
+    const newIds = newPolygons.map(p => p.restroomId).filter(Boolean);
 
     // 🧠 Detect which restroom polygon was deleted
-    const deletedIds = prevIds.filter((id) => !newIds.includes(id));
+    const deletedIds = prevIds.filter(id => !newIds.includes(id));
 
     if (deletedIds.length > 0) {
-      deletedIds.forEach((id) => {
+      deletedIds.forEach(id => {
         toast.error(`🗑️ Restroom polygon with ID ${id} was deleted`);
         console.log('Deleted restroom polygon ID:', id);
 
@@ -128,7 +128,7 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
           buildingModelCoordinates: polygons,
         })
       );
-      setCurrentStep((prevStep) => prevStep + 1);
+      setCurrentStep(prevStep => prevStep + 1);
     } else {
       toast.error('Please upload a building model image and mark at least one restroom.');
     }
@@ -136,13 +136,13 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">Building Model</h6>
-      <p className="text-sm text-gray-600 mt-2">
+      <h6 className="text-primary text-base font-medium">Building Model</h6>
+      <p className="mt-2 text-sm text-gray-600">
         You can only create up to <b>{building?.totalRestrooms}</b> restrooms. ({apiNumberOfRooms}{' '}
         already exist in this building)
       </p>
 
-      <div className="py-10 grid place-items-center">
+      <div className="grid place-items-center py-10">
         <MarkBuildingModel
           setFile={setFile}
           buildingModelImage={buildingModelPreview}
@@ -156,7 +156,7 @@ const EditBuildingModel = ({ setCurrentStep, buildingId }) => {
         <Button
           text="Back"
           width="!w-[150px]"
-          onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+          onClick={() => setCurrentStep(prevStep => prevStep - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
         <Button text="Next" width="!w-[150px]" onClick={nextBtnHandler} />

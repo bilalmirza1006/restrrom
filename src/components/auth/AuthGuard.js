@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { getRedirectPath, hasRouteAccess, isProtectedRoute } from '@/utils/routingUtils';
 
 const AuthGuard = ({ children }) => {
-  const auth = useSelector((state) => state.auth);
+  const auth = useSelector(state => state.auth);
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthorized, setIsAuthorized] = useState(false);

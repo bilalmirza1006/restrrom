@@ -11,7 +11,7 @@ const BuildingModel = ({ setCurrentStep }) => {
   const [buildingModelPreview, setBuildingModelPreview] = useState(null);
   const [polygons, setPolygons] = useState([]);
   const [file, setFile] = useState(null);
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   console.log('building', building);
   console.log('polygonsfloor', polygons);
 
@@ -28,7 +28,7 @@ const BuildingModel = ({ setCurrentStep }) => {
       );
 
       // Proceed to next step
-      setCurrentStep((prevStep) => prevStep + 1);
+      setCurrentStep(prevStep => prevStep + 1);
     } else {
       toast.error('Please upload a building model image and mark at least one floor');
     }
@@ -47,7 +47,7 @@ const BuildingModel = ({ setCurrentStep }) => {
     }
   }, [file]);
 
-  const handlePolygonsChange = (newPolygons) => {
+  const handlePolygonsChange = newPolygons => {
     setPolygons(newPolygons);
     dispatch(setBuilding({ buildingModelCoordinates: newPolygons }));
   };
@@ -64,13 +64,13 @@ const BuildingModel = ({ setCurrentStep }) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">Building Model</h6>
-      <p className="text-sm text-gray-600 mt-2">
+      <h6 className="text-primary text-base font-medium">Building Model</h6>
+      <p className="mt-2 text-sm text-gray-600">
         Upload your building model and mark each floor by creating a polygon. Each polygon needs a
         floor ID/name which will be used to identify the floor.
       </p>
 
-      <div className="py-10 grid place-items-center">
+      <div className="grid place-items-center py-10">
         <MarkBuildingModel
           setFile={setFile}
           buildingModelImage={buildingModelPreview}
@@ -84,7 +84,7 @@ const BuildingModel = ({ setCurrentStep }) => {
         <Button
           text="Back"
           width="!w-[150px]"
-          onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+          onClick={() => setCurrentStep(prevStep => prevStep - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
         <Button text="Next" width="!w-[150px]" onClick={nextBtnHandler} />

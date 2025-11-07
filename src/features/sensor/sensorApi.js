@@ -7,9 +7,9 @@ export const sensorApi = createApi({
     credentials: 'include',
   }),
   tagTypes: ['Sensor'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     createSensor: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/create',
         method: 'POST',
         body: data,
@@ -24,14 +24,14 @@ export const sensorApi = createApi({
       providesTags: ['Sensor'],
     }),
     getSingleSensor: builder.query({
-      query: (sensorId) => ({
+      query: sensorId => ({
         url: `/single/${sensorId}`,
         method: 'GET',
       }),
       providesTags: ['Sensor'],
     }),
     updateSensor: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/create',
         method: 'POST',
         body: data,
@@ -39,7 +39,7 @@ export const sensorApi = createApi({
       invalidatesTags: ['Sensor'],
     }),
     deleteSensor: builder.mutation({
-      query: (sensorId) => ({
+      query: sensorId => ({
         url: `/single/${sensorId}`,
         method: 'DELETE',
       }),

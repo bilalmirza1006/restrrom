@@ -28,13 +28,13 @@ function AllMangers() {
   } = useGetAllUsersByCreatorIdQuery(profileData?.data?._id, { skip: !profileData?.data?._id });
 
   // Handle Edit
-  const handleEdit = (user) => {
+  const handleEdit = user => {
     setSelectedUser(user);
     setEditModel(true);
   };
 
   // Handle Delete
-  const handleDelete = async (user) => {
+  const handleDelete = async user => {
     if (!window.confirm(`Are you sure you want to delete ${user.fullName}?`)) {
       return;
     }
@@ -57,9 +57,9 @@ function AllMangers() {
         {/* Three dots menu button */}
         <button
           onClick={() => setShowMenu(!showMenu)}
-          className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="rounded-full p-2 transition-colors hover:bg-gray-100"
         >
-          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
           </svg>
         </button>
@@ -69,17 +69,17 @@ function AllMangers() {
           <>
             {/* Backdrop to close menu when clicking outside */}
             <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20 border border-gray-200">
+            <div className="absolute right-0 z-20 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg">
               <div className="py-1">
                 <button
                   onClick={() => {
                     handleEdit(row);
                     setShowMenu(false);
                   }}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 >
                   <svg
-                    className="w-4 h-4 mr-2"
+                    className="mr-2 h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -99,10 +99,10 @@ function AllMangers() {
                     setShowMenu(false);
                   }}
                   disabled={isDeleting}
-                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
+                  className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
                 >
                   <svg
-                    className="w-4 h-4 mr-2"
+                    className="mr-2 h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -128,25 +128,25 @@ function AllMangers() {
   const columns = [
     {
       name: 'Full Name',
-      selector: (row) => row.fullName,
+      selector: row => row.fullName,
       sortable: true,
       minWidth: '150px',
     },
     {
       name: 'Email',
-      selector: (row) => row.email,
+      selector: row => row.email,
       sortable: true,
       minWidth: '200px',
     },
     {
       name: 'Role',
-      selector: (row) => row.role || 'N/A',
-      cell: (row) => <span className="capitalize">{row.role?.replace('-', ' ') || 'N/A'}</span>,
+      selector: row => row.role || 'N/A',
+      cell: row => <span className="capitalize">{row.role?.replace('-', ' ') || 'N/A'}</span>,
       minWidth: '150px',
     },
     {
       name: 'Actions',
-      cell: (row) => <ActionsCell row={row} />,
+      cell: row => <ActionsCell row={row} />,
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
@@ -200,16 +200,16 @@ function AllMangers() {
       )}
 
       {/* Header with Add Button */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
         <Button onClick={() => setAddModel(true)} text="Add User" width="!w-[150px]" />
       </div>
 
       {/* DataTable */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
         {isLoading ? (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="flex items-center justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           </div>
         ) : (
           <DataTable

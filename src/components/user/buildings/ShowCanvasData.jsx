@@ -675,7 +675,7 @@ const ShowCanvasData = ({ image, polygons }) => {
     const ctx = canvas.getContext('2d');
     ctx.beginPath();
     ctx.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((p) => ctx.lineTo(p.x, p.y));
+    polygon.points.forEach(p => ctx.lineTo(p.x, p.y));
     ctx.closePath();
 
     if (ctx.isPointInPath(mouseX, mouseY)) {
@@ -698,12 +698,12 @@ const ShowCanvasData = ({ image, polygons }) => {
     img.onload = () => {
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      polygons.forEach((polygon) => {
+      polygons.forEach(polygon => {
         if (!polygon?.points?.length) return;
 
         ctx.beginPath();
         ctx.moveTo(polygon.points[0].x, polygon.points[0].y);
-        polygon.points.forEach((p) => ctx.lineTo(p.x, p.y));
+        polygon.points.forEach(p => ctx.lineTo(p.x, p.y));
         ctx.closePath();
 
         ctx.fillStyle = polygon.fillColor?.[0]?.color || 'rgba(0,150,255,0.3)';
@@ -717,7 +717,7 @@ const ShowCanvasData = ({ image, polygons }) => {
         ctx.fillStyle = '#000';
         ctx.fillText(polygon.id, polygon.points[0].x, polygon.points[0].y - 5);
 
-        canvas.addEventListener('click', (e) => handlePolygonClick(e, polygon));
+        canvas.addEventListener('click', e => handlePolygonClick(e, polygon));
       });
     };
     img.src = image;
@@ -729,7 +729,7 @@ const ShowCanvasData = ({ image, polygons }) => {
 
   // ✅ Close popup if clicked outside canvas
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleClickOutside = e => {
       if (canvasRef.current && !canvasRef.current.contains(e.target)) {
         setSelectedPolygon(null);
       }
@@ -747,20 +747,20 @@ const ShowCanvasData = ({ image, polygons }) => {
         width={800}
         height={500}
         ref={canvasRef}
-        className="border border-dashed rounded-lg"
+        className="rounded-lg border border-dashed"
       />
 
       {selectedPolygon && (
         <div
-          className="absolute bg-white shadow-xl rounded-md p-3"
+          className="absolute rounded-md bg-white p-3 shadow-xl"
           style={{
             top: `${popupPosition.top}px`,
             left: `${popupPosition.left}px`,
             minWidth: '200px',
           }}
         >
-          <h6 className="font-bold mb-2">{selectedPolygon.id}</h6>
-          <p className="text-sm text-gray-600 mb-2">Label: {selectedPolygon.labelPoint}</p>
+          <h6 className="mb-2 font-bold">{selectedPolygon.id}</h6>
+          <p className="mb-2 text-sm text-gray-600">Label: {selectedPolygon.labelPoint}</p>
 
           <div className="space-y-1">
             {selectedPolygon.fillColor?.map((fc, idx) => (
@@ -770,7 +770,7 @@ const ShowCanvasData = ({ image, polygons }) => {
                   ({fc.min} - {fc.max})
                 </span>
                 <span
-                  className="inline-block w-4 h-4 rounded"
+                  className="inline-block h-4 w-4 rounded"
                   style={{ backgroundColor: fc.color }}
                 />
               </div>

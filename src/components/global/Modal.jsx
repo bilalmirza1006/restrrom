@@ -3,26 +3,26 @@ import { MdCancel } from 'react-icons/md';
 const Modal = ({ title, onClose, children, width }) => {
   return (
     <div
-      className="bg-[#000000c0] w-full h-full fixed inset-0 flex items-center justify-center py-4 z-[999]"
+      className="fixed inset-0 z-[999] flex h-full w-full items-center justify-center bg-[#000000c0] py-4"
       onClick={onClose}
     >
       <div
         className={` ${
           title === 'qr' ? 'bg-red' : 'bg-white'
-        } rounded-[12px] shadow-lg p-4 md:p-6 overflow-y-scroll h-fit max-h-full scroll-0  ${
+        } scroll-0 h-fit max-h-full overflow-y-scroll rounded-[12px] p-4 shadow-lg md:p-6 ${
           width ? width : 'w-[500px] sm:w-[600px] md:w-[800px]'
         }`}
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         {title === 'qr' ? (
           ''
         ) : (
           <div className="flex items-center justify-between">
-            <h2 className="text-[#111111] font-semibold text-sm sm:text-base md:text-xl">
+            <h2 className="text-sm font-semibold text-[#111111] sm:text-base md:text-xl">
               {title}
             </h2>
             <div className="cursor-pointer" onClick={onClose}>
-              <MdCancel className="text-[#FF3B30] text-3xl" />
+              <MdCancel className="text-3xl text-[#FF3B30]" />
             </div>
           </div>
         )}

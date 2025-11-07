@@ -5,11 +5,13 @@ This directory contains all the subscription-related API routes for the Next.js 
 ## API Endpoints
 
 ### 1. Create Checkout Session
+
 **POST** `/api/subscription/create-session`
 
 Creates a Stripe checkout session for subscription plans.
 
 **Request Body:**
+
 ```json
 {
   "plan": "monthly" | "yearly" | "lifetime"
@@ -17,6 +19,7 @@ Creates a Stripe checkout session for subscription plans.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -26,19 +29,23 @@ Creates a Stripe checkout session for subscription plans.
 ```
 
 ### 2. Stripe Webhook
+
 **POST** `/api/subscription/webhook`
 
 Handles Stripe webhook events for subscription lifecycle management.
 
 **Headers Required:**
+
 - `stripe-signature`: Stripe webhook signature
 
 ### 3. Cancel Subscription
+
 **POST** `/api/subscription/cancel`
 
 Cancels a subscription (immediately or at period end).
 
 **Request Body:**
+
 ```json
 {
   "subscriptionId": "sub_...",
@@ -47,6 +54,7 @@ Cancels a subscription (immediately or at period end).
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -57,11 +65,13 @@ Cancels a subscription (immediately or at period end).
 ```
 
 ### 4. Get Current Subscription
+
 **GET** `/api/subscription/current`
 
 Gets the current user's subscription.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -77,11 +87,13 @@ Gets the current user's subscription.
 ```
 
 ### 5. Get All Subscribers (Admin)
+
 **GET** `/api/subscription/all`
 
 Gets all subscribers (admin only).
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -97,11 +109,13 @@ Gets all subscribers (admin only).
 ```
 
 ### 6. Get Subscription History
+
 **GET** `/api/subscription/history/[userId]`
 
 Gets subscription history for a specific user.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -117,11 +131,13 @@ Gets subscription history for a specific user.
 ```
 
 ### 7. Get All Webhooks (Admin)
+
 **GET** `/api/subscription/webhooks`
 
 Gets all webhook logs (admin only).
 
 ### 8. Get Webhooks by User
+
 **GET** `/api/subscription/webhooks/[userId]`
 
 Gets webhook logs for a specific user.
@@ -163,7 +179,7 @@ export const stripeConfig = {
 ### Creating a Checkout Session
 
 ```javascript
-const createCheckoutSession = async (plan) => {
+const createCheckoutSession = async plan => {
   try {
     const response = await fetch('/api/subscription/create-session', {
       method: 'POST',
@@ -174,7 +190,7 @@ const createCheckoutSession = async (plan) => {
     });
 
     const data = await response.json();
-    
+
     if (data.success) {
       if (data.redirect_url) {
         // User has active subscription, redirect to billing portal
@@ -198,7 +214,7 @@ const getCurrentSubscription = async () => {
   try {
     const response = await fetch('/api/subscription/current');
     const data = await response.json();
-    
+
     if (data.success) {
       return data.data;
     }
@@ -218,9 +234,9 @@ const cancelSubscription = async (subscriptionId, cancelAtPeriodEnd = true) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ 
-        subscriptionId, 
-        cancelAtPeriodEnd 
+      body: JSON.stringify({
+        subscriptionId,
+        cancelAtPeriodEnd,
       }),
     });
 
@@ -237,16 +253,19 @@ const cancelSubscription = async (subscriptionId, cancelAtPeriodEnd = true) => {
 ### Local Development
 
 1. Install Stripe CLI:
+
    ```bash
    npm install -g stripe-cli
    ```
 
 2. Login to Stripe:
+
    ```bash
    stripe login
    ```
 
 3. Forward webhooks to local development:
+
    ```bash
    stripe listen --forward-to localhost:3000/api/subscription/webhook
    ```
@@ -318,6 +337,7 @@ const cancelSubscription = async (subscriptionId, cancelAtPeriodEnd = true) => {
 ## Support
 
 For issues or questions:
+
 1. Check the logs in your application
 2. Review webhook logs in the database
 3. Check Stripe dashboard for payment/subscription status

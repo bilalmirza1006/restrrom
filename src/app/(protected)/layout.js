@@ -26,7 +26,7 @@ console.log('AuthGuard:', require('@/components/auth/AuthGuard').default);
 const ProtectedLayout = ({ children }) => {
   const dispatch = useDispatch();
   const { data, isSuccess, isLoading, isUninitialized } = useGetProfileQuery();
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
 
   console.log('🛡️ ProtectedLayout - Auth state:', {
     user: user?.role || user?.user?.role,

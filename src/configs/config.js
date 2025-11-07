@@ -54,7 +54,7 @@ const config = Object.freeze({
   SUBSCRIPTION_RETURN_URL: process.env.SUBSCRIPTION_RETURN_URL,
 });
 
-const getEnv = (key) => {
+const getEnv = key => {
   const value = config[key];
   if (!value) throw new Error(`Config ${key} not found`);
   return value;

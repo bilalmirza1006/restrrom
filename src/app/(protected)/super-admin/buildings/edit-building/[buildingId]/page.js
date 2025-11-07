@@ -11,7 +11,7 @@ function EditBuildingById({ params }) {
   // console.log('Editing building:', buildingId);
 
   const dispatch = useDispatch();
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   console.log('building', building);
 
   const [image, setImage] = useState({
@@ -54,18 +54,18 @@ function EditBuildingById({ params }) {
     }
   }, [building]);
 
-  const buildingInfoChangeHandler = (e) => {
+  const buildingInfoChangeHandler = e => {
     const { name, value } = e.target;
-    setBuildingInfo((prev) => ({
+    setBuildingInfo(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const nextBtnHandler = (e) => {
+  const nextBtnHandler = e => {
     e.preventDefault();
 
-    const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
+    const hasEmptyField = Object.values(buildingInfo).some(val => !val?.toString().trim());
     const hasImage = !!(image?.file || image?.imagePreview);
 
     if (hasEmptyField || !hasImage) {
@@ -80,15 +80,15 @@ function EditBuildingById({ params }) {
       })
     );
     setFileCache('buildingImage', image.file);
-    setCurrentStep((s) => s + 1);
+    setCurrentStep(s => s + 1);
   };
 
   return (
     <div>
       <div>
-        <h6 className="text-base text-primary font-medium">General Information</h6>
+        <h6 className="text-primary text-base font-medium">General Information</h6>
         <form
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
+          className="mt-5 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3"
           onSubmit={nextBtnHandler}
         >
           <div className="lg:col-span-3">
@@ -160,7 +160,7 @@ function EditBuildingById({ params }) {
             onChange={buildingInfoChangeHandler}
           />
 
-          <div className="lg:col-span-3 flex justify-end">
+          <div className="flex justify-end lg:col-span-3">
             <Button text="Next" width="!w-[150px]" type="submit" />
           </div>
         </form>

@@ -50,13 +50,13 @@ const sensors = [
 const tableColumns = [
   {
     name: 'Sensor Name',
-    selector: (row) => row?.name,
+    selector: row => row?.name,
   },
   {
     name: 'Parameters',
-    selector: (row) => (
+    selector: row => (
       <div>
-        {row.parameters.map((item) => (
+        {row.parameters.map(item => (
           <>{item},</>
         ))}
       </div>
@@ -64,16 +64,16 @@ const tableColumns = [
   },
   {
     name: 'Unique Id',
-    selector: (row) => row?.uniqueId,
+    selector: row => row?.uniqueId,
   },
   {
     name: 'Is Connected',
-    selector: (row) =>
+    selector: row =>
       row?.isConnected === true ? <span>Connected</span> : <span>Disconnected</span>,
   },
   {
     name: 'Status',
-    cell: (row) => (
+    cell: row => (
       <div className={`${row.status === 'Activated' ? 'text-[#50D450]' : 'text-[#FF0000]'}`}>
         {row.status}
       </div>

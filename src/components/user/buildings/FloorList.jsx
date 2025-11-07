@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSelector } from 'react-redux';
 
 const FloorList = ({ data, buildingId }) => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
   const userRole = user?.role;
 
   const getRouteByRole = (role, buildingId, floorId) => {
@@ -22,18 +22,18 @@ const FloorList = ({ data, buildingId }) => {
   const route = getRouteByRole(userRole, buildingId, data?._id);
 
   return (
-    <div className="p-4 rounded-xl shadow-md grid grid-cols-1 lg:grid-cols-6 gap-5 xl:gap-10">
+    <div className="grid grid-cols-1 gap-5 rounded-xl p-4 shadow-md lg:grid-cols-6 xl:gap-10">
       {data?.modelImage?.[0]?.url && (
         <Image
           src={data?.modelImage?.[0]?.url}
           width={248}
           height={150}
           alt="Floor image"
-          className="border border-[#414141] rounded-xl size-full sm:w-[250px] h-[150px] object-cover"
+          className="size-full h-[150px] rounded-xl border border-[#414141] object-cover sm:w-[250px]"
         />
       )}
       <div>
-        <h5 className="text-base md:text-xl font-bold text-black">{data?.name}</h5>
+        <h5 className="text-base font-bold text-black md:text-xl">{data?.name}</h5>
         <div className="flex items-center gap-1">
           <Image src="/svgs/user/basement.svg" width={18} height={18} alt="icon" />
           <p className="text-sm font-semibold text-[#414141]">Basement Floor</p>
@@ -49,16 +49,16 @@ const FloorList = ({ data, buildingId }) => {
       <List icon="/svgs/user/toilet.svg" title="Free Restrooms" value={1} />
       <List icon="/svgs/user/sensors.svg" title="Active Sensors" value={data?.sensors?.length} />
 
-      <div className="mt-4 md:mt-6 flex items-center justify-center">
+      <div className="mt-4 flex items-center justify-center md:mt-6">
         {route ? (
           <Link
             href={route}
-            className="bg-[#EED8FF] py-2 px-5 rounded-lg underline text-primary text-sm font-bold"
+            className="text-primary rounded-lg bg-[#EED8FF] px-5 py-2 text-sm font-bold underline"
           >
             View Details
           </Link>
         ) : (
-          <span className="text-gray-400 text-sm">No access to view</span>
+          <span className="text-sm text-gray-400">No access to view</span>
         )}
       </div>
     </div>
@@ -68,7 +68,7 @@ const FloorList = ({ data, buildingId }) => {
 export default FloorList;
 
 const List = ({ icon, title, value }) => (
-  <div className="mt-4 md:mt-6 flex items-center gap-2">
+  <div className="mt-4 flex items-center gap-2 md:mt-6">
     <Image src={icon} width={26} height={26} alt="icon" />
     <div>
       <h6 className="text-base font-bold text-[#292D32]">{title}</h6>

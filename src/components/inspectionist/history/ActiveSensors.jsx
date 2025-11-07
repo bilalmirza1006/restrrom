@@ -6,9 +6,9 @@ const NestedPieChart = ({ title, data }) => {
   const renderLegend = useMemo(
     () =>
       ({ payload }) => {
-        const filtered = payload.filter((entry) => data.some((d) => d.name === entry.value));
+        const filtered = payload.filter(entry => data.some(d => d.name === entry.value));
         return (
-          <div className="flex flex-wrap justify-center gap-4 mt-4">
+          <div className="mt-4 flex flex-wrap justify-center gap-4">
             {filtered.map((entry, index) => (
               <div key={index} className="flex items-center space-x-2">
                 <span className="h-3 w-3 rounded-sm" style={{ backgroundColor: entry.color }} />
@@ -22,7 +22,7 @@ const NestedPieChart = ({ title, data }) => {
   );
 
   return (
-    <div className="w-[470px] h-[490px] relative py-7 px-6 bg-white rounded-lg shadow-lg">
+    <div className="relative h-[490px] w-[470px] rounded-lg bg-white px-6 py-7 shadow-lg">
       <div>
         <h1 className="text-xl font-medium">{title}</h1>
       </div>

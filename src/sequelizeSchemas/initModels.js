@@ -1,5 +1,5 @@
 // initModels.js
-import { MODEL_CLASSES, globalModelOptions, baseAttrs } from "./models.js";
+import { MODEL_CLASSES, globalModelOptions, baseAttrs } from './models.js';
 
 export function initModels(sequelize) {
   const instances = {};

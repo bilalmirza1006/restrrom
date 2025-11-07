@@ -14,15 +14,15 @@ const AddSensor = ({ onClose }) => {
     parameters: [],
   });
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       const res = await createSensor(formData).unwrap();
@@ -35,7 +35,7 @@ const AddSensor = ({ onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 lg:grid-cols-12">
       <div className="lg:col-span-6">
         <Input
           label="Sensor Name"
@@ -45,7 +45,7 @@ const AddSensor = ({ onClose }) => {
           onChange={handleChange}
         />
       </div>
-      <div className="lg:col-span-6 mt-1">
+      <div className="mt-1 lg:col-span-6">
         <Dropdown
           multi={true}
           defaultText={'Select'}
@@ -59,7 +59,7 @@ const AddSensor = ({ onClose }) => {
             { value: 'tvoc', option: 'Tvoc' },
           ]}
           label="Sensor Parameters"
-          onSelect={(values) => setFormData((prev) => ({ ...prev, parameters: values }))}
+          onSelect={values => setFormData(prev => ({ ...prev, parameters: values }))}
         />
       </div>
       <div className="lg:col-span-12">
@@ -72,7 +72,7 @@ const AddSensor = ({ onClose }) => {
         />
       </div>
 
-      <div className="lg:col-span-12 flex items-center justify-center gap-4 mt-4">
+      <div className="mt-4 flex items-center justify-center gap-4 lg:col-span-12">
         <Button onClick={onClose} text="Cancel" cn="border-primary bg-transparent !text-primary" />
         <Button type="submit" text={isLoading ? 'Adding...' : 'Add Sensor'} disabled={isLoading} />
       </div>

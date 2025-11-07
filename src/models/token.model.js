@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 // token schema
 const tokenSchema = new mongoose.Schema(
@@ -11,5 +11,4 @@ const tokenSchema = new mongoose.Schema(
 // automatic remove after 30 days
 tokenSchema.index({ createdAt: 1 }, { expireAfterSeconds: 2592000 });
 
-export const Token =
-  mongoose.models.Token || mongoose.model("Token", tokenSchema);
+export const Token = mongoose.models.Token || mongoose.model('Token', tokenSchema);

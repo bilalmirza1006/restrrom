@@ -27,7 +27,7 @@ const Settings = () => {
     { label: 'Configuration', value: 'configuration' },
   ];
 
-  const handleTabChange = (value) => {
+  const handleTabChange = value => {
     setActiveTab(value);
     router.push(`?tab=${value}`, { scroll: false });
   };
@@ -37,13 +37,13 @@ const Settings = () => {
   }, [tabParam]);
 
   return (
-    <section className="bg-white rounded-[15px] p-4 lg:p-6">
-      <div className="flex items-center gap-4 flex-wrap">
+    <section className="rounded-[15px] bg-white p-4 lg:p-6">
+      <div className="flex flex-wrap items-center gap-4">
         {tabs.map(({ label, value }) => (
           <button
             key={value}
             onClick={() => handleTabChange(value)}
-            className={`text-base font-semibold px-5 py-3 rounded-md transition-all duration-150 ${
+            className={`rounded-md px-5 py-3 text-base font-semibold transition-all duration-150 ${
               activeTab === value
                 ? 'bg-primary text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-100'

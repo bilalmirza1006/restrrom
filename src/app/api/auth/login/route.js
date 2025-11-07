@@ -4,7 +4,7 @@ import { sendToken } from '@/services/auth/sendToken';
 import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   const body = await req.json();
   const { email, password } = body;

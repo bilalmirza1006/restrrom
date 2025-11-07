@@ -39,7 +39,7 @@ export const PUT = asyncHandler(async (req, { params }) => {
   }
   const updates = await req.json();
   const allowedFields = ['name', 'type', 'uniqueId', 'status', 'isConnected'];
-  const hasUpdates = allowedFields.some((field) => field in updates);
+  const hasUpdates = allowedFields.some(field => field in updates);
   if (!hasUpdates) {
     throw new customError(400, 'Please provide at least one field to update');
   }

@@ -6,11 +6,11 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function UnauthorizedPage() {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const router = useRouter();
 
   // Define accessible routes for each role
-  const getAccessibleRoutes = (role) => {
+  const getAccessibleRoutes = role => {
     const routes = {
       super_admin: ['/super-admin', '/admin', '/inspectionist'],
       admin: ['/admin'],
@@ -37,11 +37,11 @@ export default function UnauthorizedPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md">
-        <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow-md">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
           <svg
-            className="w-8 h-8 text-red-600"
+            className="h-8 w-8 text-red-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -55,34 +55,34 @@ export default function UnauthorizedPage() {
           </svg>
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-900 mb-2 text-center">Access Denied</h1>
-        <p className="text-gray-600 mb-6 text-center">
+        <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">Access Denied</h1>
+        <p className="mb-6 text-center text-gray-600">
           You don&apos;t have permission to access this page with your current role.
         </p>
 
         {/* Current Role Info */}
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-          <h3 className="font-semibold text-blue-900 mb-2">Your Current Role</h3>
+        <div className="mb-6 rounded-lg bg-blue-50 p-4">
+          <h3 className="mb-2 font-semibold text-blue-900">Your Current Role</h3>
           <div className="flex items-center justify-between">
-            <span className="text-blue-700 font-medium capitalize">
+            <span className="font-medium text-blue-700 capitalize">
               {userRole?.replace('_', ' ') || 'Unknown'}
             </span>
-            <span className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">Current</span>
+            <span className="rounded bg-blue-100 px-2 py-1 text-sm text-blue-600">Current</span>
           </div>
         </div>
 
         {/* Accessible Routes */}
         {accessibleRoutes.length > 0 && (
-          <div className="mb-6 p-4 bg-green-50 rounded-lg">
-            <h3 className="font-semibold text-green-900 mb-2">Pages You Can Access</h3>
+          <div className="mb-6 rounded-lg bg-green-50 p-4">
+            <h3 className="mb-2 font-semibold text-green-900">Pages You Can Access</h3>
             <div className="space-y-2">
-              {accessibleRoutes.map((route) => (
+              {accessibleRoutes.map(route => (
                 <Link
                   key={route}
                   href={route}
-                  className="block p-2 bg-green-100 rounded hover:bg-green-200 transition duration-200"
+                  className="block rounded bg-green-100 p-2 transition duration-200 hover:bg-green-200"
                 >
-                  <span className="text-green-700 font-medium capitalize">
+                  <span className="font-medium text-green-700 capitalize">
                     {route === '/' ? 'Home' : route.replace('/', '').replace('-', ' ')}
                   </span>
                 </Link>
@@ -95,22 +95,22 @@ export default function UnauthorizedPage() {
         <div className="space-y-3">
           <button
             onClick={() => window.history.back()}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition duration-200 font-medium"
+            className="w-full rounded-md bg-blue-600 px-4 py-3 font-medium text-white transition duration-200 hover:bg-blue-700"
           >
             Go Back
           </button>
 
           <Link
             href={accessibleRoutes[0] || '/'}
-            className="block w-full bg-gray-200 text-gray-800 py-3 px-4 rounded-md hover:bg-gray-300 transition duration-200 text-center font-medium"
+            className="block w-full rounded-md bg-gray-200 px-4 py-3 text-center font-medium text-gray-800 transition duration-200 hover:bg-gray-300"
           >
             Go to Dashboard
           </Link>
         </div>
 
         {/* Contact Admin */}
-        <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <p className="text-sm text-yellow-800 text-center">
+        <div className="mt-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+          <p className="text-center text-sm text-yellow-800">
             Need different permissions? Contact your administrator.
           </p>
         </div>

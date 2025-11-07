@@ -59,21 +59,21 @@ const AdminAside = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <aside
-      className={`relative transition-all duration-300 hidden xl:block ${
+      className={`relative hidden transition-all duration-300 xl:block ${
         isMenuOpen ? 'w-[84px]' : 'w-[246px]'
       }`}
     >
       {/* Arrow icon */}
       <div
-        className={`bg-white rounded-full p-1 absolute top-[37px] -right-[10px] cursor-pointer z-50 transition-all duration-300 hidden xl:block ${
+        className={`absolute top-[37px] -right-[10px] z-50 hidden cursor-pointer rounded-full bg-white p-1 transition-all duration-300 xl:block ${
           isMenuOpen ? 'rotate-0' : 'rotate-180'
         }`}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
       >
-        <FaArrowCircleRight className="text-lg text-primary" />
+        <FaArrowCircleRight className="text-primary text-lg" />
       </div>
       <div
-        className="w-full h-full bg-aside-grad rounded-lg px-[11px] py-5 overflow-y-auto overflow-x-hidden scroll-0 flex flex-col relative"
+        className="bg-aside-grad scroll-0 relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto rounded-lg px-[11px] py-5"
         style={{ boxShadow: '0px 4px 14px 0px #3582E729' }}
       >
         <Image
@@ -85,7 +85,7 @@ const AdminAside = () => {
         />
         <div className="mt-5 lg:mt-10">
           <h4
-            className={`text-xs text-white/60 font-medium ${isMenuOpen ? 'text-center' : 'pl-2'}`}
+            className={`text-xs font-medium text-white/60 ${isMenuOpen ? 'text-center' : 'pl-2'}`}
           >
             MENU
           </h4>
@@ -103,25 +103,25 @@ const AdminAside = () => {
 export default AdminAside;
 
 const LinkItem = ({ page, pathname, isMenuOpen }) => {
-  const isLinkActive = page?.link.some((item) => item === pathname);
+  const isLinkActive = page?.link.some(item => item === pathname);
   return (
     <Link
       href={page?.link[0]}
-      className={`flex items-center py-[10px] px-[13px] rounded-lg text-sm font-medium ${
-        isMenuOpen ? 'gap-0 justify-center' : 'gap-3'
-      } ${isLinkActive ? 'bg-[#e8f2ffaf] text-primary' : 'text-white bg-[#e8f2ff1c]'}`}
+      className={`flex items-center rounded-lg px-[13px] py-[10px] text-sm font-medium ${
+        isMenuOpen ? 'justify-center gap-0' : 'gap-3'
+      } ${isLinkActive ? 'text-primary bg-[#e8f2ffaf]' : 'bg-[#e8f2ff1c] text-white'}`}
     >
       {React.cloneElement(page?.icon, { isLinkActive })}
       <span
-        className={`transition-all duration-300 text-nowrap ${
-          isMenuOpen ? 'opacity-0 scale-x-0 w-0 h-0' : 'opacity-100 scale-x-100 h-auto w-auto'
+        className={`text-nowrap transition-all duration-300 ${
+          isMenuOpen ? 'h-0 w-0 scale-x-0 opacity-0' : 'h-auto w-auto scale-x-100 opacity-100'
         }`}
       >
         {page?.title}
       </span>
       {!isMenuOpen && (page?.title === 'Notification' || page?.title === 'Messages') && (
-        <span className="flex-1 flex justify-end">
-          <div className="bg-[#FF2F00] w-[27px] h-[18px] rounded-[31px] grid place-items-center text-[10px] font-semibold text-white">
+        <span className="flex flex-1 justify-end">
+          <div className="grid h-[18px] w-[27px] place-items-center rounded-[31px] bg-[#FF2F00] text-[10px] font-semibold text-white">
             {page?.title === 'Notification' && '21'}
             {page?.title === 'Messages' && '3'}
           </div>

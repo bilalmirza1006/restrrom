@@ -138,7 +138,7 @@ function RestRoomDetails() {
 
       ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-      data.sensors.forEach((sensor) => {
+      data.sensors.forEach(sensor => {
         ctx.beginPath();
         ctx.moveTo(sensor.polygon[0].x, sensor.polygon[0].y);
         for (let i = 1; i < sensor.polygon.length; i++) {
@@ -158,9 +158,9 @@ function RestRoomDetails() {
 
   return (
     <div className="grid grid-cols-12 gap-5">
-      <div className="relative col-span-12 lg:col-span-8 bg-white p-7.5 rounded-2xl shadow-md">
+      <div className="relative col-span-12 rounded-2xl bg-white p-7.5 shadow-md lg:col-span-8">
         <canvas
-          onClick={(event) =>
+          onClick={event =>
             handleCanvasClick({
               event,
               canvasRef,
@@ -169,7 +169,7 @@ function RestRoomDetails() {
               // other params...
             })
           }
-          className="w-full h-full"
+          className="h-full w-full"
           ref={canvasRef}
         />
         {popupData && (
@@ -178,20 +178,20 @@ function RestRoomDetails() {
               top: popupData.y + 90,
               left: popupData.x - 90,
             }}
-            className={`absolute bg-white z-10 flex flex-col gap-3  rounded-2xl p-5`}
+            className={`absolute z-10 flex flex-col gap-3 rounded-2xl bg-white p-5`}
           >
             <div className="flex items-center justify-between gap-15">
-              <p className="text-xl text-primary font-semibold">{popupData.polygon.name}</p>
+              <p className="text-primary text-xl font-semibold">{popupData.polygon.name}</p>
               <p className="text-primary font-semibold">{popupData.polygon.value}</p>
             </div>
             <div className="flex flex-col gap-2">
-              <p className="text-primary font-semibold text-xl">Parameters</p>
-              {popupData.polygon.parameters.map((item) => (
+              <p className="text-primary text-xl font-semibold">Parameters</p>
+              {popupData.polygon.parameters.map(item => (
                 <p className="text-xs font-medium">{item}</p>
               ))}
             </div>
             <Link
-              className="bg-primary h-[50px] px-4 rounded-[10px] flex items-center text-center w-full text-white text-base font-bold hover:opacity-60 border border-primary cursor-pointer transition-all duration-150"
+              className="bg-primary border-primary flex h-[50px] w-full cursor-pointer items-center rounded-[10px] border px-4 text-center text-base font-bold text-white transition-all duration-150 hover:opacity-60"
               href={`/user/sensors/sensor-detail/${popupData.polygon.id}`}
             >
               see Full detail
@@ -203,9 +203,9 @@ function RestRoomDetails() {
         <ActiveAlerts />
       </div>
       <div className="col-span-12 grid grid-cols-12 gap-5">
-        <div className="col-span-12 lg:col-span-8 flex flex-col gap-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {data?.stats.map((item) => (
+        <div className="col-span-12 flex flex-col gap-5 lg:col-span-8">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {data?.stats.map(item => (
               <InfoCards
                 key={item.id}
                 borderColor={item.borderColor}
@@ -217,7 +217,7 @@ function RestRoomDetails() {
             ))}
           </div>
           <div>
-            <div className="bg-white p-5 rounded-xl">
+            <div className="rounded-xl bg-white p-5">
               <div className="flex justify-between">
                 <h1 className="text-[24px] font-semibold">Floors Activity</h1>
                 <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
@@ -229,7 +229,7 @@ function RestRoomDetails() {
         <div className="col-span-12 lg:col-span-4">
           <MostUsedRooms />
         </div>
-        <div className="bg-white p-5 rounded-2xl col-span-12">
+        <div className="col-span-12 rounded-2xl bg-white p-5">
           <SensorTable />
         </div>
       </div>

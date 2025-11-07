@@ -11,7 +11,7 @@ import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
 
   // Authenticate user

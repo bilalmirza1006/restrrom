@@ -20,28 +20,28 @@ class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex items-center justify-center bg-red-50 p-4">
-          <div className="max-w-2xl w-full bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h2>
+        <div className="flex min-h-screen items-center justify-center bg-red-50 p-4">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
+            <h2 className="mb-4 text-2xl font-bold text-red-600">Something went wrong</h2>
             <div className="mb-4">
-              <p className="text-gray-700 mb-2">
+              <p className="mb-2 text-gray-700">
                 A component failed to render. This is usually caused by:
               </p>
-              <ul className="list-disc list-inside text-gray-600 ml-4">
+              <ul className="ml-4 list-inside list-disc text-gray-600">
                 <li>Missing component export</li>
                 <li>Wrong import path</li>
                 <li>Component returning undefined</li>
               </ul>
             </div>
-            <details className="whitespace-pre-wrap mb-4">
-              <summary className="cursor-pointer font-semibold mb-2">Error Details</summary>
-              <pre className="bg-gray-100 p-4 rounded overflow-auto text-sm">
+            <details className="mb-4 whitespace-pre-wrap">
+              <summary className="mb-2 cursor-pointer font-semibold">Error Details</summary>
+              <pre className="overflow-auto rounded bg-gray-100 p-4 text-sm">
                 {this.state.error?.toString() || 'Unknown error'}
               </pre>
             </details>
             <button
               onClick={() => window.location.reload()}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
             >
               Reload Page
             </button>

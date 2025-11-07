@@ -15,7 +15,7 @@ import {
 
 const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
   const dispatch = useDispatch();
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
 
   const [image, setImage] = useState({ file: null, imagePreview: null });
@@ -32,7 +32,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
   });
 
   // 🆕 Modified handler
-  const buildingInfoChangeHandler = (e) => {
+  const buildingInfoChangeHandler = e => {
     const { name, value } = e.target;
 
     // Restrict only for restroom field
@@ -43,16 +43,16 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
       if (numVal < minRestroomCount) return;
 
       // Allow increase only
-      setBuildingInfo((prev) => ({ ...prev, [name]: numVal.toString() }));
+      setBuildingInfo(prev => ({ ...prev, [name]: numVal.toString() }));
       return;
     }
 
-    setBuildingInfo((prev) => ({ ...prev, [name]: value }));
+    setBuildingInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const nextBtnHandler = (e) => {
+  const nextBtnHandler = e => {
     e.preventDefault();
-    const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
+    const hasEmptyField = Object.values(buildingInfo).some(val => !val?.toString().trim());
     const hasImage = !!(image?.file || image?.imagePreview);
     if (hasEmptyField || !hasImage)
       return toast.error('Please fill all fields and upload building image.');
@@ -67,7 +67,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
       })
     );
     setFileCache('buildingImage', image.file);
-    setCurrentStep((s) => s + 1);
+    setCurrentStep(s => s + 1);
   };
 
   // Load existing building data
@@ -128,7 +128,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
       setMinRestroomCount(count);
 
       // Ensure input value is never below polygon count
-      setBuildingInfo((prev) => ({
+      setBuildingInfo(prev => ({
         ...prev,
         totalRestrooms: Math.max(parseInt(prev.totalRestrooms || 0), count).toString(),
       }));
@@ -161,9 +161,9 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
   return (
     <div>
       <div>
-        <h6 className="text-base text-primary font-medium">General Information</h6>
+        <h6 className="text-primary text-base font-medium">General Information</h6>
         <form
-          className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
+          className="mt-5 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3"
           onSubmit={nextBtnHandler}
         >
           <div className="lg:col-span-3">
@@ -239,7 +239,7 @@ const EditGeneralInfo = ({ setCurrentStep, buildingId }) => {
             onChange={buildingInfoChangeHandler}
           />
 
-          <div className="lg:col-span-3 flex justify-end">
+          <div className="flex justify-end lg:col-span-3">
             <Button text="Next" width="!w-[150px]" type="submit" />
           </div>
         </form>

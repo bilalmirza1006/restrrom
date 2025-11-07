@@ -10,7 +10,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');
@@ -40,7 +40,7 @@ export const POST = asyncHandler(async (req) => {
   const building = await Building.findById(buildingId);
   if (!building) throw new customError(400, 'Building not found');
 
-  const restroomIds = restroomInspections.map((insp) => insp.restroomId);
+  const restroomIds = restroomInspections.map(insp => insp.restroomId);
   const validRestrooms = await RestRoom.find({
     _id: { $in: restroomIds },
     buildingId: buildingId,
@@ -51,9 +51,9 @@ export const POST = asyncHandler(async (req) => {
   }
 
   // Add restroom names
-  const restroomInspectionsWithNames = restroomInspections.map((inspection) => {
+  const restroomInspectionsWithNames = restroomInspections.map(inspection => {
     const restroom = validRestrooms.find(
-      (r) => r._id.toString() === inspection.restroomId.toString()
+      r => r._id.toString() === inspection.restroomId.toString()
     );
     return {
       ...inspection,
@@ -92,7 +92,7 @@ export const POST = asyncHandler(async (req) => {
 });
 
 // Get inspections for current inspector
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');

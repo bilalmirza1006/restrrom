@@ -5,7 +5,7 @@ import CustomLineChart from '@/components/global/charts/CustomLineChart';
 
 const MostUsedRooms = () => {
   return (
-    <div className="p-5 bg-white rounded-xl  overflow-y-scroll scroll-0">
+    <div className="scroll-0 overflow-y-scroll rounded-xl bg-white p-5">
       <div className="flex items-center gap-1">
         <Twomen />
         <h2 className="text-xl font-medium">Most Used Restrooms</h2>
@@ -23,10 +23,10 @@ export default MostUsedRooms;
 
 const List = ({ item }) => {
   return (
-    <div className="flex justify-between items-center border-b border-gray-300">
+    <div className="flex items-center justify-between border-b border-gray-300">
       <div className="flex flex-col">
-        <h4 className="text-[14px] font-[700] leading-[16.94px]">{item.room}</h4>
-        <h6 className="text-[12px] font-[500] leading-[14.52px]">{item.floor}</h6>
+        <h4 className="text-[14px] leading-[16.94px] font-[700]">{item.room}</h4>
+        <h6 className="text-[12px] leading-[14.52px] font-[500]">{item.floor}</h6>
       </div>
       <div className="w-[35%]">
         <CustomLineChart type="linear" height={50} data={lineChartData} />

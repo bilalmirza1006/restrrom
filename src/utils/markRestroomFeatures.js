@@ -23,14 +23,14 @@ export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, curre
   if (image) {
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
   }
-  (Array.isArray(polygons) ? polygons : []).forEach((polygon) => {
-    polygons.forEach((polygon) => {
+  (Array.isArray(polygons) ? polygons : []).forEach(polygon => {
+    polygons.forEach(polygon => {
       if (!polygon || !polygon.points) return;
 
       // Start drawing polygon
       context.beginPath();
       context.moveTo(polygon.points[0].x, polygon.points[0].y);
-      polygon.points.forEach((point) => context.lineTo(point.x, point.y));
+      polygon.points.forEach(point => context.lineTo(point.x, point.y));
       context.closePath();
 
       // Fill the polygon with the color
@@ -90,7 +90,7 @@ export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, curre
   if (currentPolygon.length > 0) {
     context.beginPath();
     context.moveTo(currentPolygon[0].x, currentPolygon[0].y);
-    currentPolygon.forEach((point) => context.lineTo(point.x, point.y));
+    currentPolygon.forEach(point => context.lineTo(point.x, point.y));
     context.strokeStyle = '#A449EB';
     context.lineWidth = 2;
     context.stroke();
@@ -148,7 +148,7 @@ export const handleCanvasClick = ({
       ...draggedPolygon,
       id: `R-${polygonCount}`,
       polygonId: nanoid(),
-      points: draggedPolygon.points.map((point) => ({
+      points: draggedPolygon.points.map(point => ({
         x: point.x + (x - draggedPolygon.points[0].x),
         y: point.y + (y - draggedPolygon.points[0].y),
       })),
@@ -255,7 +255,7 @@ export const updateSensorAttached = ({
   sensorAttached,
 }) => {
   if (polygons && polygons.length > 0) {
-    const updatedPolygons = polygons.map((polygon) => {
+    const updatedPolygons = polygons.map(polygon => {
       if (polygon.id === polygonId) {
         return {
           ...polygon,
@@ -294,7 +294,7 @@ export const handleCanvasMouseMove = ({
 
     const updatedPolygons = [...polygons];
     const polygon = updatedPolygons[draggingPolygon];
-    const updatedPoints = polygon.points.map((point) => ({
+    const updatedPoints = polygon.points.map(point => ({
       x: point.x + dx,
       y: point.y + dy,
     }));
@@ -333,7 +333,7 @@ export const handleCanvasMouseDown = ({
     const polygon = polygons[i];
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
 
     if (canvas.getContext('2d').isPointInPath(path, x, y)) {
@@ -360,10 +360,10 @@ export const handleDeletePolygon = (
   let deletedPolygonId = null;
   let deletedSensor = null;
 
-  const filteredPolygons = polygons.filter((polygon) => {
+  const filteredPolygons = polygons.filter(polygon => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
 
     if (context.isPointInPath(path, x, y)) {
@@ -387,7 +387,8 @@ export const handleDeletePolygon = (
   }
 
   console.log(
-    `Polygon ${deletedPolygonId} deleted. Sensor ${deletedSensor || 'No sensor'
+    `Polygon ${deletedPolygonId} deleted. Sensor ${
+      deletedSensor || 'No sensor'
     } restored to available sensors`
   );
 };
@@ -399,7 +400,7 @@ export const polygonsLabelHandler = (
   setPolygons,
   setSelectedPolygon // ✅ new
 ) => {
-  const updatedPolygons = polygons.map((polygon) => {
+  const updatedPolygons = polygons.map(polygon => {
     if (polygon.id === selectedPolygon.id) {
       return {
         ...polygon,
@@ -430,7 +431,7 @@ export const sensorInfoSubmitHandler = (
   setSensorPopup,
   syncRestroom // <-- new sync function to Redux
 ) => {
-  const updatedPolygons = polygons.map((polygon) => {
+  const updatedPolygons = polygons.map(polygon => {
     if (polygon.id === selectedPolygon.id) {
       return {
         ...polygon,
@@ -457,10 +458,10 @@ export const handleReEditPolygon = ({ x, y, canvasRef, polygons, handlePolygonCl
   const canvas = canvasRef.current;
   const context = canvas.getContext('2d');
 
-  polygons.forEach((polygon) => {
+  polygons.forEach(polygon => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
 
     if (context.isPointInPath(path, x, y)) {
@@ -478,7 +479,7 @@ export const sensorInfoUpdateHandler = (
   selectedPolygonColor,
   setReEditModalOpen
 ) => {
-  const updatedPolygons = polygons.map((polygon) => {
+  const updatedPolygons = polygons.map(polygon => {
     if (polygon.id === selectedPolygon.id) {
       return {
         ...polygon,
@@ -506,7 +507,7 @@ export const handleCancelPolygon = (
   if (polygons.length > 0) {
     const updated = polygons.slice(0, -1);
     setPolygons(updated);
-    setPolygonCount((prev) => Math.max(1, prev - 1)); // ✅ now safe
+    setPolygonCount(prev => Math.max(1, prev - 1)); // ✅ now safe
   }
   setCurrentPolygon([]);
   setSelectedPolygon(null);
@@ -534,6 +535,6 @@ export const getCroppedImg = (imageSrc, crop) => {
 
       resolve(canvas.toDataURL('image/png'));
     };
-    image.onerror = (error) => reject(error);
+    image.onerror = error => reject(error);
   });
 };

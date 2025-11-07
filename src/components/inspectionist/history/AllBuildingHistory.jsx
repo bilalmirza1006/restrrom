@@ -9,7 +9,7 @@ import HistoryCard from './HistoryCard';
 import Button from '@/components/global/small/Button';
 
 function AllBuildingHistory() {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
   console.log('Logged-in User:', user);
 
   const [restroom, setRestroom] = useState([]);
@@ -20,8 +20,8 @@ function AllBuildingHistory() {
     user?.user?.role === 'admin'
       ? { ownerId: user?.user?._id }
       : user?.user?.role === 'building_inspector'
-      ? { inspectorId: user?.user?._id }
-      : {};
+        ? { inspectorId: user?.user?._id }
+        : {};
 
   console.log('queryParams:', queryParams);
 
@@ -32,7 +32,7 @@ function AllBuildingHistory() {
 
   console.log('Inspection History Data:', data);
 
-  const showBuildingHistory = (room) => {
+  const showBuildingHistory = room => {
     setRestroom(room);
     setShowRestrooms(true);
   };
@@ -41,9 +41,9 @@ function AllBuildingHistory() {
   console.log('showRestrooms:', showRestrooms);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 md:p-5">
-      <div className="mb-4 flex justify-between items-center">
-        <h4 className="text-base md:text-lg font-semibold leading-[32px]">Buildings</h4>
+    <div className="rounded-2xl bg-white p-4 shadow-md md:p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h4 className="text-base leading-[32px] font-semibold md:text-lg">Buildings</h4>
       </div>
 
       {isLoading ? (
@@ -52,8 +52,8 @@ function AllBuildingHistory() {
         <p className="text-red-500">Failed to load inspection history.</p>
       ) : showRestrooms ? ( // ✅ Correct conditional rendering
         <div>
-          <div className="flex justify-between items-center">
-            <h4 className="text-lg font-semibold mb-4">Restroom Inspections</h4>
+          <div className="flex items-center justify-between">
+            <h4 className="mb-4 text-lg font-semibold">Restroom Inspections</h4>
             <div>
               <Button
                 text="Back"
@@ -67,19 +67,19 @@ function AllBuildingHistory() {
           </div>
 
           <div>
-            <div className="w-[720px] sm:w-full overflow-auto">
+            <div className="w-[720px] overflow-auto sm:w-full">
               <HistoryCard restroom={restroom} />
             </div>
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {data?.data?.length > 0 ? (
             data.data.map((item, i) => (
               <div
                 key={i}
                 onClick={() => showBuildingHistory(item)}
-                className="cursor-pointer rounded-[20px] overflow-hidden"
+                className="cursor-pointer overflow-hidden rounded-[20px]"
               >
                 <div>
                   {item?.building?.buildingThumbnail?.url && (
@@ -87,22 +87,22 @@ function AllBuildingHistory() {
                       src={item?.building?.buildingThumbnail?.url}
                       width={400}
                       height={200}
-                      className="w-full h-[200px] object-cover"
+                      className="h-[200px] w-full object-cover"
                       alt="building image"
                     />
                   )}
                 </div>
 
-                <div className="p-4 md:p-6 rounded-b-[20px] rounded-t-[30px] relative top-[-25px] bg-[#F7F7F7]">
-                  <div className="flex justify-between w-full items-center flex-wrap">
+                <div className="relative top-[-25px] rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
+                  <div className="flex w-full flex-wrap items-center justify-between">
                     <div className="text-center sm:text-left">
                       <div className="flex items-center gap-1">
                         <IoLocationSharp />
-                        <p className="text-xs sm:text-base text-[#111111] font-[400]">
+                        <p className="text-xs font-[400] text-[#111111] sm:text-base">
                           {item?.building?.location}
                         </p>
                       </div>
-                      <h2 className="text-sm sm:text-xl mt-1 text-[#111111] font-[500]">
+                      <h2 className="mt-1 text-sm font-[500] text-[#111111] sm:text-xl">
                         {item?.building?.name}
                       </h2>
                     </div>
@@ -112,28 +112,28 @@ function AllBuildingHistory() {
                         item?.building?.type === 'Commercial'
                           ? 'bg-secondary'
                           : item?.building?.type === 'Private'
-                          ? 'bg-red-600'
-                          : item?.building?.type === 'Public'
-                          ? 'bg-yellow-600'
-                          : ''
-                      } w-fit px-4 py-2 capitalize text-white text-sm rounded-[11px]`}
+                            ? 'bg-red-600'
+                            : item?.building?.type === 'Public'
+                              ? 'bg-yellow-600'
+                              : ''
+                      } w-fit rounded-[11px] px-4 py-2 text-sm text-white capitalize`}
                     >
                       {item?.building?.type}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-                    <div className="box p-2 flex flex-col gap-2 items-center bg-[#E8E2FF] rounded-[7px]">
-                      <p className="text-lg md:text-2xl font-semibold text-primary">
+                  <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <div className="box flex flex-col items-center gap-2 rounded-[7px] bg-[#E8E2FF] p-2">
+                      <p className="text-primary text-lg font-semibold md:text-2xl">
                         {item?.building?.totalFloors}
                       </p>
-                      <p className="text-xs md:text-sm text-[#11111199]">Number Of Floors</p>
+                      <p className="text-xs text-[#11111199] md:text-sm">Number Of Floors</p>
                     </div>
-                    <div className="box p-2 flex flex-col gap-2 items-center bg-[#E8E2FF] rounded-[7px]">
-                      <p className="text-lg md:text-2xl font-semibold text-primary">
+                    <div className="box flex flex-col items-center gap-2 rounded-[7px] bg-[#E8E2FF] p-2">
+                      <p className="text-primary text-lg font-semibold md:text-2xl">
                         {item?.building?.numberOfRooms}
                       </p>
-                      <p className="text-xs md:text-sm text-[#11111199]">Number Of Restrooms</p>
+                      <p className="text-xs text-[#11111199] md:text-sm">Number Of Restrooms</p>
                     </div>
                   </div>
                 </div>

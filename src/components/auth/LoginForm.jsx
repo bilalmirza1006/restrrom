@@ -15,7 +15,7 @@ import { setUser } from '@/features/auth/authSlice';
 const LoginForm = () => {
   const [login, { isLoading, isError }] = useLoginMutation();
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
 
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -28,7 +28,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Handle input changes
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -62,7 +62,7 @@ const LoginForm = () => {
     }
   }, [loginSuccess, userRole, router]);
   // Handle form submission
-  const handleForm = async (e) => {
+  const handleForm = async e => {
     e.preventDefault();
 
     if (!formData.email || !formData.password)
@@ -114,11 +114,11 @@ const LoginForm = () => {
   };
 
   return (
-    <form className="bg-white p-5 lg:py-8 lg:px-[8%] rounded-xl w-full" onSubmit={handleForm}>
-      <h6 className="text-center md:text-left text-xl lg:text-2xl font-semibold text-text-textColor">
+    <form className="w-full rounded-xl bg-white p-5 lg:px-[8%] lg:py-8" onSubmit={handleForm}>
+      <h6 className="text-text-textColor text-center text-xl font-semibold md:text-left lg:text-2xl">
         Login now
       </h6>
-      <div className="mt-5 lg:mt-7 grid grid-cols-1 gap-4 md:gap-6">
+      <div className="mt-5 grid grid-cols-1 gap-4 md:gap-6 lg:mt-7">
         <div>
           <Input
             label="Email address"
@@ -140,7 +140,7 @@ const LoginForm = () => {
             required
           />
           <div
-            className="absolute top-0 right-3 flex items-center gap-2 cursor-pointer text-sm lg:text-lg text-[#666666CC]"
+            className="absolute top-0 right-3 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
@@ -152,7 +152,7 @@ const LoginForm = () => {
           disabled={isLoading}
           cn={`${isLoading && 'opacity-60 cursor-not-allowed'}`}
         />
-        <div className="text-sm lg:text-base text-[#666666]">
+        <div className="text-sm text-[#666666] lg:text-base">
           Don't have an account?{' '}
           <Link href="/signup" className="text-primary font-semibold">
             Signup

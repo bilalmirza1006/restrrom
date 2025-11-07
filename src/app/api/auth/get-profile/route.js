@@ -39,7 +39,7 @@ export const GET = asyncHandler(async () => {
   }
 });
 
-export const PUT = asyncHandler(async (req) => {
+export const PUT = asyncHandler(async req => {
   await connectDb();
   configureCloudinary();
   const { user: userGet, accessToken } = await isAuthenticated();
@@ -236,7 +236,7 @@ export const PUT = asyncHandler(async (req) => {
 });
 
 // 🔴 DELETE API - Add this new endpoint
-export const DELETE = asyncHandler(async (req) => {
+export const DELETE = asyncHandler(async req => {
   await connectDb();
   const { user: currentUser, accessToken } = await isAuthenticated();
 

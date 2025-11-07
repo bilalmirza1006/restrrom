@@ -32,12 +32,12 @@ function EditUser({ user, onClose }) {
     }
   }, [user]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleUpdateUser = async (e) => {
+  const handleUpdateUser = async e => {
     e.preventDefault();
 
     if (!formData.fullName || !formData.email || !formData.role) {
@@ -107,13 +107,13 @@ function EditUser({ user, onClose }) {
         defaultText="Select Role"
         options={roleOptions}
         selectedValue={formData.role}
-        onSelect={(value) => setFormData((prev) => ({ ...prev, role: value }))}
+        onSelect={value => setFormData(prev => ({ ...prev, role: value }))}
         required
       />
 
       {/* Optional Password Update Section */}
-      <div className="border-t pt-4 mt-4">
-        <h3 className="text-lg font-medium text-gray-900 mb-3">Update Password (Optional)</h3>
+      <div className="mt-4 border-t pt-4">
+        <h3 className="mb-3 text-lg font-medium text-gray-900">Update Password (Optional)</h3>
 
         <Input
           label="New Password"

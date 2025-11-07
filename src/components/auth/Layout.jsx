@@ -1,16 +1,16 @@
-import Image from "next/image";
+import Image from 'next/image';
 
 const Layout = ({ title, secondTitle, children }) => {
   return (
-    <section className="w-full bg-[url('/images/default/restroom.jpg')] bg-black/50 bg-blend-overlay bg-cover bg-bottom bg-no-repeat h-full lg:h-screen">
-      <section className="container mx-auto px-5 py-10 lg:py-[80px] grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-[60px] relative h-full overflow-auto scroll-0">
+    <section className="h-full w-full bg-black/50 bg-[url('/images/default/restroom.jpg')] bg-cover bg-bottom bg-no-repeat bg-blend-overlay lg:h-screen">
+      <section className="scroll-0 relative container mx-auto grid h-full grid-cols-1 gap-8 overflow-auto px-5 py-10 lg:grid-cols-2 lg:gap-[60px] lg:py-[80px]">
         {/* logo */}
         <Image
           src="/images/default/logo.png"
           width={219}
           height={60}
           alt="logo"
-          className="lg:absolute lg:top-[80px] lg:left-5 mx-auto w-[150px] lg:w-[219px] h-auto"
+          className="mx-auto h-auto w-[150px] lg:absolute lg:top-[80px] lg:left-5 lg:w-[219px]"
         />
         <div className="flex flex-col justify-center">
           <Title title={title} />
@@ -25,13 +25,11 @@ const Layout = ({ title, secondTitle, children }) => {
 export default Layout;
 
 const Title = ({ title }) => (
-  <h1 className="text-white text-3xl lg:text-4xl font-bold text-center lg:text-left">
-    {title}
-  </h1>
+  <h1 className="text-center text-3xl font-bold text-white lg:text-left lg:text-4xl">{title}</h1>
 );
 
 const SecondTitle = ({ title }) => (
-  <h6 className="text-white text-sm lg:text-lg font-medium mt-3 text-center lg:text-left">
+  <h6 className="mt-3 text-center text-sm font-medium text-white lg:text-left lg:text-lg">
     {title}
   </h6>
 );

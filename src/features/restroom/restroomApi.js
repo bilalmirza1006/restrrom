@@ -1,61 +1,61 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const restroomApis = createApi({
-  reducerPath: "restroomApi",
+  reducerPath: 'restroomApi',
   baseQuery: fetchBaseQuery({
     baseUrl: `/api/restroom`,
-    credentials: "include",
+    credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
-      headers.delete("Content-Type");
+      headers.delete('Content-Type');
       return headers;
     },
   }),
-  tagTypes: ["restroom"],
-  endpoints: (builder) => ({
+  tagTypes: ['restroom'],
+  endpoints: builder => ({
     createRestroom: builder.mutation({
-      query: (data) => ({
-        url: "/create",
-        method: "POST",
+      query: data => ({
+        url: '/create',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["restroom"],
+      invalidatesTags: ['restroom'],
     }),
     createMultipleRestrooms: builder.mutation({
-      query: (data) => ({
-        url: "/create-multiple",
-        method: "POST",
+      query: data => ({
+        url: '/create-multiple',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["restroom"],
+      invalidatesTags: ['restroom'],
     }),
     getAllRestrooms: builder.query({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/all?buildingId=${buildingId}`,
-        method: "GET",
+        method: 'GET',
       }),
-      providesTags: ["restroom"],
+      providesTags: ['restroom'],
     }),
     getRestroom: builder.query({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/single/${buildingId}`,
-        method: "GET",
+        method: 'GET',
       }),
-      providesTags: ["restroom"],
+      providesTags: ['restroom'],
     }),
     updateRestroom: builder.mutation({
       query: ({ restroomId, data }) => ({
         url: `/single/${restroomId}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["restroom"],
+      invalidatesTags: ['restroom'],
     }),
     deleteRestroom: builder.mutation({
-      query: (restroomId) => ({
+      query: restroomId => ({
         url: `/single/${restroomId}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["restroom"],
+      invalidatesTags: ['restroom'],
     }),
   }),
 });

@@ -14,7 +14,7 @@ export async function connectDb() {
     const connection = await mongoose.connect(getEnv('MONGODB_URL'));
     isConnected = connection.connections[0].readyState === 1;
     console.log(`MongoDB connected successfully`, isConnected);
-    connection.connection.on('error', (error) =>
+    connection.connection.on('error', error =>
       console.log('Error in connection to database', error)
     );
   } catch (error) {
@@ -83,7 +83,7 @@ const mySqlConnectionCache = new Map();
 //   }
 // };
 
-export const connectCustomMySqll = async (userId) => {
+export const connectCustomMySqll = async userId => {
   let dbConnection = sequelize; // default = global
   let customDbConnected = false;
 
@@ -127,7 +127,7 @@ export const connectCustomMySqll = async (userId) => {
         retries -= 1;
         if (!retries) throw err;
         console.error('❌ MySQL auth failed, retrying...', err.message);
-        await new Promise((res) => setTimeout(res, 2000));
+        await new Promise(res => setTimeout(res, 2000));
       }
     }
 
@@ -156,7 +156,7 @@ export const connectCustomMySqll = async (userId) => {
   }
 };
 
-export const clearCustomMySqlConnection = (userId) => {
+export const clearCustomMySqlConnection = userId => {
   mySqlConnectionCache.delete(String(userId));
 };
 

@@ -28,7 +28,7 @@ const BuildingDetail = ({ building }) => {
   const [inspectorModel, setInspectorModel] = useState(false);
   const { data: inspectorsData, isLoading: inspectorsLoading } = useGetAllInspectorsQuery();
   const [assignBuilding, { isLoading: isAssigning }] = useAssignBuildingToInspectorMutation();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const { data: restroom } = useGetAllRestroomsQuery(building?._id);
   const AddFloorHandle = () => router.push(`/admin/floor/add-floor/${building?._id}`);
   const editBuildingHandle = () => router.push(`/admin/buildings/edit-building/${building?._id}`);
@@ -45,7 +45,7 @@ const BuildingDetail = ({ building }) => {
     }
   }, [building]);
 
-  const handleAssignInspector = async (inspectorId) => {
+  const handleAssignInspector = async inspectorId => {
     try {
       const assignmentData = {
         inspectorId: inspectorId,
@@ -65,11 +65,11 @@ const BuildingDetail = ({ building }) => {
   return (
     <div className="">
       {user?.role === 'admin' && (
-        <div className="flex gap-4 justify-end my-2">
+        <div className="my-2 flex justify-end gap-4">
           <button
             onClick={() => setInspectorModel(true)}
             title="Assign Inspector"
-            className="flex items-center px-4 py-2 bg-orange-100 hover:bg-orange-200 rounded-lg shadow text-gray-800"
+            className="flex items-center rounded-lg bg-orange-100 px-4 py-2 text-gray-800 shadow hover:bg-orange-200"
           >
             <MdAdd size={20} />
             <span className="ml-2">Assign Inspector</span>
@@ -77,7 +77,7 @@ const BuildingDetail = ({ building }) => {
           <button
             onClick={AddFloorHandle}
             title="Add New Floor"
-            className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg shadow text-gray-800"
+            className="flex items-center rounded-lg bg-gray-100 px-4 py-2 text-gray-800 shadow hover:bg-gray-200"
           >
             <MdAdd size={20} />
             <span className="ml-2">Add</span>
@@ -85,7 +85,7 @@ const BuildingDetail = ({ building }) => {
           <button
             onClick={editBuildingHandle}
             title="Edit Building"
-            className="flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 rounded-lg shadow text-blue-800"
+            className="flex items-center rounded-lg bg-blue-100 px-4 py-2 text-blue-800 shadow hover:bg-blue-200"
           >
             <MdEdit size={20} />
             <span className="ml-2">Edit</span>
@@ -93,15 +93,15 @@ const BuildingDetail = ({ building }) => {
 
           <button
             title="Delete Building"
-            className="flex items-center px-4 py-2 bg-red-100 hover:bg-red-200 rounded-lg shadow text-red-800"
+            className="flex items-center rounded-lg bg-red-100 px-4 py-2 text-red-800 shadow hover:bg-red-200"
           >
             <MdDelete size={20} />
             <span className="ml-2">Delete</span>
           </button>
         </div>
       )}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 ">
-        <div className="lg:col-span-8 flex items-center justify-center bg-white rounded-lg p-4 md:p-5 ">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <div className="flex items-center justify-center rounded-lg bg-white p-4 md:p-5 lg:col-span-8">
           {building?.buildingModelImage?.url && (
             <ShowCanvasData image={image} polygons={polygons} />
           )}
@@ -140,7 +140,7 @@ const BuildingDetail = ({ building }) => {
               icon={'/svgs/user/pink-buzzer.svg'}
             />
           </div>
-          <div className="mt-5 bg-white p-5 rounded-xl">
+          <div className="mt-5 rounded-xl bg-white p-5">
             <div className="flex justify-between">
               <h1 className="text-[24px] font-semibold">Floors Activity</h1>
               <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
@@ -151,8 +151,8 @@ const BuildingDetail = ({ building }) => {
         <div className="lg:col-span-4">
           <MostUsedRooms />
         </div>
-        <div className="lg:col-span-12 bg-white p-5 rounded-xl">
-          <h6 className="text-lg md:text-2xl font-semibold text-black mb-6">All Floors</h6>
+        <div className="rounded-xl bg-white p-5 lg:col-span-12">
+          <h6 className="mb-6 text-lg font-semibold text-black md:text-2xl">All Floors</h6>
           <div className="flex flex-col gap-5">
             {restroom?.data?.restRooms?.map((item, i) => (
               <FloorList key={i} data={item} buildingId={building?._id} />
@@ -168,10 +168,10 @@ const BuildingDetail = ({ building }) => {
           isOpen={inspectorModel}
           onClose={() => setInspectorModel(false)}
         >
-          <div className="w-full md:min-w-[500px] max-h-[600px] overflow-y-auto p-5">
+          <div className="max-h-[600px] w-full overflow-y-auto p-5 md:min-w-[500px]">
             {inspectorsLoading ? (
-              <div className="flex justify-center items-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <div className="flex items-center justify-center py-8">
+                <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
               </div>
             ) : inspectorsData?.data?.length > 0 ? (
               <div className="grid gap-4">
@@ -186,7 +186,7 @@ const BuildingDetail = ({ building }) => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-gray-500">No inspectors available</div>
+              <div className="py-8 text-center text-gray-500">No inspectors available</div>
             )}
           </div>
         </Modal>
@@ -238,18 +238,18 @@ const InspectorCard = ({ data, onAssign, buildingId }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-md transition-all duration-300 hover:shadow-lg">
       <div className="p-6">
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold text-sm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+              <span className="text-sm font-semibold text-white">
                 {data?.fullName?.charAt(0) || 'I'}
               </span>
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 text-lg">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {data?.fullName || 'Unknown Inspector'}
               </h3>
               {/* <div className="flex items-center gap-2 mt-1">
@@ -272,7 +272,7 @@ const InspectorCard = ({ data, onAssign, buildingId }) => {
               </div> */}
               <div className="space-y-1">
                 {/* <p className="text-xs text-gray-500">Email</p> */}
-                <p className="text-sm font-medium text-gray-900 truncate">{data?.email || 'N/A'}</p>
+                <p className="truncate text-sm font-medium text-gray-900">{data?.email || 'N/A'}</p>
               </div>
             </div>
           </div>
@@ -287,12 +287,12 @@ const InspectorCard = ({ data, onAssign, buildingId }) => {
             <Button
               onClick={isAlreadyAssigned ? handleUnassignClick : handleAssignClick}
               disabled={isLoading}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 min-w-[100px] ${
+              className={`min-w-[100px] rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
                 isLoading
-                  ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                  ? 'cursor-not-allowed bg-gray-100 text-gray-500'
                   : isAlreadyAssigned
-                  ? 'bg-red-600 hover:bg-red-700 text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
               text={isLoading ? 'Please wait...' : isAlreadyAssigned ? 'Unassign' : 'Assign'}
             />

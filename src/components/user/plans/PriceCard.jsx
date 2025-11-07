@@ -1,42 +1,36 @@
-import { GoDotFill } from "react-icons/go";
+import { GoDotFill } from 'react-icons/go';
 
 const PriceCard = ({ card, onSelectPlan }) => {
   return (
     <div
-      className="relative px-4 md:px-6 py-6 md:py-8 rounded-[10px] shadow-dashboard"
+      className="shadow-dashboard relative rounded-[10px] px-4 py-6 md:px-6 md:py-8"
       style={{
         borderTop: `6px solid ${card.bg}`,
         // borderTop: isHovered ? `6px solid ${card.bg}` : "0px solid transparent",
       }}
     >
-      <h6 className="text-base md:text-xl text-black font-[600] ">
-        {card.title}
-      </h6>
-      <p className="text-[10px] lg:text-xs text-[#414141]">{card.subtitle}</p>
-      <p className="text-lg lg:text-3xl text-primary font-[600] mt-1">
+      <h6 className="text-base font-[600] text-black md:text-xl">{card.title}</h6>
+      <p className="text-[10px] text-[#414141] lg:text-xs">{card.subtitle}</p>
+      <p className="text-primary mt-1 text-lg font-[600] lg:text-3xl">
         ${card.price}
-        <span className="font-normal text-sm md:text-lg">/month</span>
+        <span className="text-sm font-normal md:text-lg">/month</span>
       </p>
       <div className="mt-6">
-        <p className="text-[#414141B2] text-[11px] md:text-xs">Features</p>
+        <p className="text-[11px] text-[#414141B2] md:text-xs">Features</p>
         <div className="mt-4">
           {card.featuresList.map((list, i) => (
-            <div key={i} className="flex items-center gap-2 mb-3">
+            <div key={i} className="mb-3 flex items-center gap-2">
               <GoDotFill fontSize={8} />
-              <p className="text-black text-xs md:text-sm">{list}</p>
+              <p className="text-xs text-black md:text-sm">{list}</p>
             </div>
           ))}
           <div className="mt-6 mb-8">
-            <p className="text-[#414141B2] text-[11px] md:text-xs">
-              Description
-            </p>
-            <p className="text-black text-xs md:text-sm mt-3">
-              {card.description}
-            </p>
+            <p className="text-[11px] text-[#414141B2] md:text-xs">Description</p>
+            <p className="mt-3 text-xs text-black md:text-sm">{card.description}</p>
           </div>
           <div>
             <button
-              className="w-[150px] md:w-[200px] py-2 px-4 rounded-md text-base text-white font-semibold"
+              className="w-[150px] rounded-md px-4 py-2 text-base font-semibold text-white md:w-[200px]"
               onClick={() => onSelectPlan(card)}
               style={{ background: `${card.btnBg}` }}
             >

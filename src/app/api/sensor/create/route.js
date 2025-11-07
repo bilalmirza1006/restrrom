@@ -8,7 +8,7 @@ import { NextResponse } from 'next/server';
 import { sequelize } from '@/configs/connectDb';
 import mongoose from 'mongoose';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   const ownerId = user._id;

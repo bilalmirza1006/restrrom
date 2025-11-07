@@ -21,15 +21,15 @@ const EditMapping = ({ setCurrentStep, buildingId }) => {
     lat: '',
     lng: '',
   });
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   const dispatch = useDispatch();
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
   const backHandler = () => {
-    setCurrentStep((prevStep) => prevStep - 1);
+    setCurrentStep(prevStep => prevStep - 1);
   };
-  const mappingChangeHandler = (e) => {
+  const mappingChangeHandler = e => {
     const { name, value } = e.target;
-    setMapping((prev) => ({
+    setMapping(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -41,7 +41,7 @@ const EditMapping = ({ setCurrentStep, buildingId }) => {
   const nextBtnHandler = () => {
     if (mapping.lat && mapping.lng) {
       dispatch(setBuilding({ mapInfo: mapping }));
-      setCurrentStep((prevStep) => prevStep + 1);
+      setCurrentStep(prevStep => prevStep + 1);
     } else {
       toast.error('Please enter lat and lng');
     }
@@ -79,8 +79,8 @@ const EditMapping = ({ setCurrentStep, buildingId }) => {
   return (
     <div>
       <div>
-        <h6 className="text-base text-primary font-medium">Mapping</h6>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5 mt-5">
+        <h6 className="text-primary text-base font-medium">Mapping</h6>
+        <div className="mt-5 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-2">
           <Input
             type="text"
             name="lat"
@@ -105,7 +105,7 @@ const EditMapping = ({ setCurrentStep, buildingId }) => {
           <Button
             text="Back"
             width="!w-[150px]"
-            onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+            onClick={() => setCurrentStep(prevStep => prevStep - 1)}
             cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
           />
           <Button text="Next" width="!w-[150px]" onClick={nextBtnHandler} />

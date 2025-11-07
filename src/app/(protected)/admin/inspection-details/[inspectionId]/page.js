@@ -29,8 +29,8 @@ function Inspections() {
   if (isError) return <p>Error loading inspection details.</p>;
 
   return (
-    <div className="p-6 bg-white rounded-md">
-      <h1 className="text-2xl font-semibold mb-4">Inspection Details</h1>
+    <div className="rounded-md bg-white p-6">
+      <h1 className="mb-4 text-2xl font-semibold">Inspection Details</h1>
 
       {/* Restroom inspection cards */}
       {restroomData.length > 0 ? (

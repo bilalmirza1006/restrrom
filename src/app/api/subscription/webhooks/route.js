@@ -5,7 +5,7 @@ import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
 import { NextResponse } from 'next/server';
 
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
 
   // Authenticate user

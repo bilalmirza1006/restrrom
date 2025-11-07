@@ -14,7 +14,7 @@ const CircularProgressBar = ({ percentage }) => {
   }, [percentage]);
 
   return (
-    <div className="w-12 h-12">
+    <div className="h-12 w-12">
       {' '}
       {/* Slightly larger for better visibility */}
       <CircularProgressbar

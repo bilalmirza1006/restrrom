@@ -15,11 +15,11 @@ const CheckInCard = ({ buildingId }) => {
   const [summary, setSummary] = useState('');
   const [createInspection, { isLoading }] = useCreateBuildingInspectionMutation();
 
-  const toggleTable = (id) => setTableId((prev) => (prev === id ? null : id));
+  const toggleTable = id => setTableId(prev => (prev === id ? null : id));
 
   // collect main inspection data (radio fields)
   const handleInspectionChange = (restroomId, field, value) => {
-    setInspectionData((prev) => ({
+    setInspectionData(prev => ({
       ...prev,
       [restroomId]: {
         ...prev[restroomId],
@@ -30,7 +30,7 @@ const CheckInCard = ({ buildingId }) => {
 
   // collect custom fields
   const handleCustomFields = (restroomId, extraDetails) => {
-    setInspectionData((prev) => ({
+    setInspectionData(prev => ({
       ...prev,
       [restroomId]: {
         ...prev[restroomId],
@@ -40,8 +40,8 @@ const CheckInCard = ({ buildingId }) => {
   };
 
   // Add custom field inputs
-  const handleAddCustomField = (restroomId) => {
-    setInspectionData((prev) => {
+  const handleAddCustomField = restroomId => {
+    setInspectionData(prev => {
       const currentFields = prev[restroomId]?.customFields || [];
       return {
         ...prev,
@@ -55,12 +55,12 @@ const CheckInCard = ({ buildingId }) => {
 
   // Update custom field
   const handleCustomFieldChange = (restroomId, fieldId, field, value) => {
-    setInspectionData((prev) => ({
+    setInspectionData(prev => ({
       ...prev,
       [restroomId]: {
         ...prev[restroomId],
         customFields:
-          prev[restroomId]?.customFields?.map((item) =>
+          prev[restroomId]?.customFields?.map(item =>
             item.id === fieldId ? { ...item, [field]: value } : item
           ) || [],
       },
@@ -73,8 +73,8 @@ const CheckInCard = ({ buildingId }) => {
       ...details,
       // Use customFields for the extra details
       extraDetails: (details.customFields || [])
-        .filter((field) => field.name || field.desc)
-        .map((field) => ({
+        .filter(field => field.name || field.desc)
+        .map(field => ({
           title: field.name,
           description: field.desc,
         })),
@@ -101,20 +101,20 @@ const CheckInCard = ({ buildingId }) => {
 
   return (
     <div className="mt-3 flex flex-col gap-4">
-      {data?.data?.restRooms?.map((restroom) => (
+      {data?.data?.restRooms?.map(restroom => (
         <div
           key={restroom?._id}
-          className="bg-white overflow-auto w-[700px] sm:w-full shadow-sm rounded-lg flex flex-col"
+          className="flex w-[700px] flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
         >
-          <div className="flex items-center justify-between py-2 px-3">
+          <div className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-3">
               <Image src="/svgs/user/total-restrooms.svg" width={30} height={34} alt="icon" />
-              <h1 className="text-[#05004E] text-[20px] font-semibold">{restroom?.name}</h1>
+              <h1 className="text-[20px] font-semibold text-[#05004E]">{restroom?.name}</h1>
             </div>
 
             <div className="flex items-center gap-4">
               <p
-                className={`inline-block capitalize px-4 py-1.5 rounded-[8px] text-white ${
+                className={`inline-block rounded-[8px] px-4 py-1.5 text-white capitalize ${
                   restroom?.status === 'Active' ? 'bg-[#61CA94]' : 'bg-[#FF8080]'
                 }`}
               >
@@ -122,12 +122,12 @@ const CheckInCard = ({ buildingId }) => {
               </p>
               <button
                 onClick={() => toggleTable(restroom?._id)}
-                className="p-2 rounded-[8px] bg-[#ccbfd696] border border-[#A449EB96]"
+                className="rounded-[8px] border border-[#A449EB96] bg-[#ccbfd696] p-2"
               >
                 <FaCaretDown
                   className={
                     tableId === restroom._id
-                      ? 'ease-in transition-transform duration-300 transform rotate-180'
+                      ? 'rotate-180 transform transition-transform duration-300 ease-in'
                       : 'transition-transform duration-300'
                   }
                   fill="#A449EB96"
@@ -160,14 +160,14 @@ const CheckInCard = ({ buildingId }) => {
       <div className="mt-6 flex flex-col gap-3">
         <textarea
           value={summary}
-          onChange={(e) => setSummary(e.target.value)}
+          onChange={e => setSummary(e.target.value)}
           placeholder="Add overall inspection summary..."
-          className="border border-gray-300 rounded-lg p-3 h-28 "
+          className="h-28 rounded-lg border border-gray-300 p-3"
         />
         <button
           disabled={isLoading}
           onClick={handleSubmit}
-          className="bg-[#A449EB] hover:bg-[#922cd8] text-white px-6 py-2 rounded-lg w-[200px]"
+          className="w-[200px] rounded-lg bg-[#A449EB] px-6 py-2 text-white hover:bg-[#922cd8]"
         >
           {isLoading ? 'Submitting...' : 'Submit Inspection'}
         </button>

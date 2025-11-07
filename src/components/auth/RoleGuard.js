@@ -49,7 +49,7 @@ export function canAccess(userRole, requiredRole) {
 
 export default function RoleGuard({ children, requiredRole }) {
   const router = useRouter();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
 
   // Normalize user role
   const getUserRole = () => {
@@ -80,16 +80,16 @@ export default function RoleGuard({ children, requiredRole }) {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   if (requiredRole && !canAccess(userRole, requiredRole)) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }

@@ -1,6 +1,6 @@
 const StatusAndData = ({ sensorInfo }) => {
   return (
-    <div className="shadow-md rounded-[15px] p-4 md:p-5 border border-gray-200">
+    <div className="rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
       <h6 className="text-primary text-base font-semibold">Status and Data</h6>
       <List title="Status" value={sensorInfo?.status} />
       <List title="Battery" value="90%" />
@@ -13,25 +13,23 @@ export default StatusAndData;
 
 const List = ({ title, value }) => {
   const renderValue = () => {
-    if (typeof value === "boolean") {
+    if (typeof value === 'boolean') {
       return (
         <span
-          className={`text-sm font-medium py-[5px] px-5 rounded-lg text-white ${
-            value ? "bg-secondary" : " bg-orange-400"
+          className={`rounded-lg px-5 py-[5px] text-sm font-medium text-white ${
+            value ? 'bg-secondary' : ' bg-orange-400'
           }`}
         >
-          {value ? "Active" : "Not Active"}
+          {value ? 'Active' : 'Not Active'}
         </span>
       );
     }
 
-    return (
-      <p className="text-base md:text-lg font-medium text-primary">{value}</p>
-    );
+    return <p className="text-primary text-base font-medium md:text-lg">{value}</p>;
   };
 
   return (
-    <div className="rounded-lg shadow-sm py-2 px-6 flex items-center justify-between mt-4">
+    <div className="mt-4 flex items-center justify-between rounded-lg px-6 py-2 shadow-sm">
       <h4 className="text-sm text-[#686868]">{title}</h4>
       {renderValue()}
     </div>

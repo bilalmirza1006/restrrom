@@ -7,10 +7,10 @@ export const subscriptionApis = createApi({
     credentials: 'include',
   }),
   tagTypes: ['subscription', 'history', 'webhook'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     // POST /api/subscription/create-session
     createCheckoutSession: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/create-session',
         method: 'POST',
         body: data, // { plan: 'monthly' | 'yearly' | 'lifetime' }
@@ -28,7 +28,7 @@ export const subscriptionApis = createApi({
     //   invalidatesTags: ['subscription', 'history'],
     // }),
     cancelSubscription: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/cancel',
         method: 'POST',
         body: data,
@@ -69,7 +69,7 @@ export const subscriptionApis = createApi({
 
     // GET /api/subscription/history/:userId
     getSubscriptionHistory: builder.query({
-      query: (userId) => ({
+      query: userId => ({
         url: `/history/${userId}`,
         method: 'GET',
       }),
@@ -87,7 +87,7 @@ export const subscriptionApis = createApi({
 
     // GET /api/subscription/webhooks/:userId
     getWebhooksByUser: builder.query({
-      query: (userId) => ({
+      query: userId => ({
         url: `/webhooks/${userId}`,
         method: 'GET',
       }),

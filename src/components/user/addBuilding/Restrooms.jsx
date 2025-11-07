@@ -23,8 +23,8 @@ const Restrooms = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const building = useSelector((state) => state.building);
-  const { user } = useSelector((state) => state.auth);
+  const building = useSelector(state => state.building);
+  const { user } = useSelector(state => state.auth);
   const { data: sensorsData } = useGetAllSensorsQuery();
 
   const [activeAccordion, setActiveAccordion] = useState(null);
@@ -39,7 +39,7 @@ const Restrooms = ({ setCurrentStep }) => {
   // -----------------------------
   // 🔹 Accordion Toggle
   // -----------------------------
-  const toggleAccordion = (index) => {
+  const toggleAccordion = index => {
     if (activeAccordion === index) saveRestroomData(index);
     setActiveAccordion(activeAccordion === index ? null : index);
   };
@@ -71,7 +71,7 @@ const Restrooms = ({ setCurrentStep }) => {
   // -----------------------------
   // 🔹 Save Single Restroom Validation
   // -----------------------------
-  const saveRestroomData = (index) => {
+  const saveRestroomData = index => {
     const restroom = building.restrooms[index];
     if (
       !restroom.name ||
@@ -139,7 +139,7 @@ const Restrooms = ({ setCurrentStep }) => {
       }
 
       // ✅ Prepare restroom data
-      const allRestRooms = building.restrooms.map((restroom) => {
+      const allRestRooms = building.restrooms.map(restroom => {
         const {
           name,
           restroomId,
@@ -163,7 +163,7 @@ const Restrooms = ({ setCurrentStep }) => {
           throw new Error(`Missing fields for ${name || 'a restroom'}`);
         }
 
-        const sanitizedCoordinates = restroomCoordinates.map((coordinate) => ({
+        const sanitizedCoordinates = restroomCoordinates.map(coordinate => ({
           ...coordinate,
           polygonId: coordinate?.polygonId || nanoid(),
           labelPoint: coordinate?.labelPoint || 'first',
@@ -198,7 +198,7 @@ const Restrooms = ({ setCurrentStep }) => {
 
       const roomsMeta = allRestRooms.map(({ modelImage, ...meta }) => meta);
       restRoomsFormData.append('restRooms', JSON.stringify(roomsMeta));
-      allRestRooms.forEach((r) => restRoomsFormData.append('restRoomImages', r.modelImage));
+      allRestRooms.forEach(r => restRoomsFormData.append('restRoomImages', r.modelImage));
 
       const restroomsRes = await createMultipleRestrooms(restRoomsFormData).unwrap();
       if (restroomsRes?.success) toast.success('Building and all restrooms added successfully');
@@ -206,8 +206,8 @@ const Restrooms = ({ setCurrentStep }) => {
       // ✅ Attach restroom IDs to polygons
       try {
         const createdRestrooms = restroomsRes?.data || [];
-        const updatedPolygons = (building?.buildingModelCoordinates || []).map((poly) => {
-          const match = createdRestrooms.find((r) => r?.name === (poly?.restroomName || ''));
+        const updatedPolygons = (building?.buildingModelCoordinates || []).map(poly => {
+          const match = createdRestrooms.find(r => r?.name === (poly?.restroomName || ''));
           return match ? { ...poly, restroomId: match?._id } : poly;
         });
         const updateForm = new FormData();
@@ -233,10 +233,10 @@ const Restrooms = ({ setCurrentStep }) => {
   // -----------------------------
   // 🔹 Restore sensor logic
   // -----------------------------
-  const restoreSensor = (sensorId) => {
-    const sensor = sensorsData?.data?.find((s) => s._id === sensorId);
+  const restoreSensor = sensorId => {
+    const sensor = sensorsData?.data?.find(s => s._id === sensorId);
     if (sensor)
-      setAvailableSensors((prev) => [...prev, { option: sensor?.name, value: sensor?._id }]);
+      setAvailableSensors(prev => [...prev, { option: sensor?.name, value: sensor?._id }]);
   };
 
   // -----------------------------
@@ -245,8 +245,8 @@ const Restrooms = ({ setCurrentStep }) => {
   useEffect(() => {
     if (sensorsData?.data) {
       const formattedSensors = sensorsData.data
-        .filter((sensor) => !sensor.isConnected)
-        .map((sensor) => ({
+        .filter(sensor => !sensor.isConnected)
+        .map(sensor => ({
           option: sensor.name,
           value: sensor._id,
         }));
@@ -307,11 +307,11 @@ const Restrooms = ({ setCurrentStep }) => {
     return (
       <div className="py-10 text-center">
         <p>No restrooms to display. Please add restrooms in the General Information step.</p>
-        <div className="flex items-center justify-end gap-4 mt-5">
+        <div className="mt-5 flex items-center justify-end gap-4">
           <Button
             text="Back"
             width="!w-[150px]"
-            onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+            onClick={() => setCurrentStep(prevStep => prevStep - 1)}
             cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
           />
         </div>
@@ -321,13 +321,13 @@ const Restrooms = ({ setCurrentStep }) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">Restrooms</h6>
+      <h6 className="text-primary text-base font-medium">Restrooms</h6>
       <div className="py-6">
         {building.restrooms?.map((restroom, index) => (
-          <div key={index} className="border border-[#DFDFDF] rounded-md mb-4 overflow-hidden">
+          <div key={index} className="mb-4 overflow-hidden rounded-md border border-[#DFDFDF]">
             {/* Header */}
             <div
-              className="flex items-center justify-between px-4 py-3 bg-[#F5F5F5] cursor-pointer"
+              className="flex cursor-pointer items-center justify-between bg-[#F5F5F5] px-4 py-3"
               onClick={() => toggleAccordion(index)}
             >
               <h6 className="font-medium">{restroom.name || `Restroom ${index + 1}`}</h6>
@@ -337,7 +337,7 @@ const Restrooms = ({ setCurrentStep }) => {
             {/* Accordion Body */}
             {activeAccordion === index && (
               <div className="p-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                   <Input
                     label="Restroom Name"
                     placeholder="Auto-filled from model"
@@ -355,7 +355,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Type"
                     placeholder="Select type"
                     initialValue={restroom.type || ''}
-                    onSelect={(value) => handleRestroomChange(index, 'type', value)}
+                    onSelect={value => handleRestroomChange(index, 'type', value)}
                     options={[
                       { option: 'Public', value: 'public' },
                       { option: 'Private', value: 'private' },
@@ -366,7 +366,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     label="Status"
                     placeholder="Select status"
                     initialValue={restroom.status || ''}
-                    onSelect={(value) => handleRestroomChange(index, 'status', value)}
+                    onSelect={value => handleRestroomChange(index, 'status', value)}
                     options={[
                       { option: 'Active', value: 'active' },
                       { option: 'Inactive', value: 'inactive' },
@@ -378,7 +378,7 @@ const Restrooms = ({ setCurrentStep }) => {
                     placeholder="Enter area"
                     type="number"
                     value={restroom.area || ''}
-                    onChange={(e) => handleRestroomChange(index, 'area', e.target.value)}
+                    onChange={e => handleRestroomChange(index, 'area', e.target.value)}
                   />
 
                   <Input
@@ -386,22 +386,20 @@ const Restrooms = ({ setCurrentStep }) => {
                     placeholder="Enter toilets"
                     type="number"
                     value={restroom.toilets || ''}
-                    onChange={(e) => handleRestroomChange(index, 'toilets', e.target.value)}
+                    onChange={e => handleRestroomChange(index, 'toilets', e.target.value)}
                   />
                 </div>
 
                 <div className="mt-6">
-                  <h6 className="font-medium mb-3">Restroom Layout</h6>
-                  <div className="py-4 grid place-items-center">
+                  <h6 className="mb-3 font-medium">Restroom Layout</h6>
+                  <div className="grid place-items-center py-4">
                     <MarkRestroomModel
                       restroomIndex={index}
-                      setFile={(file) => handleImageChange(index, null, file, null)}
+                      setFile={file => handleImageChange(index, null, file, null)}
                       restroomImage={restroom.restroomImage}
-                      setRestroomImage={(image) => handleImageChange(index, image, null, null)}
+                      setRestroomImage={image => handleImageChange(index, image, null, null)}
                       polygons={restroom.restroomCoordinates || []}
-                      setPolygons={(coordinates) =>
-                        handleImageChange(index, null, null, coordinates)
-                      }
+                      setPolygons={coordinates => handleImageChange(index, null, null, coordinates)}
                       availableSensors={availableSensors}
                       updateRestRoomHandler={handleRestroomChange}
                       restoreSensor={restoreSensor}
@@ -426,14 +424,14 @@ const Restrooms = ({ setCurrentStep }) => {
         <Button
           text="Back"
           width="!w-[150px]"
-          onClick={() => setCurrentStep((prevStep) => prevStep - 1)}
+          onClick={() => setCurrentStep(prevStep => prevStep - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
         <Button
           disabled={createNewBuildingLoading || createRestroomsLoading || deleteBuildingLoading}
           className={`${
             createNewBuildingLoading || createRestroomsLoading || deleteBuildingLoading
-              ? 'opacity-30 cursor-not-allowed'
+              ? 'cursor-not-allowed opacity-30'
               : ''
           }`}
           text="Save Building"

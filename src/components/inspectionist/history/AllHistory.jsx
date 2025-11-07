@@ -110,9 +110,9 @@ const AllHistory = () => {
     setModalType(type);
     setSelectedSensor(sensor);
   };
-  const modalCloseHandler = (type) => setModalType('');
+  const modalCloseHandler = type => setModalType('');
 
-  const deleteSensorHandler = async (sensorId) => {
+  const deleteSensorHandler = async sensorId => {
     try {
       const res = await deleteSensor(sensorId).unwrap();
       toast.success(res.message || 'Sensor deleted successfully');
@@ -124,7 +124,7 @@ const AllHistory = () => {
       modalCloseHandler();
     }
   };
-  const handleStatusHandler = async (sensor) => {
+  const handleStatusHandler = async sensor => {
     const updatedStatus = !sensor.status;
     try {
       const res = await updateSensor({
@@ -146,7 +146,7 @@ const AllHistory = () => {
   ];
 
   return (
-    <section className="bg-white p-4 md:p-5 rounded-[10px]">
+    <section className="rounded-[10px] bg-white p-4 md:p-5">
       {/* <div className="flex justify-between items-center">
         <h4 className="text-base md:text-xl font-semibold text-[#05004E]">All Sensors</h4>
       </div>
@@ -175,15 +175,15 @@ export default AllHistory;
 const tableColumns = () => [
   {
     name: 'Inspection',
-    selector: (row) => row?.inspection,
-    cell: (row) => (
+    selector: row => row?.inspection,
+    cell: row => (
       <div className="flex items-center gap-2">
         <Image
           src={row?.inspectionImage}
           alt="inspection"
           width={30}
           height={30}
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
         <span>{row?.inspection}</span>
       </div>
@@ -191,15 +191,15 @@ const tableColumns = () => [
   },
   {
     name: 'Building',
-    selector: (row) => row?.building,
-    cell: (row) => (
+    selector: row => row?.building,
+    cell: row => (
       <div className="flex items-center gap-2">
         <Image
           src={row?.buildingImage}
           alt="building"
           width={30}
           height={30}
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
         <span>{row?.building}</span>
       </div>
@@ -207,15 +207,15 @@ const tableColumns = () => [
   },
   {
     name: 'Rest Room',
-    selector: (row) => row?.restRoom,
-    cell: (row) => (
+    selector: row => row?.restRoom,
+    cell: row => (
       <div className="flex items-center gap-2">
         <Image
           src={row?.restRoomImage}
           alt="restroom"
           width={30}
           height={30}
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
         <span>{row?.restRoom}</span>
       </div>
@@ -223,15 +223,15 @@ const tableColumns = () => [
   },
   {
     name: 'Inspection Officer',
-    selector: (row) => row?.officer,
-    cell: (row) => (
+    selector: row => row?.officer,
+    cell: row => (
       <div className="flex items-center gap-2">
         <Image
           src={row?.officerImage}
           alt="officer"
           width={30}
           height={30}
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
         <span>{row?.officer}</span>
       </div>
@@ -239,15 +239,15 @@ const tableColumns = () => [
   },
   {
     name: 'Reason',
-    selector: (row) => row?.reason,
-    cell: (row) => (
+    selector: row => row?.reason,
+    cell: row => (
       <div className="flex items-center gap-2">
         <Image
           src={row?.reasonImage}
           alt="reason"
           width={30}
           height={30}
-          className="w-8 h-8 rounded-full"
+          className="h-8 w-8 rounded-full"
         />
         <span>{row?.reason}</span>
       </div>
@@ -255,9 +255,9 @@ const tableColumns = () => [
   },
   {
     name: 'Activity',
-    selector: (row) => row?.activity,
-    cell: (row) => (
-      <div className="flex justify-between items-center  w-full">
+    selector: row => row?.activity,
+    cell: row => (
+      <div className="flex w-full items-center justify-between">
         <CircularProgressBar percentage={row?.progress || 0} />
         <div className="cursor-pointer">
           <HiOutlineEye fontSize={20} />

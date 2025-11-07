@@ -9,11 +9,11 @@ const Input = ({
 }) => {
   return (
     <div>
-      {label && <label className="text-sm lg:text-base text-[#666666]">{label}</label>}
+      {label && <label className="text-sm text-[#666666] lg:text-base">{label}</label>}
       <div className="relative mt-2">
         {/* Left Icon */}
         {leftIcon && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#666666]">
+          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-[#666666]">
             {leftIcon}
           </span>
         )}
@@ -21,14 +21,14 @@ const Input = ({
         <input
           {...rest}
           type={type}
-          className={`outline-none px-4 h-[50px] border-[0.5px] border-[#66666659] rounded-xl w-full text-sm lg:text-base text-[#3a3a3a] ${
+          className={`h-[50px] w-full rounded-xl border-[0.5px] border-[#66666659] px-4 text-sm text-[#3a3a3a] outline-none lg:text-base ${
             shadow && 'shadow-input'
           } ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${className}`}
         />
 
         {/* Right Icon */}
         {rightIcon && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666666] cursor-pointer">
+          <span className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-[#666666]">
             {rightIcon}
           </span>
         )}

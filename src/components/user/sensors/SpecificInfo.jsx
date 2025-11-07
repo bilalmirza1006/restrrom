@@ -1,9 +1,7 @@
 const SpecificInfo = () => {
   return (
-    <div className="shadow-md rounded-[15px] p-4 md:p-5 border border-gray-200">
-      <h6 className="text-primary text-base font-semibold">
-        Sensor-Specific Information
-      </h6>
+    <div className="rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
+      <h6 className="text-primary text-base font-semibold">Sensor-Specific Information</h6>
       <List title="Current Occupancy" value="03" />
       <List title="Peak Occupancy" value="10" />
     </div>
@@ -14,9 +12,9 @@ export default SpecificInfo;
 
 const List = ({ title, value }) => {
   return (
-    <div className="rounded-lg shadow-sm py-2 px-6 flex items-center justify-between mt-4">
+    <div className="mt-4 flex items-center justify-between rounded-lg px-6 py-2 shadow-sm">
       <h4 className="text-sm text-[#686868]">{title}</h4>
-      <p className="text-base md:text-lg font-medium text-primary">{value}</p>
+      <p className="text-primary text-base font-medium md:text-lg">{value}</p>
     </div>
   );
 };

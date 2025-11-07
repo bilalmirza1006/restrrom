@@ -62,8 +62,8 @@ const CurrentSubscription = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full py-10 grid place-items-center">
-        <p className="text-sm md:text-base text-gray-600">Loading current subscription...</p>
+      <div className="grid w-full place-items-center py-10">
+        <p className="text-sm text-gray-600 md:text-base">Loading current subscription...</p>
       </div>
     );
   }
@@ -72,7 +72,7 @@ const CurrentSubscription = () => {
     const message =
       (error && (error.data?.message || error.error)) || 'Failed to load subscription.';
     return (
-      <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded">
+      <div className="rounded border border-red-200 bg-red-50 p-4 text-red-700">
         <p className="text-sm md:text-base">{message}</p>
       </div>
     );
@@ -80,7 +80,7 @@ const CurrentSubscription = () => {
 
   if (!subscription) {
     return (
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded">
+      <div className="rounded border border-yellow-200 bg-yellow-50 p-4 text-yellow-700">
         <p className="text-sm md:text-base">You don’t have an active subscription yet.</p>
       </div>
     );
@@ -98,28 +98,28 @@ const CurrentSubscription = () => {
   };
 
   return (
-    <div className="bg-white rounded-[10px] shadow-dashboard p-4 md:p-6">
+    <div className="shadow-dashboard rounded-[10px] bg-white p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h4 className="text-base md:text-lg font-semibold text-[#414141]">
+          <h4 className="text-base font-semibold text-[#414141] md:text-lg">
             Current Subscription
           </h4>
-          <p className="text-xs md:text-sm text-primary">Your active plan details</p>
+          <p className="text-primary text-xs md:text-sm">Your active plan details</p>
         </div>
         <span
-          className={`px-3 py-1 rounded text-xs capitalize ${
+          className={`rounded px-3 py-1 text-xs capitalize ${
             details?.status === 'active'
               ? 'bg-[#B2FFB0] text-gray-800'
               : details?.status === 'expired' || details?.status === 'canceled'
-              ? 'bg-[#D3D3D3] text-gray-700'
-              : 'bg-[#FF7A7F] text-white'
+                ? 'bg-[#D3D3D3] text-gray-700'
+                : 'bg-[#FF7A7F] text-white'
           }`}
         >
           {details?.status}
         </span>
       </div>
 
-      <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
         <InfoRow label="Plan" value={details?.plan} />
         <InfoRow label="Price" value={details?.price} />
         <InfoRow label="Start Date" value={details?.start} />
@@ -145,8 +145,8 @@ const CurrentSubscription = () => {
         <button
           onClick={onCancel}
           disabled={isCancelling}
-          className={`px-4 py-2 rounded-md text-white font-semibold ${
-            isCancelling ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#FF7A7F] hover:opacity-95'
+          className={`rounded-md px-4 py-2 font-semibold text-white ${
+            isCancelling ? 'cursor-not-allowed bg-gray-400' : 'bg-[#FF7A7F] hover:opacity-95'
           }`}
         >
           {isCancelling ? 'Cancelling...' : 'Cancel Subscription'}
@@ -157,9 +157,9 @@ const CurrentSubscription = () => {
 };
 
 const InfoRow = ({ label, value }) => (
-  <div className="flex items-center justify-between bg-[#F8F8F8] rounded-md px-3 py-3">
-    <span className="text-xs md:text-sm text-[#414141B2]">{label}</span>
-    <span className="text-sm md:text-base font-medium">{value}</span>
+  <div className="flex items-center justify-between rounded-md bg-[#F8F8F8] px-3 py-3">
+    <span className="text-xs text-[#414141B2] md:text-sm">{label}</span>
+    <span className="text-sm font-medium md:text-base">{value}</span>
   </div>
 );
 

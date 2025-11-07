@@ -51,7 +51,7 @@ const SignupForm = () => {
     }
   }, [signupSuccess, userRole, router]);
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -63,7 +63,7 @@ const SignupForm = () => {
     formData.confirmPassword.trim() !== '' &&
     formData.password === formData.confirmPassword;
 
-  const handleForm = async (e) => {
+  const handleForm = async e => {
     e.preventDefault();
     if (!isFormValid) return toast.error('Please fill all fields correctly');
 
@@ -103,11 +103,11 @@ const SignupForm = () => {
   };
 
   return (
-    <form className="bg-white p-5 lg:py-8 lg:px-[8%] rounded-xl w-full" onSubmit={handleForm}>
-      <h6 className="text-center md:text-left text-xl lg:text-2xl font-semibold text-text-textColor">
+    <form className="w-full rounded-xl bg-white p-5 lg:px-[8%] lg:py-8" onSubmit={handleForm}>
+      <h6 className="text-text-textColor text-center text-xl font-semibold md:text-left lg:text-2xl">
         Sign up now
       </h6>
-      <div className="mt-5 lg:mt-7 grid grid-cols-1 gap-4 md:gap-6">
+      <div className="mt-5 grid grid-cols-1 gap-4 md:gap-6 lg:mt-7">
         <div>
           <Input
             label="Full name"
@@ -135,7 +135,7 @@ const SignupForm = () => {
             autoComplete="new-password"
           />
           <div
-            className="absolute top-0 right-3 flex items-center gap-2 cursor-pointer text-sm lg:text-lg text-[#666666CC]"
+            className="absolute top-0 right-3 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
             onClick={() => setShowPassword(!showPassword)}
           >
             {!showPassword ? (
@@ -161,7 +161,7 @@ const SignupForm = () => {
             autoComplete="new-password"
           />
           <div
-            className="absolute top-0 right-3 flex items-center gap-2 cursor-pointer text-sm lg:text-lg text-[#666666CC]"
+            className="absolute top-0 right-3 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
           >
             {!showConfirmPassword ? (
@@ -183,7 +183,7 @@ const SignupForm = () => {
           disabled={isLoading}
           cn={`${isLoading && 'opacity-60 cursor-not-allowed'}`}
         />
-        <div className="text-sm lg:text-base text-[#666666]">
+        <div className="text-sm text-[#666666] lg:text-base">
           Already have an Account?{' '}
           <Link href="/login" className="text-primary font-semibold">
             Login

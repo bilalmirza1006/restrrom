@@ -9,22 +9,23 @@ const Plans = () => {
   const [isActiveTab, setIsActiveTab] = useState('Current Subscription');
   const [selectedPlan, setSelectedPlan] = useState(null);
 
-  const tabsHandler = (tab) => {
+  const tabsHandler = tab => {
     setIsActiveTab(tab);
   };
 
   return (
-    <section className="bg-white rounded-[15px] p-4 lg:p-6">
+    <section className="rounded-[15px] bg-white p-4 lg:p-6">
       <div className="flex items-center gap-4">
-        {['Current Subscription', 'Price Plans', 'Review'].map((tab) => {
+        {['Current Subscription', 'Price Plans', 'Review'].map(tab => {
           const isDisabled = tab === 'Review' && !selectedPlan;
           return (
             <button
               key={tab}
-              className={`text-base font-semibold px-5 py-3 rounded-md transition-all duration-150 ${isActiveTab === tab
+              className={`rounded-md px-5 py-3 text-base font-semibold transition-all duration-150 ${
+                isActiveTab === tab
                   ? 'bg-primary text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-100'
-                } ${isDisabled ? '!cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${isDisabled ? '!cursor-not-allowed' : 'cursor-pointer'}`}
               disabled={isDisabled}
               onClick={() => !isDisabled && tabsHandler(tab)}
             >
@@ -33,11 +34,11 @@ const Plans = () => {
           );
         })}
       </div>
-      <div className="mt-4 md:mt-6 pb-7">
+      <div className="mt-4 pb-7 md:mt-6">
         {isActiveTab === 'Current Subscription' && <CurrentSubscription />}
         {isActiveTab === 'Price Plans' && (
           <PricePlans
-            onSelectPlan={(plan) => {
+            onSelectPlan={plan => {
               setSelectedPlan(plan);
               tabsHandler('Review');
             }}

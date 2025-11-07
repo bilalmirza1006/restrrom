@@ -25,7 +25,7 @@ export async function GET() {
   return NextResponse.json({ ok: true, message: 'Webhook GET reachable' });
 }
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
 
   console.log('[Stripe Webhook] >>> HIT', new Date().toISOString());

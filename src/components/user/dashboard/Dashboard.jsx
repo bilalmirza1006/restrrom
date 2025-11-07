@@ -17,7 +17,7 @@ const Map = dynamic(() => import('./Map'), { ssr: false });
 const Dashboard = () => {
   return (
     <div className="grid grid-cols-12 gap-3">
-      <div className="col-span-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="col-span-12 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
         {dashboardCardsData.map((card, i) => (
           <DashboardCard card={card} key={i} />
         ))}
@@ -28,17 +28,17 @@ const Dashboard = () => {
       <div className="col-span-12 lg:col-span-4">
         <Alerts />
       </div>
-      <div className="col-span-12 lg:col-span-8 rounded-2xl bg-white p-4 md:p-5 shadow-md">
+      <div className="col-span-12 rounded-2xl bg-white p-4 shadow-md md:p-5 lg:col-span-8">
         <div className="flex justify-between">
-          <h6 className="text-base md:text-xl font-semibold text-black mb-5">
+          <h6 className="mb-5 text-base font-semibold text-black md:text-xl">
             Overall Performance
           </h6>
           <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
         </div>
         <CustomLineChart data={lineChartData} xaxis yaxis />
       </div>
-      <div className="col-span-12 lg:col-span-4 rounded-2xl bg-white p-4 md:p-5 shadow-md flex flex-col justify-around">
-        <h6 className="text-base md:text-xl font-medium text-black mb-5 flex items-center gap-1">
+      <div className="col-span-12 flex flex-col justify-around rounded-2xl bg-white p-4 shadow-md md:p-5 lg:col-span-4">
+        <h6 className="mb-5 flex items-center gap-1 text-base font-medium text-black md:text-xl">
           <BuildingIcon isLinkActive />
           Top Buildings
         </h6>
@@ -48,14 +48,14 @@ const Dashboard = () => {
           icon="/images/dashboard/building.png"
         />
       </div>
-      <div className="col-span-12 xl:col-span-12 rounded-2xl bg-white p-4 md:p-5 shadow-md">
-        <div className="mb-4 flex justify-between items-center">
-          <h4 className="text-base md:text-lg font-semibold text-[#05004E]">All Buildings</h4>
-          <Link href="/buildings" className="text-[#05004E99] text-sm font-medium">
+      <div className="col-span-12 rounded-2xl bg-white p-4 shadow-md md:p-5 xl:col-span-12">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-base font-semibold text-[#05004E] md:text-lg">All Buildings</h4>
+          <Link href="/buildings" className="text-sm font-medium text-[#05004E99]">
             See All
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
           {buildingData.slice(0, 3).map((building, i) => (
             <Link href={`/buildings/${building?.id}`} key={i}>
               <BuildingCard data={building} />

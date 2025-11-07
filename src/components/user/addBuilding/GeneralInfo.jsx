@@ -11,7 +11,7 @@ import { getFileCache, setFileCache } from '@/utils/fileStore';
 
 const GeneralInfo = ({ setCurrentStep }) => {
   const dispatch = useDispatch();
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   const [image, setImage] = useState({ file: null, imagePreview: null });
   const [buildingInfo, setBuildingInfo] = useState({
     buildingName: '',
@@ -23,13 +23,13 @@ const GeneralInfo = ({ setCurrentStep }) => {
     buildingManager: '',
     phone: '',
   });
-  const buildingInfoChangeHandler = (e) => {
+  const buildingInfoChangeHandler = e => {
     const { name, value } = e.target;
-    setBuildingInfo((prev) => ({ ...prev, [name]: value }));
+    setBuildingInfo(prev => ({ ...prev, [name]: value }));
   };
-  const nextBtnHandler = (e) => {
+  const nextBtnHandler = e => {
     e.preventDefault();
-    const hasEmptyField = Object.values(buildingInfo).some((val) => !val?.toString().trim());
+    const hasEmptyField = Object.values(buildingInfo).some(val => !val?.toString().trim());
     const hasImage = !!(image?.file || image?.imagePreview);
     if (hasEmptyField || !hasImage)
       return toast.error('Please fill all fields and upload building image.');
@@ -41,7 +41,7 @@ const GeneralInfo = ({ setCurrentStep }) => {
       })
     );
     setFileCache('buildingImage', image.file);
-    setCurrentStep((s) => s + 1);
+    setCurrentStep(s => s + 1);
   };
   // Load redux values
   useEffect(() => {
@@ -74,9 +74,9 @@ const GeneralInfo = ({ setCurrentStep }) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">General Information</h6>
+      <h6 className="text-primary text-base font-medium">General Information</h6>
       <form
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 mt-5"
+        className="mt-5 grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-3"
         onSubmit={nextBtnHandler}
       >
         <div className="lg:col-span-3">
@@ -148,7 +148,7 @@ const GeneralInfo = ({ setCurrentStep }) => {
           onChange={buildingInfoChangeHandler}
         />
 
-        <div className="lg:col-span-3 flex justify-end">
+        <div className="flex justify-end lg:col-span-3">
           <Button text="Next" width="!w-[150px]" type="submit" />
         </div>
       </form>

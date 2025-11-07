@@ -389,11 +389,11 @@ function syncRestroomIdWithBuilding(buildingData) {
 
   const updatedBuilding = { ...building };
 
-  updatedBuilding.buildingCoordinates = building.buildingCoordinates.map((coord) => {
+  updatedBuilding.buildingCoordinates = building.buildingCoordinates.map(coord => {
     if (coord.restroomId) return coord;
 
     const matchingRestroom = restrooms.find(
-      (r) => r.name?.trim()?.toLowerCase() === coord.restroomName?.trim()?.toLowerCase()
+      r => r.name?.trim()?.toLowerCase() === coord.restroomName?.trim()?.toLowerCase()
     );
 
     if (matchingRestroom) {
@@ -406,7 +406,7 @@ function syncRestroomIdWithBuilding(buildingData) {
   return updatedBuilding;
 }
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   await configureCloudinary();
 
@@ -424,7 +424,7 @@ export const POST = asyncHandler(async (req) => {
   const parsedCoordinates = JSON.parse(coordinates);
   const sensors = [];
 
-  parsedCoordinates.forEach((item) => {
+  parsedCoordinates.forEach(item => {
     if (
       !item.labelPoint ||
       !item.id ||
@@ -438,7 +438,7 @@ export const POST = asyncHandler(async (req) => {
     sensors.push(item.sensor);
   });
 
-  const sensorObjectIds = sensors.map((id) => new mongoose.Types.ObjectId(id));
+  const sensorObjectIds = sensors.map(id => new mongoose.Types.ObjectId(id));
 
   const availableSensors = await Sensor.find({
     _id: { $in: sensorObjectIds },

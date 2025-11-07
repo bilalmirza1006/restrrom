@@ -19,12 +19,12 @@ const HistoryCard = ({ buildingId, restroom }) => {
   const [summary, setSummary] = useState('');
   const [createInspection, { isLoading }] = useCreateBuildingInspectionMutation();
 
-  const toggleTable = (id) => setTableId((prev) => (prev === id ? null : id));
+  const toggleTable = id => setTableId(prev => (prev === id ? null : id));
   console.log('inspectionDatainspectionData', inspectionData);
 
   // collect main inspection data (radio fields)
   const handleInspectionChange = (restroomId, field, value) => {
-    setInspectionData((prev) => ({
+    setInspectionData(prev => ({
       ...prev,
       [restroomId]: {
         ...prev[restroomId],
@@ -37,7 +37,7 @@ const HistoryCard = ({ buildingId, restroom }) => {
 
   // collect custom fields
   const handleCustomFields = (restroomId, extraDetails) => {
-    setInspectionData((prev) => ({
+    setInspectionData(prev => ({
       ...prev,
       [restroomId]: {
         ...prev[restroomId],
@@ -51,7 +51,7 @@ const HistoryCard = ({ buildingId, restroom }) => {
       restroomId,
       ...details,
       extraDetails:
-        details.extraDetails?.map((d) => ({
+        details.extraDetails?.map(d => ({
           title: d.name,
           description: d.desc,
         })) || [],
@@ -78,26 +78,26 @@ const HistoryCard = ({ buildingId, restroom }) => {
 
   return (
     <div className="mt-3 flex flex-col gap-4">
-      {restroom?.restroomInspections?.map((restroom) => (
+      {restroom?.restroomInspections?.map(restroom => (
         <div
           key={restroom?.restroomId}
-          className="bg-white overflow-auto w-[700px] sm:w-full shadow-sm rounded-lg flex flex-col"
+          className="flex w-[700px] flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
         >
-          <div className="flex items-center justify-between py-2 px-3">
+          <div className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-3">
               <Image src="/svgs/user/total-restrooms.svg" width={30} height={34} alt="icon" />
-              <h1 className="text-[#05004E] text-[20px] font-semibold">{restroom?.restroomName}</h1>
+              <h1 className="text-[20px] font-semibold text-[#05004E]">{restroom?.restroomName}</h1>
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => toggleTable(restroom?.restroomId)}
-                className="p-2 rounded-[8px] bg-[#ccbfd696] border border-[#A449EB96]"
+                className="rounded-[8px] border border-[#A449EB96] bg-[#ccbfd696] p-2"
               >
                 <FaCaretDown
                   className={
                     tableId === restroom.restroomId
-                      ? 'ease-in transition-transform duration-300 transform rotate-180'
+                      ? 'rotate-180 transform transition-transform duration-300 ease-in'
                       : 'transition-transform duration-300'
                   }
                   fill="#A449EB96"
@@ -117,7 +117,7 @@ const HistoryCard = ({ buildingId, restroom }) => {
               <AddInput
                 restroom={restroom}
                 tableId={tableId}
-                onCustomChange={(custom) => handleCustomFields(restroom.restroomId, custom)}
+                onCustomChange={custom => handleCustomFields(restroom.restroomId, custom)}
               />
             </div>
           )}
@@ -128,9 +128,9 @@ const HistoryCard = ({ buildingId, restroom }) => {
       <div className="mt-6 flex flex-col gap-3 bg-white">
         <textarea
           value={restroom?.summary}
-          onChange={(e) => setSummary(e.target.value)}
+          onChange={e => setSummary(e.target.value)}
           placeholder="Add overall inspection summary..."
-          className="border cursor-not-allowed w-full border-gray-300 rounded-lg p-3 h-28 "
+          className="h-28 w-full cursor-not-allowed rounded-lg border border-gray-300 p-3"
           readOnly
         />
       </div>

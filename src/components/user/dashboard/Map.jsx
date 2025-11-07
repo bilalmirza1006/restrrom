@@ -26,7 +26,7 @@ const RecenterAutomatically = ({ latlng }) => {
   return null;
 };
 
-const getCoordinates = async (locationName) => {
+const getCoordinates = async locationName => {
   const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
     locationName
   )}&limit=1`;
@@ -50,7 +50,7 @@ const HouseMap = ({ location, name, status }) => {
 
   useEffect(() => {
     if (location) {
-      getCoordinates(location).then((coords) => {
+      getCoordinates(location).then(coords => {
         if (coords) {
           setPosition(coords);
           setError('');
@@ -86,10 +86,10 @@ const HouseMap = ({ location, name, status }) => {
             position={position}
             icon={customDivIcon}
             eventHandlers={{
-              mouseover: (e) => {
+              mouseover: e => {
                 e.target.openTooltip();
               },
-              mouseout: (e) => {
+              mouseout: e => {
                 e.target.closeTooltip();
               },
             }}

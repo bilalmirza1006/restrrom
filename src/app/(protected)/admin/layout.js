@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import Loader from '@/components/global/Loader';
 
 const Admins = ({ children }) => {
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
 
   // Normalize role names
   const getUserRole = () => {
@@ -34,12 +34,12 @@ const Admins = ({ children }) => {
 
   console.log('✅ AdminLayout: Access granted for role:', userRole);
   return (
-    <section className="bg-[#F5F2FF] w-screen h-screen grid place-items-center overflow-hidden">
-      <section className="h-[calc(100vh-16px)] w-[calc(100vw-16px)] flex gap-4">
+    <section className="grid h-screen w-screen place-items-center overflow-hidden bg-[#F5F2FF]">
+      <section className="flex h-[calc(100vh-16px)] w-[calc(100vw-16px)] gap-4">
         <Aside />
         <div className="flex-1">
           <Header />
-          <main className="h-[calc(100vh-197px)] overflow-y-scroll overflow-x-hidden scroll-0 pt-4 rounded-lg">
+          <main className="scroll-0 h-[calc(100vh-197px)] overflow-x-hidden overflow-y-scroll rounded-lg pt-4">
             {children}
           </main>
         </div>

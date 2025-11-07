@@ -6,8 +6,8 @@ function CheckInList({ buildingId }) {
 
   return (
     <div>
-      <h1 className="text-[#05004E] text-[20px] font-semibold">All Restrooms</h1>
-      <div className="w-[720px] sm:w-full overflow-auto">
+      <h1 className="text-[20px] font-semibold text-[#05004E]">All Restrooms</h1>
+      <div className="w-[720px] overflow-auto sm:w-full">
         <CheckInCard buildingId={buildingId} />
       </div>
     </div>

@@ -10,7 +10,7 @@ import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   await configureCloudinary();
   console.log('erererere', req.body);
@@ -46,7 +46,7 @@ export const POST = asyncHandler(async (req) => {
     }
 
     // sanitize and validate coordinates
-    r.coordinates = r.coordinates.map((item) => {
+    r.coordinates = r.coordinates.map(item => {
       const sanitized = {
         ...item,
         polygonId: item?.polygonId || nanoid(),
@@ -71,7 +71,7 @@ export const POST = asyncHandler(async (req) => {
       numOfToilets: r.numOfToilets,
       modelCoordinates: r.coordinates,
       buildingId,
-      sensors: r.coordinates.map((item) => String(item.sensor)),
+      sensors: r.coordinates.map(item => String(item.sensor)),
     };
   });
 
@@ -80,7 +80,7 @@ export const POST = asyncHandler(async (req) => {
   }
 
   // Validate sensor availability
-  const sensorObjectIds = sensorIds.map((id) => new mongoose.Types.ObjectId(id));
+  const sensorObjectIds = sensorIds.map(id => new mongoose.Types.ObjectId(id));
   const availableSensors = await Sensor.find({
     _id: { $in: sensorObjectIds },
     isConnected: false,
@@ -93,7 +93,7 @@ export const POST = asyncHandler(async (req) => {
 
   // Upload all images in parallel
   const uploads = await Promise.all(
-    restRoomImages.map((file) => uploadOnCloudinary(file, 'restroom-models'))
+    restRoomImages.map(file => uploadOnCloudinary(file, 'restroom-models'))
   );
 
   uploads.forEach((upload, idx) => {
@@ -114,8 +114,8 @@ export const POST = asyncHandler(async (req) => {
 
   // ✅ Update each sensor with restroomId and buildingId
   const sensorUpdateOps = [];
-  createdRestRooms.forEach((restroom) => {
-    restroom.sensors.forEach((sensorId) => {
+  createdRestRooms.forEach(restroom => {
+    restroom.sensors.forEach(sensorId => {
       sensorUpdateOps.push({
         updateOne: {
           filter: { _id: new mongoose.Types.ObjectId(sensorId) },
@@ -135,7 +135,7 @@ export const POST = asyncHandler(async (req) => {
   if (!updateSensors) throw new customError(500, 'Failed to update sensors.');
 
   const populatedRestrooms = await Promise.all(
-    createdRestRooms.map(async (restroom) => {
+    createdRestRooms.map(async restroom => {
       const fullSensors = await Sensor.find({ _id: { $in: restroom.sensors } });
       return {
         ...restroom.toObject(),

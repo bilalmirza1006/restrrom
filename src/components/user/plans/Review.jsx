@@ -62,47 +62,47 @@ const Review = ({ plan }) => {
 
   return (
     <div>
-      <div className="mt-4 md:mt-5 bg-[#F3F0FF] p-4 md:p-6 grid grid-cols-1 lg:grid-cols-3 gap-4 rounded-lg">
+      <div className="mt-4 grid grid-cols-1 gap-4 rounded-lg bg-[#F3F0FF] p-4 md:mt-5 md:p-6 lg:grid-cols-3">
         <div>
-          <div className="flex items-center gap-2 text-primary">
+          <div className="text-primary flex items-center gap-2">
             <FaMapMarkerAlt fontSize={22} />
-            <p className="text-sm md:text-base font-[600]">Billing Address</p>
+            <p className="text-sm font-[600] md:text-base">Billing Address</p>
           </div>
-          <p className="text-sm md:text-md font-semibold my-2 md:my-4">
+          <p className="md:text-md my-2 text-sm font-semibold md:my-4">
             5678 Maple Avenue, Anytown, CA, 90210, USA
           </p>
           <PriceList title="Plan Selected:" value={plan.title} />
           <PriceList title="Monthly Fee:" value={`$${totalAmount.toFixed(2)}`} />
           <PriceList title="Tax:" value={`$${tax}`} />
-          <div className="w-full h-[1px] bg-[#00000066] mb-3"></div>
+          <div className="mb-3 h-[1px] w-full bg-[#00000066]"></div>
           <PriceList title="Total Monthly Charge:" value={`$${totalPrice}`} />
         </div>
 
         <div></div>
 
-        <div className="px-4 py-4 md:py-6 rounded-[10px] shadow-dashboard bg-white">
-          <h6 className="text-base md:text-xl text-black font-[600]">{plan.title}</h6>
-          <p className="text-[10px] lg:text-xs text-[#414141]">{plan.subtitle}</p>
-          <p className="text-lg lg:text-3xl text-primary font-[600] mt-1">
+        <div className="shadow-dashboard rounded-[10px] bg-white px-4 py-4 md:py-6">
+          <h6 className="text-base font-[600] text-black md:text-xl">{plan.title}</h6>
+          <p className="text-[10px] text-[#414141] lg:text-xs">{plan.subtitle}</p>
+          <p className="text-primary mt-1 text-lg font-[600] lg:text-3xl">
             ${plan.price}
-            <span className="font-normal text-sm md:text-lg">/month</span>
+            <span className="text-sm font-normal md:text-lg">/month</span>
           </p>
           <div className="mt-6">
-            <p className="text-[#414141B2] text-[11px] md:text-xs">Features</p>
+            <p className="text-[11px] text-[#414141B2] md:text-xs">Features</p>
             <div className="mt-4">
               {plan.featuresList.map((feature, i) => (
-                <div key={i} className="flex items-center gap-2 mb-3">
+                <div key={i} className="mb-3 flex items-center gap-2">
                   <GoDotFill fontSize={8} />
-                  <p className="text-black text-xs md:text-sm">{feature}</p>
+                  <p className="text-xs text-black md:text-sm">{feature}</p>
                 </div>
               ))}
               <div className="mt-6 mb-8">
-                <p className="text-[#414141B2] text-[11px] md:text-xs">Description</p>
-                <p className="text-black text-xs md:text-sm mt-3">{plan.description}</p>
+                <p className="text-[11px] text-[#414141B2] md:text-xs">Description</p>
+                <p className="mt-3 text-xs text-black md:text-sm">{plan.description}</p>
               </div>
               <div>
                 <button
-                  className="w-[150px] md:w-[200px] py-2 px-4 rounded-md text-base text-white font-semibold"
+                  className="w-[150px] rounded-md px-4 py-2 text-base font-semibold text-white md:w-[200px]"
                   style={{ background: `${plan.btnBg}` }}
                 >
                   Buy Plan
@@ -113,11 +113,11 @@ const Review = ({ plan }) => {
         </div>
       </div>
       {errorMsg ? (
-        <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+        <div className="mt-4 rounded border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
           {errorMsg}
         </div>
       ) : null}
-      <div className="flex justify-end mt-5">
+      <div className="mt-5 flex justify-end">
         <Button
           text={isCreating ? 'Processing...' : 'Confirm & Subscribe'}
           width="w-[160px] md:w-[268px]"
@@ -132,8 +132,8 @@ const Review = ({ plan }) => {
 export default Review;
 
 const PriceList = ({ title, value }) => (
-  <div className="flex items-center justify-between gap-4 mb-3">
+  <div className="mb-3 flex items-center justify-between gap-4">
     <p className="text-sm md:text-base">{title}</p>
-    <p className="text-sm md:text-base font-medium md:font-semibold">{value}</p>
+    <p className="text-sm font-medium md:text-base md:font-semibold">{value}</p>
   </div>
 );

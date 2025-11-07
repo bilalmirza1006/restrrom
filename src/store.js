@@ -21,7 +21,7 @@ const store = configureStore({
     [inspectionApis.reducerPath]: inspectionApis.reducer,
     [subscriptionApis.reducerPath]: subscriptionApis.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({ serializableCheck: false })
       .concat(authApi.middleware)
       .concat(sensorApi.middleware)

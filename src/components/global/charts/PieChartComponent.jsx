@@ -1,14 +1,7 @@
-"use client";
-import { Cell, Pie, PieChart } from "recharts";
+'use client';
+import { Cell, Pie, PieChart } from 'recharts';
 
-const renderLabel = ({
-  cx,
-  cy,
-  midAngle,
-  innerRadius,
-  outerRadius,
-  percent,
-}) => {
+const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
   const RADIAN = Math.PI / 180;
   const radius = innerRadius + (outerRadius - innerRadius) / 2;
   const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -29,17 +22,10 @@ const renderLabel = ({
   );
 };
 
-const PieChartComponent = ({
-  data,
-  COLORS,
-  icon,
-  width = 200,
-  height = 200,
-  ...rest
-}) => {
+const PieChartComponent = ({ data, COLORS, icon, width = 200, height = 200, ...rest }) => {
   return (
     <>
-      <div className="relative grid place-items-center mt-4">
+      <div className="relative mt-4 grid place-items-center">
         <PieChart width={width} height={height}>
           <Pie
             data={data}
@@ -56,29 +42,21 @@ const PieChartComponent = ({
             {...rest}
           >
             {data?.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS?.length]}
-              />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS?.length]} />
             ))}
           </Pie>
         </PieChart>
         {icon && (
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform">
             <img src={icon} alt="bin image" className="w-[60px]" />
           </div>
         )}
       </div>
-      <div className="mt-8 flex items-center justify-between gap-4 max-w-[344px] mx-auto">
+      <div className="mx-auto mt-8 flex max-w-[344px] items-center justify-between gap-4">
         {data?.map((entry, index) => (
           <div key={`cell-${index}`} className="flex items-center gap-2">
-            <div
-              className="w-3 h-3 rounded-sm"
-              style={{ backgroundColor: COLORS[index] }}
-            ></div>
-            <span className="text-sm font-medium text-[#030229]">
-              {entry.name}
-            </span>
+            <div className="h-3 w-3 rounded-sm" style={{ backgroundColor: COLORS[index] }}></div>
+            <span className="text-sm font-medium text-[#030229]">{entry.name}</span>
           </div>
         ))}
       </div>

@@ -8,10 +8,10 @@ export const authApi = createApi({
     credentials: 'include',
   }),
   tagTypes: ['Profile', 'Users', 'User'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     // 🔐 AUTH ENDPOINTS
     register: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/auth/register',
         method: 'POST',
         body: data,
@@ -20,7 +20,7 @@ export const authApi = createApi({
     }),
 
     login: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/auth/login',
         method: 'POST',
         body: data,
@@ -46,7 +46,7 @@ export const authApi = createApi({
 
     // 👤 USER PROFILE ENDPOINTS
     updateProfile: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/user/profile',
         method: 'PUT',
         body: data,
@@ -64,7 +64,7 @@ export const authApi = createApi({
 
     // 👥 USER MANAGEMENT ENDPOINTS (Admin only)
     getAllUsersByCreatorId: builder.query({
-      query: (creatorId) => ({
+      query: creatorId => ({
         url: `/user/all-users-by-id/${creatorId}`,
         method: 'GET',
       }),
@@ -73,7 +73,7 @@ export const authApi = createApi({
 
     // 🔍 GET User by ID
     getUserById: builder.query({
-      query: (userId) => ({
+      query: userId => ({
         url: `/user/profile/${userId}`,
         method: 'GET',
       }),
@@ -92,7 +92,7 @@ export const authApi = createApi({
 
     // 🗑️ DELETE User by ID
     deleteUserById: builder.mutation({
-      query: (userId) => ({
+      query: userId => ({
         url: `/user/profile/${userId}`,
         method: 'DELETE',
       }),

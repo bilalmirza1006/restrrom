@@ -50,7 +50,7 @@ export const createSubscriptionData = (subscription, customer) => {
  * @param {string} priceId - Stripe price ID
  * @returns {string} Plan name
  */
-export const getPlanFromPriceId = (priceId) => {
+export const getPlanFromPriceId = priceId => {
   if (priceId === stripeConfig.monthlyPrice) return 'monthly';
   if (priceId === stripeConfig.yearlyPrice) return 'yearly';
   if (priceId === stripeConfig.lifetimePrice) return 'lifetime';
@@ -115,7 +115,7 @@ export const updateUserSubscription = async (userId, subscriptionId, isTrialDone
  * @param {string} subscriptionId - Stripe subscription ID
  * @returns {Object} Updated Stripe subscription
  */
-export const cancelStripeSubscription = async (subscriptionId) => {
+export const cancelStripeSubscription = async subscriptionId => {
   // 1️⃣ Fetch subscription from Stripe
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 

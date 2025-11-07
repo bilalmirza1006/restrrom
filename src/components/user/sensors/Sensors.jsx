@@ -48,9 +48,9 @@ const Sensors = () => {
   };
   console.log('selectedSensor', selectedSensor);
 
-  const modalCloseHandler = (type) => setModalType('');
+  const modalCloseHandler = type => setModalType('');
 
-  const deleteSensorHandler = async (sensorId) => {
+  const deleteSensorHandler = async sensorId => {
     try {
       const res = await deleteSensor(sensorId).unwrap();
       toast.success(res.message || 'Sensor deleted successfully');
@@ -63,21 +63,21 @@ const Sensors = () => {
     }
   };
 
-  const validate = (formData) => {
+  const validate = formData => {
     if (!formData.name.trim()) return 'Sensor name is required';
     if (!formData.uniqueId.trim()) return 'Unique ID is required';
     if (!formData.parameters || formData.parameters.length === 0)
       return 'At least one parameter is required';
     return null;
   };
-  const handleStatusHandler = async (sensor) => {
+  const handleStatusHandler = async sensor => {
     try {
       const payload = {
         id: sensor._id,
         name: sensor.name,
         uniqueId: sensor.uniqueId,
         status: !sensor.status, // Toggle the current status
-        parameters: sensor.parameters.map((p) =>
+        parameters: sensor.parameters.map(p =>
           typeof p === 'string' ? p.toLowerCase() : p.value.toLowerCase()
         ),
       };
@@ -91,9 +91,9 @@ const Sensors = () => {
   };
 
   return (
-    <section className="bg-white p-4 md:p-5 rounded-[10px]">
-      <div className="flex justify-between items-center">
-        <h4 className="text-base md:text-xl font-semibold text-[#05004E]">All Sensors</h4>
+    <section className="rounded-[10px] bg-white p-4 md:p-5">
+      <div className="flex items-center justify-between">
+        <h4 className="text-base font-semibold text-[#05004E] md:text-xl">All Sensors</h4>
         <button onClick={() => modalOpenHandler('add')}>
           <IoIosAddCircle className="text-primary text-2xl" />
         </button>
@@ -130,7 +130,7 @@ const Sensors = () => {
             <p className="text-[16px] text-[#00000090]">
               Are you sure you want to delete this sensor?
             </p>
-            <div className="flex items-center justify-end gap-4 mt-5">
+            <div className="mt-5 flex items-center justify-end gap-4">
               <Button
                 onClick={modalCloseHandler}
                 text="Cancel"
@@ -154,27 +154,27 @@ export default Sensors;
 const tableColumns = (handleStatusHandler, setSelectedSensor, modalOpenHandler) => [
   {
     name: 'Sensor Name',
-    selector: (row) => row?.name,
+    selector: row => row?.name,
   },
   {
     name: 'Parameters',
-    selector: (row) =>
+    selector: row =>
       Array.isArray(row?.parameters) && row.parameters.length > 0
-        ? row.parameters.map((p) => PARAMETER_LABELS[p] || p).join(', ')
+        ? row.parameters.map(p => PARAMETER_LABELS[p] || p).join(', ')
         : '-',
   },
   {
     name: 'Unique Id',
-    selector: (row) => row?.uniqueId,
+    selector: row => row?.uniqueId,
   },
   {
     name: 'Is Connected',
-    selector: (row) =>
+    selector: row =>
       row?.isConnected === true ? <span>Connected</span> : <span>Disconnected</span>,
   },
   {
     name: 'Status',
-    cell: (row) => (
+    cell: row => (
       <div>
         <ToggleButton isChecked={row.status} onToggle={() => handleStatusHandler(row)} />
       </div>
@@ -182,7 +182,7 @@ const tableColumns = (handleStatusHandler, setSelectedSensor, modalOpenHandler) 
   },
   {
     name: 'Action',
-    cell: (row) => (
+    cell: row => (
       <div className="flex items-center gap-3">
         <Link href={`/admin/sensors/sensor-details/${row._id}`}>
           <div className="cursor-pointer">

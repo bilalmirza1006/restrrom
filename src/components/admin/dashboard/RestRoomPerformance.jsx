@@ -80,8 +80,8 @@ function RestRoomPerformance() {
     },
   ];
   return (
-    <div className="basis-[100%] bg-white shadow-lg mt-5 rounded-xl py-3 px-4  xl:basis-[32%]">
-      <div className="flex justify-between items-center mb-3">
+    <div className="mt-5 basis-[100%] rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
+      <div className="mb-3 flex items-center justify-between">
         <h1 className="text-[20px] font-bold">Restrooms Performance</h1>
       </div>
       <ResponsiveContainer width="100%" height={280}>
@@ -102,11 +102,11 @@ function RestRoomPerformance() {
           <Line dot={false} strokeWidth={2} type="monotone" dataKey="value" stroke="#058F9A" />
         </LineChart>
       </ResponsiveContainer>
-      <div className="flex justify-between items-center mt-2">
+      <div className="mt-2 flex items-center justify-between">
         <p className="text-[14px] text-[#767676]">
           Your performance is 50% better<br></br> compare to last month
         </p>
-        <span className="text-[24px] text-[#2E2E30] font-bold">50%</span>
+        <span className="text-[24px] font-bold text-[#2E2E30]">50%</span>
       </div>
     </div>
   );
@@ -120,7 +120,7 @@ function renderTooltip({ active, payload }) {
     const formattedDate = formatDateWithSuffix(date);
 
     return (
-      <div className="bg-white flex gap-2 items-center py-3 px-5 rounded-xl">
+      <div className="flex items-center gap-2 rounded-xl bg-white px-5 py-3">
         <p>
           <FaSmile fill="#078E9B" fontSize={30} />
         </p>
@@ -133,14 +133,14 @@ function renderTooltip({ active, payload }) {
   }
 }
 
-const formatDateWithSuffix = (rawDate) => {
+const formatDateWithSuffix = rawDate => {
   const date = new Date(rawDate);
 
   const day = date.getDate();
   const weekday = date.toLocaleDateString('en-US', { weekday: 'long' });
   const month = date.toLocaleDateString('en-US', { month: 'long' });
 
-  const getSuffix = (d) => {
+  const getSuffix = d => {
     if (d > 3 && d < 21) return 'th';
     switch (d % 10) {
       case 1:

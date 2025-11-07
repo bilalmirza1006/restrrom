@@ -8,19 +8,19 @@ function InspectionFields({ onChange, prefillData = {} }) {
   };
 
   const renderRow = (icon, label, field, value) => (
-    <div className="bg-white rounded-md py-2 px-3 shadow-md mb-3">
-      <div className="bg-[#A449EB0F] flex justify-between py-4 px-4 rounded-md">
-        <div className="flex gap-2 items-center">
+    <div className="mb-3 rounded-md bg-white px-3 py-2 shadow-md">
+      <div className="flex justify-between rounded-md bg-[#A449EB0F] px-4 py-4">
+        <div className="flex items-center gap-2">
           <Image src={icon} width={19} height={19} alt={label} /> {label}
         </div>
-        <div className={`${styles.customRadio} basis-[65%] flex justify-between gap-4`}>
-          {['good', 'bad', 'excellent', 'malfunctioned', 'not_checked'].map((opt) => (
+        <div className={`${styles.customRadio} flex basis-[65%] justify-between gap-4`}>
+          {['good', 'bad', 'excellent', 'malfunctioned', 'not_checked'].map(opt => (
             <div key={opt} className="w-[20%] text-center">
               <input
                 type="radio"
                 value={opt}
                 checked={value === opt}
-                onChange={(e) => handleChange(field, e.target.value)}
+                onChange={e => handleChange(field, e.target.value)}
                 name={field}
               />
             </div>
@@ -31,7 +31,7 @@ function InspectionFields({ onChange, prefillData = {} }) {
   );
 
   return (
-    <div className="mt-2 px-5 flex flex-col mb-2">
+    <div className="mt-2 mb-2 flex flex-col px-5">
       <div className="mb-2 flex gap-[28%] px-3 text-[#696969]">
         Sensors
         <div className="flex w-full justify-between">

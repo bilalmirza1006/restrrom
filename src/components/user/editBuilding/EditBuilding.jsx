@@ -21,7 +21,7 @@ const EditBuilding = () => {
 
   const steps = ['General Information', 'Building Model', 'Mapping', 'Restrooms'];
 
-  const renderStep = (step) => {
+  const renderStep = step => {
     switch (step) {
       case 1:
         return <EditGeneralInfo setCurrentStep={setCurrentStep} buildingId={buildingId} />;
@@ -41,29 +41,29 @@ const EditBuilding = () => {
   }
 
   return (
-    <div className="bg-white p-4 md:p-5 rounded-[10px]">
-      <h4 className="text-base md:text-lg font-semibold leading-[32px]">Edit Building</h4>
-      <div className="flex items-center justify-center mt-4">
+    <div className="rounded-[10px] bg-white p-4 md:p-5">
+      <h4 className="text-base leading-[32px] font-semibold md:text-lg">Edit Building</h4>
+      <div className="mt-4 flex items-center justify-center">
         {steps.map((step, index) => (
           <div key={index} className="flex items-center">
             <div
-              className={`size-[32px] rounded-full text-lg font-medium grid place-items-center ${
+              className={`grid size-[32px] place-items-center rounded-full text-lg font-medium ${
                 index > currentStep
                   ? 'bg-[#D9D9D9] text-[#11111180]'
                   : index == currentStep
-                  ? 'bg-[#D9D9D9] text-[#000]'
-                  : 'bg-primary text-white'
+                    ? 'bg-[#D9D9D9] text-[#000]'
+                    : 'bg-primary text-white'
               }`}
             >
               {index + 1}
             </div>
             <h6
-              className={`text-base md:text-lg font-semibold ml-3 ${
+              className={`ml-3 text-base font-semibold md:text-lg ${
                 index > currentStep
                   ? 'text-[#11111180]'
                   : index == currentStep
-                  ? 'text-[#000]'
-                  : 'text-primary'
+                    ? 'text-[#000]'
+                    : 'text-primary'
               }`}
             >
               {step}

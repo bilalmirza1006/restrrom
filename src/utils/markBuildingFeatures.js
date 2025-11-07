@@ -30,13 +30,13 @@ export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, curre
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
   }
 
-  polygons.forEach((polygon) => {
+  polygons.forEach(polygon => {
     if (!polygon || !polygon.points) return;
 
     // Start drawing polygon
     context.beginPath();
     context.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => context.lineTo(point.x, point.y));
+    polygon.points.forEach(point => context.lineTo(point.x, point.y));
     context.closePath();
 
     // Fill the polygon with the color
@@ -95,7 +95,7 @@ export const drawCanvas = ({ canvasRef, isDrawingEnabled, image, polygons, curre
   if (currentPolygon.length > 0) {
     context.beginPath();
     context.moveTo(currentPolygon[0].x, currentPolygon[0].y);
-    currentPolygon.forEach((point) => context.lineTo(point.x, point.y));
+    currentPolygon.forEach(point => context.lineTo(point.x, point.y));
     context.strokeStyle = '#A449EB';
     context.lineWidth = 2;
     context.stroke();
@@ -149,7 +149,7 @@ export const handleCanvasClick = ({
       id: `F1-PS${polygonCount}`,
       polygonId: nanoid(),
       restroomName: `Restroom ${polygons.length + 1}`,
-      points: draggedPolygon.points.map((point) => ({
+      points: draggedPolygon.points.map(point => ({
         x: point.x + (x - draggedPolygon.points[0].x),
         y: point.y + (y - draggedPolygon.points[0].y),
       })),
@@ -246,10 +246,10 @@ export const exportSVG = async ({ canvasRef, image, polygons }) => {
   if (!canvas || !image) return;
 
   // Convert blob URL to base64
-  const toBase64 = async (blobUrl) => {
+  const toBase64 = async blobUrl => {
     const response = await fetch(blobUrl);
     const blob = await response.blob();
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
       reader.readAsDataURL(blob);
@@ -266,19 +266,21 @@ export const exportSVG = async ({ canvasRef, image, polygons }) => {
   svgContent += `<image href="${base64Image}" width="${canvas.width}" height="${canvas.height}" />`;
 
   // Add polygons and text labels to the SVG
-  polygons.forEach((polygon) => {
+  polygons.forEach(polygon => {
     if (!polygon || !polygon.points) return;
 
     const fillColor = `${polygon.color}${90}` || '#A449EB60';
     const strokeColor = polygon.fillColor || polygon.color || '#A449EB60';
 
     svgContent += `<polygon points="${polygon.points
-      .map((point) => `${point.x},${point.y}`)
-      .join(' ')}" id="${polygon.id}" sensorAttached="${polygon.sensorAttached || ''
-      }" fill="${fillColor}" stroke="${strokeColor}" strokeWidth="2"/>`;
+      .map(point => `${point.x},${point.y}`)
+      .join(' ')}" id="${polygon.id}" sensorAttached="${
+      polygon.sensorAttached || ''
+    }" fill="${fillColor}" stroke="${strokeColor}" strokeWidth="2"/>`;
 
-    svgContent += `<text x="${polygon.points[0].x}" y="${polygon.points[0].y - 10
-      }" font-size="12" fill="black">${polygon.id}</text>`;
+    svgContent += `<text x="${polygon.points[0].x}" y="${
+      polygon.points[0].y - 10
+    }" font-size="12" fill="black">${polygon.id}</text>`;
   });
 
   svgContent += '</svg>';
@@ -317,10 +319,10 @@ export const updateSensorAttached = ({
   setPolygons,
   sensorAttached,
 }) => {
-  const updatedPolygons = polygons.map((polygon) => {
+  const updatedPolygons = polygons.map(polygon => {
     return polygon?.id === polygonId
       ? // ? { ...polygon, sensorAttached: sensor }
-      { ...polygon, id: sensor, sensorAttached }
+        { ...polygon, id: sensor, sensorAttached }
       : polygon;
   });
   setPolygons(updatedPolygons);
@@ -345,9 +347,9 @@ export const handleCanvasMouseMove = ({
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    const updatedPolygons = polygons.map((polygon) => {
+    const updatedPolygons = polygons.map(polygon => {
       if (polygon.id === draggingPolygon.id) {
-        const updatedPoints = polygon.points.map((point) => ({
+        const updatedPoints = polygon.points.map(point => ({
           x: point.x + (x - dragOffset.x - polygon.points[0].x),
           y: point.y + (y - dragOffset.y - polygon.points[0].y),
         }));
@@ -381,10 +383,10 @@ export const handleCanvasMouseDown = ({
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
-  const selectedPolygon = polygons.find((polygon) => {
+  const selectedPolygon = polygons.find(polygon => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
 
     return canvas.getContext('2d').isPointInPath(path, x, y);
@@ -402,10 +404,10 @@ export const handleCanvasMouseDown = ({
 // Delete polygon
 export const handleDeletePolygon = (x, y, polygons, setPolygons, canvasRef) => {
   const canvas = canvasRef.current;
-  const updatedPolygons = polygons.filter((polygon) => {
+  const updatedPolygons = polygons.filter(polygon => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
 
     // Check if the clicked point is inside the polygon
@@ -419,7 +421,7 @@ export const polygonsLabelHandler = (selectedOption, selectedPolygon, polygons, 
   console.log('In polygon label handler', selectedOption, selectedPolygon);
   let selectedPolygonId = selectedPolygon.id;
   setPolygons(
-    polygons.map((poly) => {
+    polygons.map(poly => {
       if (poly.id === selectedPolygonId) {
         return { ...poly, labelPoint: selectedOption.value };
       }
@@ -438,16 +440,16 @@ export const sensorInfoSubmitHandler = (
   setSensorPopup
 ) => {
   if (sensorIdInput) {
-    const updatedPolygons = polygons.map((polygon) =>
+    const updatedPolygons = polygons.map(polygon =>
       polygon.id === selectedPolygon.id
         ? {
-          ...polygon,
-          id: sensorIdInput,
-          sensorAttached: selectedSensor || sensorIdInput,
-          color: color,
-          fillColor: color,
-          labelPoint: polygon.labelPoint || 'first',
-        }
+            ...polygon,
+            id: sensorIdInput,
+            sensorAttached: selectedSensor || sensorIdInput,
+            color: color,
+            fillColor: color,
+            labelPoint: polygon.labelPoint || 'first',
+          }
         : polygon
     );
     setPolygons(updatedPolygons);
@@ -461,10 +463,10 @@ export const sensorInfoSubmitHandler = (
 // Re-Edit Polygon
 export const handleReEditPolygon = ({ x, y, canvasRef, polygons, handlePolygonClick }) => {
   const canvas = canvasRef.current;
-  const clickedPolygon = polygons.find((polygon) => {
+  const clickedPolygon = polygons.find(polygon => {
     const path = new Path2D();
     path.moveTo(polygon.points[0].x, polygon.points[0].y);
-    polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+    polygon.points.forEach(point => path.lineTo(point.x, point.y));
     path.closePath();
     return canvas.getContext('2d').isPointInPath(path, x, y);
   });
@@ -483,18 +485,18 @@ export const sensorInfoUpdateHandler = (
   selectedPolygonColor,
   setReEditModalOpen
 ) => {
-  setPolygons((prevPolygons) =>
-    prevPolygons.map((polygon) =>
+  setPolygons(prevPolygons =>
+    prevPolygons.map(polygon =>
       polygon.id === selectedPolygon.id
         ? {
-          ...polygon,
-          id: selectedPolygonId,
-          sensorAttached: selectedPolygonSensor || selectedSensor,
-          color: selectedPolygonColor,
-          fillColor: selectedPolygonColor,
-          position: selectedPolygon.position,
-          labelPoint: selectedPolygon.labelPoint,
-        }
+            ...polygon,
+            id: selectedPolygonId,
+            sensorAttached: selectedPolygonSensor || selectedSensor,
+            color: selectedPolygonColor,
+            fillColor: selectedPolygonColor,
+            position: selectedPolygon.position,
+            labelPoint: selectedPolygon.labelPoint,
+          }
         : polygon
     )
   );
@@ -509,9 +511,7 @@ export const handleCancelPolygon = (
   setSelectedPolygon
 ) => {
   setSensorPopup(false);
-  setPolygons((prevPolygons) =>
-    prevPolygons.filter((polygon) => polygon.id !== selectedPolygon?.id)
-  );
+  setPolygons(prevPolygons => prevPolygons.filter(polygon => polygon.id !== selectedPolygon?.id));
   setCurrentPolygon([]);
   setSelectedPolygon(null);
 };
@@ -523,7 +523,7 @@ export const convertImageSrcToFile = async (imageSrc, fileName = 'image.png') =>
 };
 
 export const getCroppedImg = (imageSrc, crop) => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const image = new Image();
     image.src = imageSrc;
     image.onload = () => {
@@ -544,7 +544,7 @@ export const getCroppedImg = (imageSrc, crop) => {
         canvas.height
       );
 
-      canvas.toBlob((blob) => {
+      canvas.toBlob(blob => {
         resolve(URL.createObjectURL(blob));
       }, 'image/jpeg');
     };

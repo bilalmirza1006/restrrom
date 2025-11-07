@@ -33,7 +33,7 @@ async function urlToFile(url, fileName = 'image.png') {
 
 const EditRestrooms = ({ setCurrentStep, buildingId }) => {
   const dispatch = useDispatch();
-  const building = useSelector((state) => state.building);
+  const building = useSelector(state => state.building);
   const { data: editData } = useGetBuildingWithRestroomsQuery(buildingId);
   const { data: sensorsData } = useGetAllSensorsQuery();
   const [updateBuilding] = useUpdateBuildingMutation();
@@ -75,7 +75,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
       const mergedRestrooms = storePolygons.map((poly, index) => {
         const polygonRestroomId = poly?.restroomId?.toString?.() || null;
 
-        const matchedRestroom = apiRestrooms.find((r) => {
+        const matchedRestroom = apiRestrooms.find(r => {
           const rId = r._id?.toString?.() || r.restroomId?.toString?.();
           return polygonRestroomId && rId === polygonRestroomId;
         });
@@ -120,7 +120,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
   }, [building?.buildingModelCoordinates, editData?.data?.restrooms, building.restrooms, dispatch]);
 
   const restroomChangeHandler = (index, field, value) => {
-    setRestroomss((prev) => {
+    setRestroomss(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], [field]: value };
       return updated;
@@ -129,7 +129,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
   };
 
   const handleImageChange = (index, image, file, coordinates) => {
-    setRestroomss((prev) => {
+    setRestroomss(prev => {
       const updated = [...prev];
       const target = { ...updated[index] };
       if (file) target.restroomImage = file;
@@ -141,10 +141,10 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
     dispatch(setUserEdited(true));
   };
 
-  const restoreSensor = (sensorId) => {
-    const sensor = sensorsData?.data?.find((s) => s._id === sensorId);
+  const restoreSensor = sensorId => {
+    const sensor = sensorsData?.data?.find(s => s._id === sensorId);
     if (sensor)
-      setAvailableSensors((prev) => [...prev, { option: sensor?.name, value: sensor?._id }]);
+      setAvailableSensors(prev => [...prev, { option: sensor?.name, value: sensor?._id }]);
   };
 
   // 🆕 Save single restroom locally
@@ -158,11 +158,11 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
 
   // 🔹 Save building + restrooms
   const saveBuilding = async () => {
-    const newRestroomsWithoutImages = restrooms.filter((r) => !r.isExisting && !r.restroomImage);
+    const newRestroomsWithoutImages = restrooms.filter(r => !r.isExisting && !r.restroomImage);
 
     if (newRestroomsWithoutImages.length > 0) {
       toast.error(
-        `Please upload model images for: ${newRestroomsWithoutImages.map((r) => r.name).join(', ')}`
+        `Please upload model images for: ${newRestroomsWithoutImages.map(r => r.name).join(', ')}`
       );
       return;
     }
@@ -196,14 +196,14 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
 
       await updateBuilding({ buildingId, data: buildingFormData }).unwrap();
 
-      const restroomPromises = restrooms.map(async (r) => {
+      const restroomPromises = restrooms.map(async r => {
         const restroomData = {
           name: r.name,
           type: r.type,
           status: r.status,
           area: r.area,
           numOfToilets: parseInt(r.toilets),
-          coordinates: (r.restroomCoordinates || []).map((coord) => ({
+          coordinates: (r.restroomCoordinates || []).map(coord => ({
             ...coord,
             polygonId: coord?.polygonId || nanoid(),
             labelPoint: coord?.labelPoint || 'first',
@@ -258,10 +258,10 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
   // Update available sensors
   useEffect(() => {
     if (sensorsData?.data?.length && restrooms.length) {
-      const usedSensorIds = restrooms.flatMap((r) => r.sensors || []);
+      const usedSensorIds = restrooms.flatMap(r => r.sensors || []);
       const available = sensorsData.data
-        .filter((sensor) => !sensor.isConnect && !usedSensorIds.includes(sensor._id))
-        .map((sensor) => ({
+        .filter(sensor => !sensor.isConnect && !usedSensorIds.includes(sensor._id))
+        .map(sensor => ({
           option: sensor.name,
           value: sensor._id,
         }));
@@ -271,21 +271,21 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">Restrooms</h6>
+      <h6 className="text-primary text-base font-medium">Restrooms</h6>
 
       <div className="mt-5 space-y-6">
         {restrooms.map((restroom, index) => (
-          <div key={index} className="border border-gray-200 rounded-lg p-4">
-            <h6 className="text-lg font-medium mb-4">Restroom {index + 1}</h6>
+          <div key={index} className="rounded-lg border border-gray-200 p-4">
+            <h6 className="mb-4 text-lg font-medium">Restroom {index + 1}</h6>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <Input
                 type="text"
                 name="name"
                 label="Restroom Name"
                 placeholder="Restroom Name"
                 value={restroom.name}
-                onChange={(e) => restroomChangeHandler(index, 'name', e.target.value)}
+                onChange={e => restroomChangeHandler(index, 'name', e.target.value)}
               />
               <Input
                 type="text"
@@ -300,7 +300,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
                 label="Type"
                 placeholder="Select type"
                 initialValue={restroom.type || ''}
-                onSelect={(value) => restroomChangeHandler(index, 'type', value)}
+                onSelect={value => restroomChangeHandler(index, 'type', value)}
                 options={[
                   { option: 'Public', value: 'public' },
                   { option: 'Private', value: 'private' },
@@ -311,7 +311,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
                 label="Status"
                 placeholder="Select status"
                 initialValue={restroom.status || ''}
-                onSelect={(value) => restroomChangeHandler(index, 'status', value)}
+                onSelect={value => restroomChangeHandler(index, 'status', value)}
                 options={[
                   { option: 'Active', value: 'active' },
                   { option: 'Inactive', value: 'inactive' },
@@ -324,7 +324,7 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
                 label="Area"
                 placeholder="Area"
                 value={restroom.area}
-                onChange={(e) => restroomChangeHandler(index, 'area', e.target.value)}
+                onChange={e => restroomChangeHandler(index, 'area', e.target.value)}
               />
 
               <Input
@@ -333,20 +333,20 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
                 label="Number of Toilets"
                 placeholder="Number of Toilets"
                 value={restroom.toilets}
-                onChange={(e) => restroomChangeHandler(index, 'toilets', e.target.value)}
+                onChange={e => restroomChangeHandler(index, 'toilets', e.target.value)}
               />
             </div>
 
             <div className="mt-4">
-              <h6 className="font-medium mb-3">Restroom Layout</h6>
-              <div className="py-4 grid place-items-center">
+              <h6 className="mb-3 font-medium">Restroom Layout</h6>
+              <div className="grid place-items-center py-4">
                 <MarkRestroomModel
                   restroomIndex={index}
-                  setFile={(file) => handleImageChange(index, null, file, null)}
+                  setFile={file => handleImageChange(index, null, file, null)}
                   restroomImage={restroom.restroomImage}
-                  setRestroomImage={(image) => handleImageChange(index, image, null, null)}
+                  setRestroomImage={image => handleImageChange(index, image, null, null)}
                   polygons={restroom.restroomCoordinates || []}
-                  setPolygons={(coordinates) => handleImageChange(index, null, null, coordinates)}
+                  setPolygons={coordinates => handleImageChange(index, null, null, coordinates)}
                   availableSensors={availableSensors}
                   updateRestRoomHandler={(field, value) =>
                     restroomChangeHandler(index, field, value)
@@ -357,23 +357,23 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
             </div>
 
             <div className="mt-4">
-              <h6 className="text-sm font-medium mb-2">Restroom Coordinates</h6>
+              <h6 className="mb-2 text-sm font-medium">Restroom Coordinates</h6>
               <p className="text-sm text-gray-600">
                 {restroom.restroomCoordinates?.length || 0} polygon(s) defined
               </p>
             </div>
 
-            <div className="mt-4 flex justify-between items-center">
+            <div className="mt-4 flex items-center justify-between">
               <div className="text-sm">
                 {!restroom.isExisting && !restroom.restroomImage && (
-                  <span className="text-red-500 font-medium">
+                  <span className="font-medium text-red-500">
                     ⚠️ Model image required for new restroom
                   </span>
                 )}
                 {restroom.isExisting &&
                   restroom.restroomImage &&
                   typeof restroom.restroomImage === 'object' && (
-                    <span className="text-blue-500 font-medium">
+                    <span className="font-medium text-blue-500">
                       📷 New image will replace existing
                     </span>
                   )}
@@ -388,11 +388,11 @@ const EditRestrooms = ({ setCurrentStep, buildingId }) => {
         ))}
       </div>
 
-      <div className="flex items-center justify-end gap-4 mt-6">
+      <div className="mt-6 flex items-center justify-end gap-4">
         <Button
           text="Back"
           width="!w-[150px]"
-          onClick={() => setCurrentStep((prev) => prev - 1)}
+          onClick={() => setCurrentStep(prev => prev - 1)}
           cn="!bg-[#ACACAC40] !text-[#111111B2] hover:!bg-primary hover:!text-white"
         />
         <Button

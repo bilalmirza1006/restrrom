@@ -7,7 +7,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
 
   // ✅ Authenticate user
@@ -39,10 +39,10 @@ export const GET = asyncHandler(async (req) => {
   if (!inspections?.length) throw new customError(404, 'No inspection history found');
 
   // ✅ Transform response to desired structure
-  const formatted = inspections.map((item) => ({
+  const formatted = inspections.map(item => ({
     building: item.buildingId, // includes full building details
     summary: item.summary,
-    restroomInspections: item.restroomInspections.map((r) => ({
+    restroomInspections: item.restroomInspections.map(r => ({
       restroomId: r.restroomId?.toString(),
       restroomName: r.restroomName,
       cleanliness: r.cleanliness,

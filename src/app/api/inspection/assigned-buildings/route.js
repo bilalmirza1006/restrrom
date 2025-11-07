@@ -8,7 +8,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   if (!user?._id) throw new customError(400, 'User not found');
@@ -23,7 +23,7 @@ export const GET = asyncHandler(async (req) => {
 
   // Get restrooms for each building
   const buildingsWithRestrooms = await Promise.all(
-    buildingsForInspection.map(async (assignment) => {
+    buildingsForInspection.map(async assignment => {
       const restrooms = await RestRoom.find({
         buildingId: assignment.buildingId._id,
       }).select('name type status area numOfToilets sensors');

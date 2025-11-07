@@ -1,67 +1,67 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const buildingApis = createApi({
-  reducerPath: "buildingApi",
+  reducerPath: 'buildingApi',
   baseQuery: fetchBaseQuery({
     baseUrl: `/api/building`,
-    credentials: "include",
+    credentials: 'include',
     prepareHeaders: (headers, { getState }) => {
-      headers.delete("Content-Type");
+      headers.delete('Content-Type');
       return headers;
     },
   }),
-  tagTypes: ["building"],
-  endpoints: (builder) => ({
+  tagTypes: ['building'],
+  endpoints: builder => ({
     createBuilding: builder.mutation({
-      query: (data) => ({
-        url: "/create",
-        method: "POST",
+      query: data => ({
+        url: '/create',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["building"],
+      invalidatesTags: ['building'],
     }),
     getAllBuildings: builder.query({
       query: () => ({
-        url: "/all",
-        method: "GET",
+        url: '/all',
+        method: 'GET',
       }),
-      providesTags: ["building"],
+      providesTags: ['building'],
     }),
     getBuilding: builder.query({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/single/${buildingId}`,
-        method: "GET",
+        method: 'GET',
       }),
-      providesTags: ["building"],
+      providesTags: ['building'],
     }),
     getBuildingWithRestrooms: builder.query({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/with-restrooms/${buildingId}`,
-        method: "GET",
+        method: 'GET',
       }),
-      providesTags: ["building"],
+      providesTags: ['building'],
     }),
     updateBuilding: builder.mutation({
       query: ({ buildingId, data }) => ({
         url: `/single/${buildingId}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["building"],
+      invalidatesTags: ['building'],
     }),
     deleteBuilding: builder.mutation({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/single/${buildingId}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["building"],
+      invalidatesTags: ['building'],
     }),
     getBuildingEditData: builder.query({
-      query: (buildingId) => ({
+      query: buildingId => ({
         url: `/edit-data/${buildingId}`,
-        method: "GET",
+        method: 'GET',
       }),
-      providesTags: ["building"],
+      providesTags: ['building'],
     }),
   }),
 });

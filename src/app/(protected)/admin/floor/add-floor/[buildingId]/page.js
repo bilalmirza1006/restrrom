@@ -27,14 +27,14 @@ const AddFloor = ({}) => {
   });
 
   const handleRestroomChange = (index, field, value) => {
-    setRestroom((prev) => ({ ...prev, [field]: value }));
+    setRestroom(prev => ({ ...prev, [field]: value }));
   };
 
   const [polygons, setPolygons] = useState([]);
   const [availableSensors, setAvailableSensors] = useState([]);
 
   const handleChange = (field, value) => {
-    setRestroom((prev) => ({ ...prev, [field]: value }));
+    setRestroom(prev => ({ ...prev, [field]: value }));
   };
 
   const handleImageChange = (image, file, coordinates) => {
@@ -85,7 +85,7 @@ const AddFloor = ({}) => {
   useEffect(() => {
     if (sensorData?.data) {
       const formattedSensors = [];
-      sensorData?.data?.forEach((sensor) => {
+      sensorData?.data?.forEach(sensor => {
         if (!sensor?.isConnected)
           formattedSensors.push({ option: sensor?.name, value: sensor?._id });
       });
@@ -95,21 +95,21 @@ const AddFloor = ({}) => {
 
   return (
     <div>
-      <h6 className="text-base text-primary font-medium">Restroom</h6>
-      <div className="py-6 p-4 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h6 className="text-primary text-base font-medium">Restroom</h6>
+      <div className="space-y-6 p-4 py-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Input
             label="Restroom Name"
             placeholder="Enter name"
             value={restroom.name}
-            onChange={(e) => handleChange('name', e.target.value)}
+            onChange={e => handleChange('name', e.target.value)}
           />
 
           <Dropdown
             label="Type"
             placeholder="Select type"
             value={restroom.type}
-            onSelect={(value) => handleChange('type', value)}
+            onSelect={value => handleChange('type', value)}
             options={[
               { option: 'Public', value: 'public' },
               { option: 'Private', value: 'private' },
@@ -119,7 +119,7 @@ const AddFloor = ({}) => {
           <Dropdown
             label="Status"
             placeholder="Select status"
-            onSelect={(value) => handleChange('status', value)}
+            onSelect={value => handleChange('status', value)}
             options={[
               { option: 'Active', value: 'active' },
               { option: 'Inactive', value: 'inactive' },
@@ -131,7 +131,7 @@ const AddFloor = ({}) => {
             placeholder="Enter area"
             type="number"
             value={restroom.area}
-            onChange={(e) => handleChange('area', e.target.value)}
+            onChange={e => handleChange('area', e.target.value)}
           />
 
           <Input
@@ -139,19 +139,19 @@ const AddFloor = ({}) => {
             placeholder="Enter toilets"
             type="number"
             value={restroom.toilets}
-            onChange={(e) => handleChange('toilets', e.target.value)}
+            onChange={e => handleChange('toilets', e.target.value)}
           />
         </div>
 
         <div>
-          <h6 className="font-medium mb-3">Restroom Layout</h6>
-          <div className="py-4 grid place-items-center">
+          <h6 className="mb-3 font-medium">Restroom Layout</h6>
+          <div className="grid place-items-center py-4">
             <MarkRestroomModel
               restroomIndex={'1'}
               updateRestRoomHandler={handleRestroomChange}
-              setFile={(file) => handleImageChange(null, file, null)}
+              setFile={file => handleImageChange(null, file, null)}
               restroomImage={restroom.restroomImage}
-              setRestroomImage={(image) => handleImageChange(image, null, null)}
+              setRestroomImage={image => handleImageChange(image, null, null)}
               polygons={polygons}
               setPolygons={setPolygons}
               availableSensors={availableSensors}

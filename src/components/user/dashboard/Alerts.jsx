@@ -29,25 +29,25 @@ const Alerts = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-5 h-full ">
-      <div className="flex justify-between items-center mb-4">
+    <div className="h-full rounded-2xl bg-white p-5 shadow-md">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GoAlertFill className="text-2xl text-[#FF3B30]" />
-          <h2 className="text-[19px] font-semibold md:text-lg leading-[30px]">Alerts</h2>
+          <h2 className="text-[19px] leading-[30px] font-semibold md:text-lg">Alerts</h2>
         </div>
-        <button onClick={() => handleModalOpen()} className="text-primary text-xs cursor-pointer">
+        <button onClick={() => handleModalOpen()} className="text-primary cursor-pointer text-xs">
           See all
         </button>
       </div>
 
       {alerts.length === 0 ? (
-        <h2 className="bg-[#00000010] text-[#00000090] p-3 text-[21px]">No Alert Found!</h2>
+        <h2 className="bg-[#00000010] p-3 text-[21px] text-[#00000090]">No Alert Found!</h2>
       ) : (
-        <div className="flex flex-col gap-3 h-[344px] overflow-y-scroll scroll-0">
+        <div className="scroll-0 flex h-[344px] flex-col gap-3 overflow-y-scroll">
           {alerts.map((alert, i) => (
             <div
               key={i}
-              className="bg-[#FFECEC] text-[#F42F2F] rounded-[6px] p-[15px] flex gap-2 items-center border-l-4 border-[#F42F2F]"
+              className="flex items-center gap-2 rounded-[6px] border-l-4 border-[#F42F2F] bg-[#FFECEC] p-[15px] text-[#F42F2F]"
             >
               <p className="text-sm md:text-base">{alert}</p>
             </div>
@@ -58,11 +58,11 @@ const Alerts = () => {
       {modal && (
         <Modal title="All Alerts" onClose={handleModalClose}>
           <div>
-            <div className="modal-content overflow-y-auto max-h-64 custom-scroll">
+            <div className="modal-content custom-scroll max-h-64 overflow-y-auto">
               {alerts.map((alert, i) => (
                 <div
                   key={i}
-                  className="bg-[#FFECEC] text-[#F42F2F] rounded-[6px] p-[10px] flex gap-2 items-center mb-2 border-l-4 border-[#F42F2F]"
+                  className="mb-2 flex items-center gap-2 rounded-[6px] border-l-4 border-[#F42F2F] bg-[#FFECEC] p-[10px] text-[#F42F2F]"
                 >
                   <p>{alert}</p>
                 </div>

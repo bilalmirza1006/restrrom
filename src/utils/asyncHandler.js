@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import customError from './customError';
 
-export const asyncHandler = (fn) => {
+export const asyncHandler = fn => {
   return async (req, context) => {
     try {
       return await fn(req, context);

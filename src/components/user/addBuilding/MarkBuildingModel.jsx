@@ -76,19 +76,19 @@ const MarkBuildingModel = ({
   ]);
   console.log('severityColors', severityColors);
 
-  const totalRestroomsFromState = useSelector((state) =>
+  const totalRestroomsFromState = useSelector(state =>
     parseInt(state.building?.totalRestrooms || '0')
   );
   const currentTotalRestrooms = totalRestrooms || totalRestroomsFromState;
 
-  const openSensorPopup = (polygon) => {
+  const openSensorPopup = polygon => {
     setSelectedPolygon(polygon);
     setSensorPopup(true);
     setFloorIdInput('');
   };
   const handleSeverityChange = (level, field, value) => {
-    setSeverityColors((prev) =>
-      prev.map((item) => (item.level === level ? { ...item, [field]: value } : item))
+    setSeverityColors(prev =>
+      prev.map(item => (item.level === level ? { ...item, [field]: value } : item))
     );
   };
 
@@ -114,7 +114,7 @@ const MarkBuildingModel = ({
   };
 
   // Enable Polygon Copying
-  const handlePolygonCopy = (event) => {
+  const handlePolygonCopy = event => {
     if (!isCopyMode) return;
 
     const canvas = canvasRef.current;
@@ -122,10 +122,10 @@ const MarkBuildingModel = ({
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    const selectedPolygon = polygons.find((polygon) => {
+    const selectedPolygon = polygons.find(polygon => {
       const path = new Path2D();
       path.moveTo(polygon.points[0].x, polygon.points[0].y);
-      polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+      polygon.points.forEach(point => path.lineTo(point.x, point.y));
       path.closePath();
 
       return canvas.getContext('2d').isPointInPath(path, x, y);
@@ -137,8 +137,8 @@ const MarkBuildingModel = ({
   };
 
   // Function to open modal with polygon ID
-  const handlePolygonClick = (polygonId) => {
-    const polygonToEdit = polygons.find((polygon) => polygon.id === polygonId);
+  const handlePolygonClick = polygonId => {
+    const polygonToEdit = polygons.find(polygon => polygon.id === polygonId);
     setSelectedPolygon(polygonToEdit);
     setSelectedPolygonId(polygonId);
     setReEditModalOpen(true);
@@ -171,7 +171,7 @@ const MarkBuildingModel = ({
         setImage(img);
         setIsDrawingEnabled(true);
       };
-      img.onerror = (err) => console.log('Image failed to load', err);
+      img.onerror = err => console.log('Image failed to load', err);
       img.src = buildingModelImage;
     }
   }, [buildingModelImage]);
@@ -180,7 +180,7 @@ const MarkBuildingModel = ({
     <div className="relative inline-block">
       {!isDrawingEnabled && (
         <BrowseFileBtn
-          onFileChange={(event) =>
+          onFileChange={event =>
             handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)
           }
         />
@@ -190,8 +190,8 @@ const MarkBuildingModel = ({
         width={800}
         height={500}
         ref={canvasRef}
-        className="border border-primary border-dashed bg-[#03a5e010] rounded-xl"
-        onClick={(event) =>
+        className="border-primary rounded-xl border border-dashed bg-[#03a5e010]"
+        onClick={event =>
           handleCanvasClick({
             event,
             canvasRef,
@@ -219,7 +219,7 @@ const MarkBuildingModel = ({
             onLimitReached: () => toast.error('You cannot add more polygons than Total Restrooms'),
           })
         }
-        onMouseDown={(event) =>
+        onMouseDown={event =>
           handleCanvasMouseDown({
             event,
             isMoveMode,
@@ -229,7 +229,7 @@ const MarkBuildingModel = ({
             setDragOffset,
           })
         }
-        onMouseMove={(event) =>
+        onMouseMove={event =>
           handleCanvasMouseMove({
             event,
             isCopyMode,
@@ -245,8 +245,8 @@ const MarkBuildingModel = ({
       />
 
       {showCropper && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-4 rounded-lg w-3/4 max-w-lg">
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-gray-900">
+          <div className="w-3/4 max-w-lg rounded-lg bg-white p-4">
             <Cropper
               image={imageSrc}
               crop={crop}
@@ -256,16 +256,16 @@ const MarkBuildingModel = ({
               onZoomChange={setZoom}
               onCropComplete={onCropComplete}
             />
-            <div className="flex items-center gap-2 mt-4 z-[999] absolute bottom-6 right-6">
+            <div className="absolute right-6 bottom-6 z-[999] mt-4 flex items-center gap-2">
               <button
                 onClick={() => setShowCropper(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
+                className="rounded bg-gray-500 px-4 py-2 text-white"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCropConfirm}
-                className="bg-primary text-white px-4 py-2 rounded"
+                className="bg-primary rounded px-4 py-2 text-white"
               >
                 Crop
               </button>
@@ -275,7 +275,7 @@ const MarkBuildingModel = ({
       )}
       {isDrawingEnabled && (
         <>
-          <div className="flex flex-col items-center gap-4 absolute top-0 right-[-6%]">
+          <div className="absolute top-0 right-[-6%] flex flex-col items-center gap-4">
             <button
               onClick={() => {
                 setIsEditMode(!isEditMode);
@@ -284,8 +284,9 @@ const MarkBuildingModel = ({
                 setIsDeleteMode(false);
                 setIsUpdateMode(false);
               }}
-              className={`p-2 border rounded-md text-white ${isEditMode ? 'border-primary' : 'border-[#565656]'
-                }`}
+              className={`rounded-md border p-2 text-white ${
+                isEditMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
               <LiaDrawPolygonSolid fontSize={20} color={isEditMode ? '#A449EB' : '#565656'} />
             </button>
@@ -301,8 +302,9 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isCopyMode ? 'border-primary' : 'border-[#565656]'
-                }`}
+              className={`rounded-md border p-2 text-white ${
+                isCopyMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
               <VscCopy fontSize={20} color={isCopyMode ? '#A449EB' : '#565656'} />
             </button>
@@ -318,8 +320,9 @@ const MarkBuildingModel = ({
                   isCopyMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isUpdateMode ? 'border-primary' : 'border-[#565656]'
-                }`}
+              className={`rounded-md border p-2 text-white ${
+                isUpdateMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
               <RiEditBoxFill fontSize={20} color={isUpdateMode ? '#A449EB' : '#565656'} />
             </button>
@@ -335,8 +338,9 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isMoveMode ? 'border-primary' : 'border-[#565656]'
-                }`}
+              className={`rounded-md border p-2 text-white ${
+                isMoveMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
               <SlCursorMove fontSize={20} color={isMoveMode ? '#A449EB' : '#565656'} />
             </button>
@@ -351,8 +355,9 @@ const MarkBuildingModel = ({
                   setIsUpdateMode,
                 })
               }
-              className={`p-2 border rounded-md text-white ${isDeleteMode ? 'border-primary' : 'border-[#565656]'
-                }`}
+              className={`rounded-md border p-2 text-white ${
+                isDeleteMode ? 'border-primary' : 'border-[#565656]'
+              }`}
             >
               <AiOutlineDelete fontSize={20} color={isDeleteMode ? '#A449EB' : '#565656'} />
             </button>
@@ -367,7 +372,7 @@ const MarkBuildingModel = ({
               placeholder="Restroom ID"
               label="Restroom ID"
               value={floorIdInput}
-              onChange={(e) => setFloorIdInput(e.target.value)}
+              onChange={e => setFloorIdInput(e.target.value)}
             />
 
             <Dropdown
@@ -379,17 +384,17 @@ const MarkBuildingModel = ({
                 { option: 'Fourth-Point', value: 'fourth' },
               ]}
               label="Label Positioning of polygon"
-              onSelect={(selectedOption) =>
+              onSelect={selectedOption =>
                 polygonsLabelHandler(selectedOption, selectedPolygon, polygons, setPolygons)
               }
             />
 
-            <div className="flex flex-col  border p-2 rounded-xl border-[#66666659]">
+            <div className="flex flex-col rounded-xl border border-[#66666659] p-2">
               {severityColors.map((sev, index) => (
                 <div key={sev.level} className="flex w-full flex-col items-center gap-4">
-                  <div className="flex flex-row w-full justify-center items-center px-2 gap-4">
+                  <div className="flex w-full flex-row items-center justify-center gap-4 px-2">
                     <div className="w-full">
-                      <span className="w-16 capitalize font-bold text-xs">{sev.level}</span>
+                      <span className="w-16 text-xs font-bold capitalize">{sev.level}</span>
                     </div>
                     <div className="w-full">
                       <Input
@@ -397,7 +402,7 @@ const MarkBuildingModel = ({
                         placeholder="Min"
                         value={sev.min}
                         readOnly={sev.level === 'empty'} // ✅ only "empty" is read-only
-                        onChange={(e) => handleSeverityChange(sev.level, 'min', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'min', e.target.value)}
                       />
                     </div>
 
@@ -407,7 +412,7 @@ const MarkBuildingModel = ({
                         placeholder="Max"
                         value={sev.max}
                         readOnly={sev.level === 'empty'} // ✅ only "empty" is read-only
-                        onChange={(e) => handleSeverityChange(sev.level, 'max', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'max', e.target.value)}
                       />
                     </div>
 
@@ -416,14 +421,14 @@ const MarkBuildingModel = ({
                         className="w-full"
                         type="color"
                         value={sev.color}
-                        onChange={(e) => handleSeverityChange(sev.level, 'color', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'color', e.target.value)}
                       />
                     </div>
                   </div>
 
                   {/* ✅ Show divider except for last index */}
                   {index < severityColors.length - 1 && (
-                    <div className="border-t-2 p-1 w-full border-[#66666659]"></div>
+                    <div className="w-full border-t-2 border-[#66666659] p-1"></div>
                   )}
                 </div>
               ))}
@@ -472,7 +477,7 @@ const MarkBuildingModel = ({
               placeholder="Floor ID"
               label="Floor ID"
               value={selectedPolygonId}
-              onChange={(e) => setSelectedPolygonId(e.target.value)}
+              onChange={e => setSelectedPolygonId(e.target.value)}
             />
 
             <Dropdown
@@ -484,24 +489,24 @@ const MarkBuildingModel = ({
                 { option: 'Fourth-Point', value: 'fourth' },
               ]}
               label="Label Positioning of polygon"
-              onSelect={(selectedOption) =>
+              onSelect={selectedOption =>
                 polygonsLabelHandler(selectedOption, selectedPolygon, polygons, setPolygons)
               }
             />
 
-            <div className="flex flex-col  border p-2 rounded-xl border-[#66666659]">
+            <div className="flex flex-col rounded-xl border border-[#66666659] p-2">
               {severityColors.map((sev, index) => (
                 <div key={sev.level} className="flex w-full flex-col items-center gap-4">
-                  <div className="flex flex-row w-full justify-center items-center px-2 gap-4">
+                  <div className="flex w-full flex-row items-center justify-center gap-4 px-2">
                     <div className="w-full">
-                      <span className="w-16 capitalize font-bold text-xs">{sev.level}</span>
+                      <span className="w-16 text-xs font-bold capitalize">{sev.level}</span>
                     </div>
                     <div className="w-full">
                       <Input
                         type="number"
                         placeholder="Min"
                         value={sev.min}
-                        onChange={(e) => handleSeverityChange(sev.level, 'min', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'min', e.target.value)}
                       />
                     </div>
 
@@ -510,7 +515,7 @@ const MarkBuildingModel = ({
                         type="number"
                         placeholder="Max"
                         value={sev.max}
-                        onChange={(e) => handleSeverityChange(sev.level, 'max', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'max', e.target.value)}
                       />
                     </div>
 
@@ -519,14 +524,14 @@ const MarkBuildingModel = ({
                         className="w-full"
                         type="color"
                         value={sev.color}
-                        onChange={(e) => handleSeverityChange(sev.level, 'color', e.target.value)}
+                        onChange={e => handleSeverityChange(sev.level, 'color', e.target.value)}
                       />
                     </div>
                   </div>
 
                   {/* ✅ Show divider except for last index */}
                   {index < severityColors.length - 1 && (
-                    <div className="border-t-2 p-1 w-full border-[#66666659]"></div>
+                    <div className="w-full border-t-2 border-[#66666659] p-1"></div>
                   )}
                 </div>
               ))}
@@ -560,7 +565,7 @@ export default MarkBuildingModel;
 
 const BrowseFileBtn = ({ onFileChange }) => {
   return (
-    <button className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 cursor-pointer rounded-lg bg-primary text-white font-semibold">
+    <button className="bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer rounded-lg px-4 py-2 font-semibold text-white">
       Browse File
       <input
         type="file"

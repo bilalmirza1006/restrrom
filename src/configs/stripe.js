@@ -27,7 +27,7 @@ export const stripeConfig = {
 };
 
 // Helper function to get price ID by plan
-export const getPriceIdByPlan = (plan) => {
+export const getPriceIdByPlan = plan => {
   switch (plan) {
     case 'monthly':
       return stripeConfig.monthlyPrice;
@@ -41,7 +41,7 @@ export const getPriceIdByPlan = (plan) => {
 };
 
 // Helper function to get subscription mode by plan
-export const getSubscriptionMode = (plan) => {
+export const getSubscriptionMode = plan => {
   return plan === 'lifetime' ? 'payment' : 'subscription';
 };
 

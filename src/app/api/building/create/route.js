@@ -7,7 +7,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const POST = asyncHandler(async (req) => {
+export const POST = asyncHandler(async req => {
   await connectDb();
   await configureCloudinary();
   const { user, accessToken } = await isAuthenticated();

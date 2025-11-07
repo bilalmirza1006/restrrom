@@ -7,7 +7,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
 
   const { user, accessToken } = await isAuthenticated();

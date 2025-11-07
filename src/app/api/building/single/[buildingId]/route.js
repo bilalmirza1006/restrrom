@@ -74,7 +74,7 @@ export const DELETE = asyncHandler(async (req, { params }) => {
   const floors = await RestRoom.find({ buildingId });
 
   // Get all sensor IDs from floors
-  const allFloorSensorIds = floors.flatMap((floor) => floor.sensors || []);
+  const allFloorSensorIds = floors.flatMap(floor => floor.sensors || []);
 
   // Disconnect all sensors from building and floor
   if (allFloorSensorIds.length) {

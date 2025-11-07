@@ -11,7 +11,7 @@ export const inspectionApis = createApi({
     },
   }),
   tagTypes: ['inspections'],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     getAllInspectors: builder.query({
       query: () => ({
         url: '/all-inspectors',
@@ -20,7 +20,7 @@ export const inspectionApis = createApi({
       providesTags: ['inspections'],
     }),
     assignBuildingToInspector: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/assign',
         method: 'POST',
         body: data,
@@ -28,7 +28,7 @@ export const inspectionApis = createApi({
       invalidatesTags: ['inspections'],
     }),
     unAssignBuildingToInspector: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/unassign',
         method: 'DELETE',
         body: data,
@@ -36,7 +36,7 @@ export const inspectionApis = createApi({
       invalidatesTags: ['inspections'],
     }),
     createBuildingInspection: builder.mutation({
-      query: (data) => ({
+      query: data => ({
         url: '/create',
         method: 'POST',
         body: data,
@@ -72,7 +72,7 @@ export const inspectionApis = createApi({
       providesTags: ['inspections'],
     }),
     getInspectionById: builder.query({
-      query: (id) => ({
+      query: id => ({
         url: `/get-inpection-by-id?id=${id}`,
         method: 'GET',
       }),

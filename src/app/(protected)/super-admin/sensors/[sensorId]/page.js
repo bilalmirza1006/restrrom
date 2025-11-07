@@ -1,4 +1,4 @@
-import SensorDetail from "@/components/user/sensors/SensorDetail";
+import SensorDetail from '@/components/user/sensors/SensorDetail';
 
 const SensorViewPage = async ({ params }) => {
   const { sensorId } = await params;

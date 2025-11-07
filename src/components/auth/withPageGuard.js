@@ -57,7 +57,7 @@ export const PAGE_PERMISSIONS = {
 const withPageGuard = (WrappedComponent, requiredPath) => {
   return function ProtectedComponent(props) {
     const router = useRouter();
-    const { user, isAuthenticated } = useSelector((state) => state.auth);
+    const { user, isAuthenticated } = useSelector(state => state.auth);
 
     // Normalize user role
     const getUserRole = () => {

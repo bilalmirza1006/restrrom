@@ -76,12 +76,12 @@ const MarkRestroomModel = ({
   // Get filtered sensors - removing ones already used in this restroom or other restrooms
   const getFilteredSensors = () => {
     const usedSensors = polygons
-      .map((polygon) => polygon?.sensor)
-      .filter((sensor) => sensor && sensor !== 'No sensor');
-    return availableSensors?.filter((sensor) => !usedSensors.includes(sensor?.value)) || [];
+      .map(polygon => polygon?.sensor)
+      .filter(sensor => sensor && sensor !== 'No sensor');
+    return availableSensors?.filter(sensor => !usedSensors.includes(sensor?.value)) || [];
   };
 
-  const openSensorPopup = (polygon) => {
+  const openSensorPopup = polygon => {
     setSelectedPolygon(polygon);
     setSensorPopup(true);
     setSensorIdInput('');
@@ -110,16 +110,16 @@ const MarkRestroomModel = ({
   };
 
   // Enable Polygon Copying
-  const handlePolygonCopy = (event) => {
+  const handlePolygonCopy = event => {
     if (!isCopyMode) return;
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    const selectedPolygon = polygons?.find((polygon) => {
+    const selectedPolygon = polygons?.find(polygon => {
       const path = new Path2D();
       path.moveTo(polygon.points[0].x, polygon.points[0].y);
-      polygon.points.forEach((point) => path.lineTo(point.x, point.y));
+      polygon.points.forEach(point => path.lineTo(point.x, point.y));
       path.closePath();
       return canvas.getContext('2d').isPointInPath(path, x, y);
     });
@@ -128,7 +128,7 @@ const MarkRestroomModel = ({
 
   // Function to open modal with polygon ID
   const handlePolygonClick = (polygonId, polygonSensor) => {
-    const polygonToEdit = polygons?.find((polygon) => polygon.id === polygonId);
+    const polygonToEdit = polygons?.find(polygon => polygon.id === polygonId);
     setSelectedPolygon(polygonToEdit);
     setSelectedPolygonId(polygonId);
     setSelectedPolygonSensor(polygonSensor);
@@ -162,7 +162,7 @@ const MarkRestroomModel = ({
         setImage(img);
         setIsDrawingEnabled(true);
       };
-      img.onerror = (err) => console.log('Image failed to load', err);
+      img.onerror = err => console.log('Image failed to load', err);
       img.src = imgSrc;
 
       // cleanup object URL
@@ -178,7 +178,7 @@ const MarkRestroomModel = ({
     <div className="relative inline-block">
       {!isDrawingEnabled && (
         <BrowseFileBtn
-          onFileChange={(event) =>
+          onFileChange={event =>
             handleImageUpload(event, setImageSrc, setShowCropper, setIsDrawingEnabled)
           }
         />
@@ -188,8 +188,8 @@ const MarkRestroomModel = ({
         width={800}
         height={500}
         ref={canvasRef}
-        className="border border-primary border-dashed bg-[#03a5e010] rounded-xl"
-        onClick={(event) =>
+        className="border-primary rounded-xl border border-dashed bg-[#03a5e010]"
+        onClick={event =>
           handleCanvasClick({
             event,
             canvasRef,
@@ -215,7 +215,7 @@ const MarkRestroomModel = ({
             restoreSensor,
           })
         }
-        onMouseDown={(event) =>
+        onMouseDown={event =>
           handleCanvasMouseDown({
             event,
             isMoveMode,
@@ -225,7 +225,7 @@ const MarkRestroomModel = ({
             setDragOffset,
           })
         }
-        onMouseMove={(event) =>
+        onMouseMove={event =>
           handleCanvasMouseMove({
             event,
             isCopyMode,
@@ -241,7 +241,7 @@ const MarkRestroomModel = ({
       />
 
       {isDrawingEnabled && (
-        <div className="mt-4 flex items-center justify-center flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <button
             onClick={() =>
               handleUpdateMode({
@@ -253,8 +253,8 @@ const MarkRestroomModel = ({
                 isUpdateMode,
               })
             }
-            className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isUpdateMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
+            className={`flex items-center rounded-md px-3 py-1 text-lg font-medium ${
+              isUpdateMode ? 'text-primary bg-[#A449EB50]' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <RiEditBoxFill />
@@ -272,8 +272,8 @@ const MarkRestroomModel = ({
                 setDraggingPolygon,
               })
             }
-            className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isMoveMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
+            className={`flex items-center rounded-md px-3 py-1 text-lg font-medium ${
+              isMoveMode ? 'text-primary bg-[#A449EB50]' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <SlCursorMove />
@@ -291,8 +291,8 @@ const MarkRestroomModel = ({
                 isCopyMode,
               })
             }
-            className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isCopyMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
+            className={`flex items-center rounded-md px-3 py-1 text-lg font-medium ${
+              isCopyMode ? 'text-primary bg-[#A449EB50]' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <VscCopy />
@@ -309,16 +309,16 @@ const MarkRestroomModel = ({
                 setIsUpdateMode,
               })
             }
-            className={`flex items-center text-lg font-medium rounded-md px-3 py-1 ${
-              isDeleteMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
+            className={`flex items-center rounded-md px-3 py-1 text-lg font-medium ${
+              isDeleteMode ? 'text-primary bg-[#A449EB50]' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
           >
             <AiOutlineDelete />
             <span className="ml-1 text-sm">Delete</span>
           </button>
           <button
-            className={`flex items-center text-base md:text-lg font-medium rounded-md px-3 py-1 ${
-              isEditMode ? 'bg-[#A449EB50] text-primary' : 'bg-[#ACACAC40] text-[#11111180]'
+            className={`flex items-center rounded-md px-3 py-1 text-base font-medium md:text-lg ${
+              isEditMode ? 'text-primary bg-[#A449EB50]' : 'bg-[#ACACAC40] text-[#11111180]'
             }`}
             onClick={() => {
               setIsEditMode(true);
@@ -337,9 +337,9 @@ const MarkRestroomModel = ({
       {/* Image Cropper Modal */}
       {showCropper && (
         <Modal isOpen={showCropper} onClose={() => setShowCropper(false)}>
-          <div className="w-full md:min-w-[600px] p-5">
-            <h4 className="text-center text-lg md:text-[22px] font-semibold mb-5">Crop Image</h4>
-            <div className="flex-1 h-[400px] relative">
+          <div className="w-full p-5 md:min-w-[600px]">
+            <h4 className="mb-5 text-center text-lg font-semibold md:text-[22px]">Crop Image</h4>
+            <div className="relative h-[400px] flex-1">
               <Cropper
                 image={imageSrc}
                 crop={crop}
@@ -350,14 +350,14 @@ const MarkRestroomModel = ({
                 onCropComplete={onCropComplete}
               />
             </div>
-            <div className="flex items-center justify-end gap-3 mt-5">
+            <div className="mt-5 flex items-center justify-end gap-3">
               <Button
                 text="Cancel"
                 onClick={() => {
-                  setShowCropper(false),
+                  (setShowCropper(false),
                     setImageSrc(null),
                     setShowCropper(false),
-                    setIsDrawingEnabled(false);
+                    setIsDrawingEnabled(false));
                 }}
                 cn="!bg-[#ACACAC40] !text-[#111111B2]"
               />
@@ -370,14 +370,14 @@ const MarkRestroomModel = ({
       {/* Sensor Popup Modal */}
       {sensorPopup && (
         <Modal isOpen={sensorPopup} onClose={() => setSensorPopup(false)}>
-          <div className="w-full md:min-w-[500px] p-5">
-            <h5 className="text-lg font-semibold mb-6">Add Sensor </h5>
+          <div className="w-full p-5 md:min-w-[500px]">
+            <h5 className="mb-6 text-lg font-semibold">Add Sensor </h5>
             <div className="space-y-4">
               <Input
                 label="Sensor Name"
                 placeholder="Enter Sensor Name"
                 value={sensorIdInput}
-                onChange={(e) => setSensorIdInput(e.target.value)}
+                onChange={e => setSensorIdInput(e.target.value)}
               />
 
               <Dropdown
@@ -393,9 +393,9 @@ const MarkRestroomModel = ({
               />
 
               <div>
-                <label className="block text-sm font-medium mb-2">Label Position</label>
-                <div className="flex items-center flex-wrap gap-2">
-                  {['left', 'right', 'top', 'bottom'].map((point) => (
+                <label className="mb-2 block text-sm font-medium">Label Position</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {['left', 'right', 'top', 'bottom'].map(point => (
                     <button
                       key={point}
                       onClick={() =>
@@ -407,7 +407,7 @@ const MarkRestroomModel = ({
                           setSelectedPolygon // ✅ Pass setter
                         )
                       }
-                      className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
+                      className={`rounded-md px-3 py-1 text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point
                           ? 'bg-primary text-white'
                           : 'bg-[#ACACAC40] text-[#111111B2]'
@@ -420,11 +420,11 @@ const MarkRestroomModel = ({
               </div>
 
               <div className="flex items-center gap-4">
-                <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+                <h1 className="text-xs font-bold">Select Color of Polygon</h1>
+                <input type="color" value={color} onChange={e => setColor(e.target.value)} />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 mt-5">
+            <div className="mt-5 flex items-center justify-end gap-3">
               <Button
                 text="Cancel"
                 onClick={() =>
@@ -450,7 +450,7 @@ const MarkRestroomModel = ({
                     color,
                     setPolygons,
                     setSensorPopup,
-                    (newPolygons) => {
+                    newPolygons => {
                       // ✅ Sync to Redux
                       updateRestRoomHandler(restroomIndex, 'restroomCoordinates', newPolygons);
                     }
@@ -465,22 +465,20 @@ const MarkRestroomModel = ({
       {/* Re-edit Modal */}
       {reEditModalOpen && (
         <Modal isOpen={reEditModalOpen} onClose={() => setReEditModalOpen(false)}>
-          <div className="w-full md:min-w-[500px] p-5">
-            <h5 className="text-lg font-semibold mb-6">Update Restroom Details</h5>
+          <div className="w-full p-5 md:min-w-[500px]">
+            <h5 className="mb-6 text-lg font-semibold">Update Restroom Details</h5>
             <div className="space-y-4">
               <Input
                 label="Restroom ID"
                 placeholder="Enter Restroom ID"
                 value={selectedPolygonId}
-                onChange={(e) => setSelectedPolygonId(e.target.value)}
+                onChange={e => setSelectedPolygonId(e.target.value)}
               />
 
               <Dropdown
                 options={[
                   { option: 'No sensor', value: 'No sensor' },
-                  ...getFilteredSensors().filter(
-                    (sensor) => sensor.value !== selectedPolygonSensor
-                  ),
+                  ...getFilteredSensors().filter(sensor => sensor.value !== selectedPolygonSensor),
                   ...(selectedPolygonSensor && selectedPolygonSensor !== 'No sensor'
                     ? [
                         {
@@ -497,9 +495,9 @@ const MarkRestroomModel = ({
               />
 
               <div>
-                <label className="block text-sm font-medium mb-2">Label Position</label>
-                <div className="flex items-center flex-wrap gap-2">
-                  {['left', 'right', 'top', 'bottom'].map((point) => (
+                <label className="mb-2 block text-sm font-medium">Label Position</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {['left', 'right', 'top', 'bottom'].map(point => (
                     <button
                       key={point}
                       onClick={() =>
@@ -511,7 +509,7 @@ const MarkRestroomModel = ({
                           setSelectedPolygon // ✅ Pass setter
                         )
                       }
-                      className={`px-3 py-1 rounded-md text-xs font-medium capitalize ${
+                      className={`rounded-md px-3 py-1 text-xs font-medium capitalize ${
                         selectedPolygon?.labelPoint === point
                           ? 'bg-primary text-white'
                           : 'bg-[#ACACAC40] text-[#111111B2]'
@@ -524,11 +522,11 @@ const MarkRestroomModel = ({
               </div>
 
               <div className="flex items-center gap-4">
-                <h1 className="font-bold text-xs">Select Color of Polygon</h1>
-                <input type="color" value={color} onChange={(e) => setColor(e.target.value)} />
+                <h1 className="text-xs font-bold">Select Color of Polygon</h1>
+                <input type="color" value={color} onChange={e => setColor(e.target.value)} />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 mt-5">
+            <div className="mt-5 flex items-center justify-end gap-3">
               <Button
                 text="Cancel"
                 onClick={() => setReEditModalOpen(false)}
@@ -562,7 +560,7 @@ const BrowseFileBtn = ({ onFileChange }) => {
       <div>
         <label className="cursor-pointer">
           <div className="flex flex-col items-center justify-center">
-            <p className="text-lg font-medium text-primary">Browse or Drop Restroom Photo Here</p>
+            <p className="text-primary text-lg font-medium">Browse or Drop Restroom Photo Here</p>
             <p className="text-sm text-[#11111180]">Supported formats: JPEG, PNG</p>
           </div>
           <input type="file" accept="image/*" onChange={onFileChange} className="hidden" />

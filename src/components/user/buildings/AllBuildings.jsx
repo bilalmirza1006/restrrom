@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 import React, { useMemo } from 'react';
 
 const AllBuildings = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
 
   // 🧠 Fetch only for relevant role
   const { data: assignData, isLoading: isLoadingAssign } = useGetAllAssignBuildingQuery(undefined, {
@@ -47,20 +47,20 @@ const AllBuildings = () => {
   if (isLoadingAssign || isLoadingAll) return <p>Loading buildings...</p>;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 md:p-5">
-      <div className="mb-4 flex justify-between items-center">
-        <h4 className="text-base md:text-lg font-semibold leading-[32px]">
+    <div className="rounded-2xl bg-white p-4 shadow-md md:p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h4 className="text-base leading-[32px] font-semibold md:text-lg">
           {user?.role === 'admin' ? 'All Buildings' : 'Assigned Buildings'}
         </h4>
 
         {user?.role === 'admin' && (
           <Link href="/admin/add-building">
-            <FaPlus className="text-blue-500 hover:text-blue-600 text-2xl" />
+            <FaPlus className="text-2xl text-blue-500 hover:text-blue-600" />
           </Link>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
         {buildings.length > 0 ? (
           buildings.map((building, i) => {
             const buildingId =

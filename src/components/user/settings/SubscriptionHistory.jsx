@@ -80,7 +80,7 @@ import { AiOutlineDownload } from 'react-icons/ai';
 import { useSelector } from 'react-redux';
 
 const SubscriptionHistory = () => {
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector(state => state.auth);
   const userId = user?.user?._id;
 
   const { data: historyData, isLoading: isHistoryLoading } = useGetSubscriptionHistoryQuery(
@@ -93,7 +93,7 @@ const SubscriptionHistory = () => {
 
   // Transform API response
   const formattedData =
-    historyData?.data?.map((item) => ({
+    historyData?.data?.map(item => ({
       date: new Date(item.createdAt).toLocaleString(),
       plan: item.plan || 'N/A',
       amount: item.plan === 'yearly' ? 120 : item.plan === 'monthly' ? 10 : 0,
@@ -122,29 +122,29 @@ export default SubscriptionHistory;
 const columns = [
   {
     name: 'Date',
-    selector: (row) => row.date,
+    selector: row => row.date,
   },
   {
     name: 'Plan',
-    selector: (row) => row.plan,
+    selector: row => row.plan,
   },
   {
     name: 'Amount',
-    selector: (row) => <span>${row.amount}</span>,
+    selector: row => <span>${row.amount}</span>,
   },
   {
     name: 'Status',
-    cell: (row) =>
+    cell: row =>
       row.status === 'created' ? (
-        <div className="bg-[#B2FFB0] rounded-[6px] text-sm w-[90px] h-8 grid place-items-center capitalize">
+        <div className="grid h-8 w-[90px] place-items-center rounded-[6px] bg-[#B2FFB0] text-sm capitalize">
           {row.status}
         </div>
       ) : row.status === 'canceled' ? (
-        <div className="bg-[#FF7A7F] rounded-[6px] text-sm w-[90px] h-8 grid place-items-center capitalize text-white">
+        <div className="grid h-8 w-[90px] place-items-center rounded-[6px] bg-[#FF7A7F] text-sm text-white capitalize">
           {row.status}
         </div>
       ) : (
-        <div className="bg-[#D3D3D3] rounded-[6px] text-sm w-[90px] h-8 grid place-items-center  capitalize">
+        <div className="grid h-8 w-[90px] place-items-center rounded-[6px] bg-[#D3D3D3] text-sm capitalize">
           {row.status}
         </div>
       ),

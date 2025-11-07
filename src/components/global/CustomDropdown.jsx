@@ -7,7 +7,7 @@ function CustomDropdown({ lists }) {
   const optionsHandler = () => setIsOptionOpen(!isOptionOpen);
   const [selectedOption, setSelectedOption] = useState('This Month');
   const [isOptionOpen, setIsOptionOpen] = useState(false);
-  const selectHandler = (option) => {
+  const selectHandler = option => {
     setSelectedOption(option);
     setIsOptionOpen(false);
   };
@@ -15,13 +15,13 @@ function CustomDropdown({ lists }) {
   return (
     <div className="relative z-50">
       <div
-        className="flex border text-[#A449EB] py-2 px-3 cursor-pointer items-center gap-2 rounded-[8px] text-[14px]"
+        className="flex cursor-pointer items-center gap-2 rounded-[8px] border px-3 py-2 text-[14px] text-[#A449EB]"
         onClick={() => optionsHandler()}
       >
         {selectedOption}
         <div
           className={`relative top-[-4px] transition-all duration-300 ${
-            isOptionOpen ? 'rotate-180 top-[3px]' : 'rotate-0'
+            isOptionOpen ? 'top-[3px] rotate-180' : 'rotate-0'
           }`}
         >
           <FaSortDown fontSize={18} />

@@ -128,7 +128,7 @@ export const hasRouteAccess = (pathname, role) => {
 /**
  * Gets default route for a user based on their role
  */
-export const getDefaultRouteForRole = (role) => {
+export const getDefaultRouteForRole = role => {
   const defaultRoutes = {
     super_admin: '/super-admin',
     building_inspector: '/inspectionist',
@@ -146,7 +146,7 @@ export const getDefaultRouteForRole = (role) => {
 /**
  * Determine if a path should be protected by authentication
  */
-export const isProtectedRoute = (pathname) => {
+export const isProtectedRoute = pathname => {
   // Check if path matches any public route
   for (const [route, config] of Object.entries(ROUTE_CONFIG)) {
     if (config.public) {

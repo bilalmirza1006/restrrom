@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 
-const HumidityIcon = ({temperature}) => {
-    let color = '#64ED23';
-    if(temperature <= 25) {
-        color = '#64ED23'
-    } else if(temperature > 25 && temperature <= 45) {
-        color = '#f1a634'
-    } else {
-        color = '#ee0e00'
-    }
+const HumidityIcon = ({ temperature }) => {
+  let color = '#64ED23';
+  if (temperature <= 25) {
+    color = '#64ED23';
+  } else if (temperature > 25 && temperature <= 45) {
+    color = '#f1a634';
+  } else {
+    color = '#ee0e00';
+  }
   return (
     <>
       <svg

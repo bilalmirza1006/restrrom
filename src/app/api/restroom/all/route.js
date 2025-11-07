@@ -7,7 +7,7 @@ import customError from '@/utils/customError';
 import sendResponse from '@/utils/sendResponse';
 import { NextResponse } from 'next/server';
 
-export const GET = asyncHandler(async (req) => {
+export const GET = asyncHandler(async req => {
   await connectDb();
 
   // ✅ Authenticate user
@@ -25,8 +25,8 @@ export const GET = asyncHandler(async (req) => {
 
   // ✅ Extract restroom IDs from buildingCoordinates
   const restroomIds = building.buildingCoordinates
-    ?.map((coord) => coord?.restroomId)
-    .filter((id) => !!id);
+    ?.map(coord => coord?.restroomId)
+    .filter(id => !!id);
 
   if (!restroomIds || restroomIds.length === 0)
     throw new customError(404, 'No restrooms found in this building');
