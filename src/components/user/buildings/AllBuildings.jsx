@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import React, { useMemo } from 'react';
+import { useGetAllAdminBuildingsQuery } from '@/features/superAdmin/superAdminApi';
 
 const AllBuildings = () => {
   const { user } = useSelector(state => state.auth);
@@ -18,6 +19,11 @@ const AllBuildings = () => {
   const { data: allData, isLoading: isLoadingAll } = useGetAllBuildingsQuery(undefined, {
     skip: user?.role !== 'admin',
   });
+  const { data: allAdminBuildings, isLoading: loadingAllAdminBuildings } =
+    useGetAllAdminBuildingsQuery(undefined, {
+      skip: user?.role !== 'super_admin',
+    });
+  console.log('allAdminBuildings', allAdminBuildings);
 
   // 🧩 Choose correct dataset based on role
   const buildings = useMemo(() => {
@@ -27,8 +33,11 @@ const AllBuildings = () => {
     if (user?.role === 'admin') {
       return allData?.data || [];
     }
+    if (user?.role === 'super_admin') {
+      return allAdminBuildings?.data || [];
+    }
     return [];
-  }, [user, assignData, allData]);
+  }, [user, assignData, allData, allAdminBuildings]);
   console.log('buildingsbuildingsbuildings', buildings);
 
   // 🚀 Route by role
@@ -38,6 +47,8 @@ const AllBuildings = () => {
         return `/admin/buildings/building-detail/${id}`;
       case 'building_inspector':
         return `/inspectionist/checkinlist/${id}`;
+      case 'super_admin':
+        return `/super-admin/buildings/building-details/${id}`;
       default:
         return '';
     }
@@ -69,7 +80,7 @@ const AllBuildings = () => {
             const route = getRouteByRole(user?.role, buildingId);
 
             return route ? (
-              <Link href={route} key={i}>
+              <Link href={route} key={i} className="cursor-pointer">
                 <BuildingCard data={building?.buildingId || building} />
               </Link>
             ) : (

@@ -152,13 +152,22 @@ export const POST = asyncHandler(async req => {
   }
 
   // ✅ Create sub-user
-  const newUser = await Auth.create({
+  // ✅ Create sub-user (with creatorId)
+  const newUserData = {
     fullName,
     email,
     password,
     role,
-    creatorId: currentUser._id,
-  });
+  };
+
+  // Only set creatorId if a user is logged in
+  if (currentUser?._id) {
+    newUserData.creatorId = currentUser._id;
+  }
+
+  const newUser = await Auth.create(newUserData);
+
+  console.log(`✅ ${currentUser.role} created a new user with role: ${role}`);
 
   console.log('✅ New user created with role:', role);
 

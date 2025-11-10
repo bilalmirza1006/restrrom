@@ -21,6 +21,12 @@ const pages = [
     icon: <DashboardIcon />,
   },
   {
+    id: 1,
+    title: 'All Users',
+    link: ['/super-admin/all-users'],
+    icon: <DashboardIcon />,
+  },
+  {
     id: 2,
     title: 'Buildings',
     link: ['/super-admin/buildings'],

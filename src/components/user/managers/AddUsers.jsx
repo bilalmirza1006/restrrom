@@ -111,9 +111,11 @@ import Button from '@/components/global/small/Button';
 import Dropdown from '@/components/global/small/Dropdown';
 import toast from 'react-hot-toast';
 import { useRegisterMutation } from '@/features/auth/authApi';
+import { useSelector } from 'react-redux';
 
 function AddUsers({ onClose, data }) {
   const [register, { isLoading }] = useRegisterMutation();
+  const { user } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -155,14 +157,18 @@ function AddUsers({ onClose, data }) {
       toast.error(err?.data?.message || 'Failed to add user');
     }
   };
+  console.log('user', user.role);
 
-  const roleOptions = [
+  const allRoleOptions = [
     { option: 'Building Manager', value: 'building_manager' },
     { option: 'Report Manager', value: 'report_manager' },
     { option: 'Subscription Manager', value: 'subscription_manager' },
     { option: 'Building Inspector', value: 'building_inspector' },
-    { option: 'User', value: 'user' },
+    // { option: 'User', value: 'user' },
   ];
+
+  const roleOptions =
+    user.role === 'super_admin' ? [{ option: 'Admin', value: 'admin' }] : allRoleOptions;
 
   return (
     <form onSubmit={handleAddUser} className="space-y-4">

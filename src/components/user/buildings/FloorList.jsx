@@ -12,8 +12,8 @@ const FloorList = ({ data, buildingId }) => {
     switch (role) {
       case 'admin':
         return `/admin/floor/floor-detail/${floorId}`;
-      case 'user':
-        return `/user/floor/floor-detail/${floorId}`;
+      case 'super_admin':
+        return `/super-admin/floor/floor-detail/${floorId}`;
       default:
         return ''; // Unknown or unauthorized role
     }

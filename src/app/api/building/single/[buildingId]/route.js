@@ -20,7 +20,7 @@ export const GET = asyncHandler(async (req, { params }) => {
   const url = new URL(req.url);
   const include = url.searchParams.get('include'); // e.g. include=restrooms
 
-  const building = await Building.findOne({ _id: buildingId, ownerId: user?._id });
+  const building = await Building.findOne({ _id: buildingId });
   if (!building) throw new customError(404, 'Building not found');
 
   if (include === 'restrooms') {

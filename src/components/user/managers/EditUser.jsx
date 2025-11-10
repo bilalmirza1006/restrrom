@@ -6,10 +6,12 @@ import Button from '@/components/global/small/Button';
 import Dropdown from '@/components/global/small/Dropdown';
 import toast from 'react-hot-toast';
 import { useUpdateUserByIdMutation } from '@/features/auth/authApi';
+import { useSelector } from 'react-redux';
 // import { useUpdateUserMutation } from '@/features/auth/authApi'; // 👈 Use updateUser instead of updateProfile
 
 function EditUser({ user, onClose }) {
   const [updateUser, { isLoading }] = useUpdateUserByIdMutation();
+  const { user: mainUser } = useSelector(state => state.auth);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -75,13 +77,16 @@ function EditUser({ user, onClose }) {
     }
   };
 
-  const roleOptions = [
+  const allRoleOptions = [
     { option: 'Building Manager', value: 'building_manager' },
     { option: 'Report Manager', value: 'report_manager' },
     { option: 'Subscription Manager', value: 'subscription_manager' },
     { option: 'Building Inspector', value: 'building_inspector' },
-    { option: 'User', value: 'user' },
+    // { option: 'User', value: 'user' },
   ];
+
+  const roleOptions =
+    mainUser.role === 'super_admin' ? [{ option: 'Admin', value: 'admin' }] : allRoleOptions;
 
   return (
     <form onSubmit={handleUpdateUser} className="space-y-4">
