@@ -18,9 +18,15 @@ export const superAdminApis = createApi({
         method: 'GET',
       }),
     }),
+    getAllAdminSensors: builder.query({
+      query: () => ({
+        url: `/get-all-sensors`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
-export const { useGetAllAdminBuildingsQuery } = superAdminApis;
+export const { useGetAllAdminBuildingsQuery, useGetAllAdminSensorsQuery } = superAdminApis;
 
 export const superAdminApiState = superAdminApis.util.resetApiState;

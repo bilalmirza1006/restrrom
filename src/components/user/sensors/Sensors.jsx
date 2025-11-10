@@ -9,7 +9,7 @@ import {
   useUpdateSensorMutation,
 } from '@/features/sensor/sensorApi';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import toast from 'react-hot-toast';
 import { AiOutlineDelete } from 'react-icons/ai';
@@ -19,6 +19,8 @@ import { IoIosAddCircle } from 'react-icons/io';
 import AddSensor from './AddSensor';
 import EditSensor from './EditSensor';
 import Spinner from '@/components/global/small/Spinner';
+import { useGetAllAdminSensorsQuery } from '@/features/superAdmin/superAdminApi';
+import { useSelector } from 'react-redux';
 
 const PARAMETER_LABELS = {
   temperature: 'Temperature',
@@ -30,31 +32,41 @@ const PARAMETER_LABELS = {
 };
 
 const Sensors = () => {
+  const { user } = useSelector(state => state.auth);
+
   const [modalType, setModalType] = useState('');
   const [selectedSensor, setSelectedSensor] = useState(null);
-  const { data, isLoading } = useGetAllSensorsQuery();
+
+  const { data: adminSensors, isLoading } = useGetAllSensorsQuery({
+    skip: user?.role !== 'admin',
+  });
+  const { data: getAllSensors, isLoading: loading } = useGetAllAdminSensorsQuery({
+    skip: user?.role !== 'super_admin',
+  });
+
   const [updateSensor] = useUpdateSensorMutation();
   const [deleteSensor, { isLoading: deleteLoading }] = useDeleteSensorMutation();
-  const [formData, setFormData] = useState({
-    id: selectedSensor?._id,
-    name: selectedSensor?.name || '',
-    uniqueId: selectedSensor?.uniqueId || '',
-    parameters: selectedSensor?.parameters || [],
-    status: selectedSensor?.status || '',
-  });
+
+  // ✅ Dynamic sensors based on user role
+  const sensors = useMemo(() => {
+    if (user?.role === 'admin') return adminSensors?.data || [];
+    if (user?.role === 'super_admin') return getAllSensors?.data || [];
+    return [];
+  }, [user, adminSensors, getAllSensors]);
+
+  // ✅ Modal control
   const modalOpenHandler = (type, sensor = null) => {
     setModalType(type);
     setSelectedSensor(sensor);
   };
-  console.log('selectedSensor', selectedSensor);
 
-  const modalCloseHandler = type => setModalType('');
+  const modalCloseHandler = () => setModalType('');
 
+  // ✅ Delete handler
   const deleteSensorHandler = async sensorId => {
     try {
       const res = await deleteSensor(sensorId).unwrap();
       toast.success(res.message || 'Sensor deleted successfully');
-
       modalCloseHandler();
     } catch (error) {
       toast.error(error.message || 'Something went wrong');
@@ -63,20 +75,14 @@ const Sensors = () => {
     }
   };
 
-  const validate = formData => {
-    if (!formData.name.trim()) return 'Sensor name is required';
-    if (!formData.uniqueId.trim()) return 'Unique ID is required';
-    if (!formData.parameters || formData.parameters.length === 0)
-      return 'At least one parameter is required';
-    return null;
-  };
+  // ✅ Status toggle
   const handleStatusHandler = async sensor => {
     try {
       const payload = {
         id: sensor._id,
         name: sensor.name,
         uniqueId: sensor.uniqueId,
-        status: !sensor.status, // Toggle the current status
+        status: !sensor.status,
         parameters: sensor.parameters.map(p =>
           typeof p === 'string' ? p.toLowerCase() : p.value.toLowerCase()
         ),
@@ -90,6 +96,20 @@ const Sensors = () => {
     }
   };
 
+  // ✅ Role-based route generator
+  const getSensorRoute = (role, id) => {
+    switch (role) {
+      case 'admin':
+        return `/admin/sensors/sensor-details/${id}`;
+      case 'super_admin':
+        return `/super-admin/sensors/sensor-detail/${id}`;
+      case 'building_inspector':
+        return `/inspectionist/sensors/sensor-details/${id}`;
+      default:
+        return `/sensors/sensor-details/${id}`;
+    }
+  };
+
   return (
     <section className="rounded-[10px] bg-white p-4 md:p-5">
       <div className="flex items-center justify-between">
@@ -100,12 +120,12 @@ const Sensors = () => {
       </div>
 
       <div className="mt-6">
-        {isLoading ? (
+        {isLoading || loading ? (
           <Spinner />
         ) : (
           <DataTable
-            data={data?.data || []}
-            columns={tableColumns(handleStatusHandler, setSelectedSensor, modalOpenHandler)}
+            data={sensors || []}
+            columns={tableColumns(handleStatusHandler, modalOpenHandler, user, getSensorRoute)}
             customStyles={tableStyles}
             pagination
             fixedHeader
@@ -114,16 +134,22 @@ const Sensors = () => {
           />
         )}
       </div>
+
+      {/* Add Sensor */}
       {modalType === 'add' && (
         <Modal onClose={modalCloseHandler} title={'Add Sensor'}>
           <AddSensor onClose={modalCloseHandler} />
         </Modal>
       )}
+
+      {/* Edit Sensor */}
       {modalType === 'edit' && (
         <Modal onClose={modalCloseHandler} title={'Edit Sensor'}>
           <EditSensor onClose={modalCloseHandler} selectedSensor={selectedSensor} />
         </Modal>
       )}
+
+      {/* Delete Sensor */}
       {modalType === 'delete' && (
         <Modal onClose={modalCloseHandler} title={'Confirmation'} width="w-[300px] md:w-[600px]">
           <div>
@@ -151,7 +177,8 @@ const Sensors = () => {
 
 export default Sensors;
 
-const tableColumns = (handleStatusHandler, setSelectedSensor, modalOpenHandler) => [
+// ✅ Updated tableColumns with role-based routing
+const tableColumns = (handleStatusHandler, modalOpenHandler, user, getSensorRoute) => [
   {
     name: 'Sensor Name',
     selector: row => row?.name,
@@ -176,26 +203,38 @@ const tableColumns = (handleStatusHandler, setSelectedSensor, modalOpenHandler) 
     name: 'Status',
     cell: row => (
       <div>
-        <ToggleButton isChecked={row.status} onToggle={() => handleStatusHandler(row)} />
+        {user?.role === 'admin' ? (
+          <ToggleButton
+            role={user?.role}
+            isChecked={row.status}
+            onToggle={() => handleStatusHandler(row)}
+          />
+        ) : (
+          <ToggleButton role={user?.role} isChecked={row.status} />
+        )}
       </div>
     ),
   },
   {
     name: 'Action',
     cell: row => (
-      <div className="flex items-center gap-3">
-        <Link href={`/admin/sensors/sensor-details/${row._id}`}>
+      <div className="flex items-center justify-center gap-3">
+        {/* ✅ Dynamic link based on user role */}
+        <Link href={getSensorRoute(user?.role, row._id)}>
           <div className="cursor-pointer">
             <HiOutlineEye fontSize={20} />
           </div>
         </Link>
-
-        <div className="cursor-pointer" onClick={() => modalOpenHandler('edit', row)}>
-          <CiEdit fontSize={23} />
-        </div>
-        <div className="cursor-pointer" onClick={() => modalOpenHandler('delete', row)}>
-          <AiOutlineDelete fontSize={23} style={{ color: 'red' }} />
-        </div>
+        {user?.role === 'admin' && (
+          <div className="flex gap-3">
+            <div className="cursor-pointer" onClick={() => modalOpenHandler('edit', row)}>
+              <CiEdit fontSize={23} />
+            </div>
+            <div className="cursor-pointer" onClick={() => modalOpenHandler('delete', row)}>
+              <AiOutlineDelete fontSize={23} style={{ color: 'red' }} />
+            </div>
+          </div>
+        )}
       </div>
     ),
   },
