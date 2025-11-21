@@ -28,6 +28,7 @@ const buildingCoordinateSchema = new mongoose.Schema(
     id: { type: String, required: true },
     polygonId: { type: String },
     restroomId: { type: mongoose.Schema.Types.ObjectId, ref: 'RestRoom' },
+
     restroomName: { type: String },
     labelPoint: { type: String },
     sensorAttached: { type: String },

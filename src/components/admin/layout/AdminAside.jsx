@@ -47,12 +47,6 @@ const pages = [
   },
 
   {
-    id: 5,
-    title: 'Plans',
-    link: ['/super-admin/plans'],
-    icon: <PlansIcon />,
-  },
-  {
     id: 6,
     title: 'Settings',
     link: ['/super-admin/settings'],

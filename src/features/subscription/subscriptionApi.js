@@ -75,6 +75,13 @@ export const subscriptionApis = createApi({
       }),
       providesTags: (result, error, userId) => [{ type: 'history', id: userId }],
     }),
+    getAllHistory: builder.query({
+      query: () => ({
+        url: `/get-all-subscriptions`,
+        method: 'GET',
+      }),
+      providesTags: (result, error, userId) => [{ type: 'history', id: userId }],
+    }),
 
     // GET /api/subscription/webhooks (admin)
     getAllWebhooks: builder.query({
@@ -104,6 +111,7 @@ export const {
   useGetSubscriptionHistoryQuery,
   useGetAllWebhooksQuery,
   useGetWebhooksByUserQuery,
+  useGetAllHistoryQuery,
 } = subscriptionApis;
 
 export const resetSubscriptionApiState = subscriptionApis.util.resetApiState;

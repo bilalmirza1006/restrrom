@@ -74,7 +74,11 @@
 // ];
 
 import { subscriptionHistoryData, tableStyles } from '@/data/data';
-import { useGetSubscriptionHistoryQuery } from '@/features/subscription/subscriptionApi';
+import {
+  useGetAllHistoryQuery,
+  useGetSubscriptionHistoryQuery,
+} from '@/features/subscription/subscriptionApi';
+import { useMemo } from 'react';
 import DataTable from 'react-data-table-component';
 import { AiOutlineDownload } from 'react-icons/ai';
 import { useSelector } from 'react-redux';
@@ -86,20 +90,43 @@ const SubscriptionHistory = () => {
   const { data: historyData, isLoading: isHistoryLoading } = useGetSubscriptionHistoryQuery(
     userId,
     {
-      skip: !userId,
+      skip: user?.role !== 'admin' || !userId,
     }
   );
-  console.log('historyData', historyData);
+
+  const { data: allHistoryData, isLoading: isAllHistoryLoading } = useGetAllHistoryQuery(
+    undefined,
+    {
+      skip: user?.role !== 'super_admin',
+    }
+  );
+  console.log('allHistoryData', allHistoryData);
+  const isLoading = isHistoryLoading || isAllHistoryLoading;
+  const history = useMemo(() => {
+    if (user?.role === 'admin') {
+      return historyData || [];
+    }
+    if (user?.role === 'admin') {
+      return allData?.data || [];
+    }
+    if (user?.role === 'super_admin') {
+      return allHistoryData || [];
+    }
+    return [];
+  }, [user, historyData, allHistoryData]);
+  // console.log('buildingsbuildingsbuildings', buildings);
 
   // Transform API response
   const formattedData =
-    historyData?.data?.map(item => ({
+    history?.data?.map(item => ({
       date: new Date(item.createdAt).toLocaleString(),
+      email: item.user.email || 'N/A',
       plan: item.plan || 'N/A',
       amount: item.plan === 'yearly' ? 120 : item.plan === 'monthly' ? 10 : 0,
       status: item.action, // using action field
       invoice: item.metadata?.invoice_url || null,
     })) || [];
+  console.log('formattedDataformattedData', formattedData);
 
   return (
     <div>
@@ -111,7 +138,7 @@ const SubscriptionHistory = () => {
         customStyles={tableStyles}
         fixedHeader
         fixedHeaderScrollHeight="70vh"
-        progressPending={isHistoryLoading} // show loader
+        progressPending={isLoading} // show loader
       />
     </div>
   );
@@ -123,6 +150,10 @@ const columns = [
   {
     name: 'Date',
     selector: row => row.date,
+  },
+  {
+    name: 'email',
+    selector: row => row?.email,
   },
   {
     name: 'Plan',

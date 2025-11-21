@@ -2,16 +2,25 @@
 import BuildingCard from '@/components/global/BuildingCard';
 import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
 import { useGetAllAssignBuildingQuery } from '@/features/inspection/inspectionApi';
+import { useGetAllAdminBuildingsQuery } from '@/features/superAdmin/superAdminApi';
 import Link from 'next/link';
 import { FaPlus } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import React, { useMemo } from 'react';
-import { useGetAllAdminBuildingsQuery } from '@/features/superAdmin/superAdminApi';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+
+const LoadingSkeletonCard = () => (
+  <div className="rounded-xl lp-4">
+    <Skeleton height={150} className="mb-4" />
+    <Skeleton height={20} width={`80%`} className="mb-2" />
+    <Skeleton height={20} width={`60%`} />
+  </div>
+);
 
 const AllBuildings = () => {
   const { user } = useSelector(state => state.auth);
 
-  // 🧠 Fetch only for relevant role
   const { data: assignData, isLoading: isLoadingAssign } = useGetAllAssignBuildingQuery(undefined, {
     skip: user?.role !== 'building_inspector',
   });
@@ -19,28 +28,19 @@ const AllBuildings = () => {
   const { data: allData, isLoading: isLoadingAll } = useGetAllBuildingsQuery(undefined, {
     skip: user?.role !== 'admin',
   });
+
   const { data: allAdminBuildings, isLoading: loadingAllAdminBuildings } =
     useGetAllAdminBuildingsQuery(undefined, {
       skip: user?.role !== 'super_admin',
     });
-  console.log('allAdminBuildings', allAdminBuildings);
 
-  // 🧩 Choose correct dataset based on role
   const buildings = useMemo(() => {
-    if (user?.role === 'building_inspector') {
-      return assignData?.data || [];
-    }
-    if (user?.role === 'admin') {
-      return allData?.data || [];
-    }
-    if (user?.role === 'super_admin') {
-      return allAdminBuildings?.data || [];
-    }
+    if (user?.role === 'building_inspector') return assignData?.data || [];
+    if (user?.role === 'admin') return allData?.data || [];
+    if (user?.role === 'super_admin') return allAdminBuildings?.data || [];
     return [];
   }, [user, assignData, allData, allAdminBuildings]);
-  console.log('buildingsbuildingsbuildings', buildings);
 
-  // 🚀 Route by role
   const getRouteByRole = (role, id) => {
     switch (role) {
       case 'admin':
@@ -54,8 +54,7 @@ const AllBuildings = () => {
     }
   };
 
-  // 🕐 Handle loading state
-  if (isLoadingAssign || isLoadingAll) return <p>Loading buildings...</p>;
+  const isLoading = isLoadingAssign || isLoadingAll || loadingAllAdminBuildings;
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-md md:p-5">
@@ -72,7 +71,9 @@ const AllBuildings = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-        {buildings.length > 0 ? (
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, i) => <LoadingSkeletonCard key={i} />)
+        ) : buildings.length > 0 ? (
           buildings.map((building, i) => {
             const buildingId =
               user?.role === 'building_inspector' ? building?.buildingId?._id : building?._id;

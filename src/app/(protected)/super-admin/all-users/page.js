@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import Modal from '@/components/global/Modal';
 import Button from '@/components/global/small/Button';
 import AddUsers from '@/components/user/managers/AddUsers';
@@ -12,6 +12,7 @@ import {
 } from '@/features/auth/authApi';
 import toast from 'react-hot-toast';
 import withPageGuard from '@/components/auth/withPageGuard';
+import { createPortal } from 'react-dom';
 
 function AllUsers() {
   const [addModel, setAddModel] = useState(false);
@@ -49,14 +50,27 @@ function AllUsers() {
   };
 
   // Custom Actions Cell with 3-dot menu
-  const ActionsCell = ({ row }) => {
+  // import React, { useState, useRef, useEffect } from 'react';
+  // import { createPortal } from 'react-dom';
+
+  const ActionsCell = ({ row, handleEdit, handleDelete, isDeleting }) => {
     const [showMenu, setShowMenu] = useState(false);
+    const buttonRef = useRef(null);
+    const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+    // Update menu position whenever it opens
+    useEffect(() => {
+      if (showMenu && buttonRef.current) {
+        const rect = buttonRef.current.getBoundingClientRect();
+        setMenuPosition({ top: rect.bottom + window.scrollY, left: rect.left + window.scrollX });
+      }
+    }, [showMenu]);
 
     return (
-      <div className="relative">
-        {/* Three dots menu button */}
+      <>
         <button
-          onClick={() => setShowMenu(!showMenu)}
+          ref={buttonRef}
+          onClick={() => setShowMenu(prev => !prev)}
           className="rounded-full p-2 transition-colors hover:bg-gray-100"
         >
           <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
@@ -64,63 +78,42 @@ function AllUsers() {
           </svg>
         </button>
 
-        {/* Dropdown Menu */}
-        {showMenu && (
-          <>
-            {/* Backdrop to close menu when clicking outside */}
-            <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
-            <div className="absolute right-0 z-20 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg">
-              <div className="py-1">
-                <button
-                  onClick={() => {
-                    handleEdit(row);
-                    setShowMenu(false);
-                  }}
-                  className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+        {showMenu &&
+          createPortal(
+            <>
+              {/* Backdrop */}
+              <div className="fixed inset-0 z-[9998]" onClick={() => setShowMenu(false)} />
+              {/* Menu */}
+              <div
+                className="fixed z-[9999] w-48 rounded-md border border-gray-200 bg-white shadow-lg"
+                style={{ top: menuPosition.top, left: menuPosition.left }}
+              >
+                <div className="py-1">
+                  <button
+                    onClick={() => {
+                      handleEdit(row);
+                      setShowMenu(false);
+                    }}
+                    className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                    />
-                  </svg>
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    handleDelete(row);
-                    setShowMenu(false);
-                  }}
-                  disabled={isDeleting}
-                  className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
-                >
-                  <svg
-                    className="mr-2 h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleDelete(row);
+                      setShowMenu(false);
+                    }}
+                    disabled={isDeleting}
+                    className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 disabled:opacity-50"
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                  {isDeleting ? 'Deleting...' : 'Delete'}
-                </button>
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>,
+            document.body
+          )}
+      </>
     );
   };
 
@@ -130,37 +123,47 @@ function AllUsers() {
       name: 'Full Name',
       selector: row => row.fullName,
       sortable: true,
-      minWidth: '150px',
+      style: {
+        minWidth: '150px', // ✅ correct way
+      },
     },
     {
       name: 'Email',
       selector: row => row.email,
       sortable: true,
-      minWidth: '200px',
+      style: {
+        minWidth: '200px', // ✅ correct way
+      },
     },
     {
       name: 'Role',
       selector: row => row.role || 'N/A',
       cell: row => <span className="capitalize">{row.role?.replace('-', ' ') || 'N/A'}</span>,
-      minWidth: '150px',
+      style: {
+        minWidth: '150px', // ✅ correct way
+      },
     },
     {
       name: 'Actions',
-      cell: row => <ActionsCell row={row} />,
+      cell: row => (
+        <ActionsCell
+          handleEdit={handleEdit}
+          handleDelete={handleDelete}
+          isDeleting={isDeleting}
+          row={row}
+        />
+      ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
-      width: '80px',
+      // allowOverflow: true,
+      // button: true,
+      style: {
+        minWidth: '80px', // ✅ correct way
+      },
     },
   ];
 
   // Custom styles for better appearance
   const customStyles = {
-    rows: {
-      style: {
-        minHeight: '60px',
-      },
-    },
     headCells: {
       style: {
         backgroundColor: '#f8fafc',

@@ -1,17 +1,26 @@
-// import { connectDb } from '@/configs/connectDb';
-// import { Sensor } from '@/models/sensor.model';
 import { connectDb } from '@/configs/connectDb';
 import { Sensor } from '@/models/sensor.model';
+import { Building } from '@/models/building.model';
+import { RestRoom } from '@/models/restroom.model';
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 
 export const GET = async () => {
   try {
     // Connect to MongoDB
     await connectDb();
 
-    // Fetch all sensors (optionally populate references)
+    // ✅ Force Mongoose to register Building and RestRoom explicitly
+    if (!mongoose.models.Building) {
+      require('@/models/building.model');
+    }
+    if (!mongoose.models.RestRoom) {
+      require('@/models/restroom.model');
+    }
+
+    // ✅ Now safe to query
     const sensors = await Sensor.find()
-      .populate('ownerId', 'name email') // optional
+      .populate('ownerId', 'name email')
       .populate('buildingId', 'name')
       .populate('restroomId', 'name');
 

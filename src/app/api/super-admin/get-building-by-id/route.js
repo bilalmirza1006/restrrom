@@ -1,4 +1,7 @@
 import { connectDb } from '@/configs/connectDb';
+import { Building } from '@/models/building.model';
+import { RestRoom } from '@/models/restroom.model';
+import { asyncHandler } from '@/utils/asyncHandler';
 
 export const GET = asyncHandler(async (req, { params }) => {
   await connectDb();
