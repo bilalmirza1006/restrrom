@@ -5,8 +5,12 @@ import Input from '@/components/global/small/Input';
 import { useGetProfileQuery, useUpdateProfileMutation } from '@/features/auth/authApi';
 import toast from 'react-hot-toast';
 import Loader from '@/components/global/Loader';
+import { useSelector } from 'react-redux';
 
 const Profile = () => {
+  const { user } = useSelector(state => state.auth);
+  const userId = user?.user?._id;
+
   const { data, isLoading } = useGetProfileQuery();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateProfileMutation();
 
@@ -19,6 +23,7 @@ const Profile = () => {
   useEffect(() => {
     if (data?.data) {
       setProfile(data.data);
+
       setFormData({
         fullName: data.data.fullName || '',
         email: data.data.email || '',
@@ -49,24 +54,34 @@ const Profile = () => {
     if (isEditing) {
       try {
         const form = new FormData();
+
+        // append text fields
         Object.entries(formData).forEach(([key, value]) => {
           form.append(key, value);
         });
 
+        // append image
         if (selectedImage) {
           form.append('image', selectedImage);
         }
 
-        const res = await updateProfile(form).unwrap();
+        // IMPORTANT FIX — use correct keys: { userId, formData: form }
+        const res = await updateProfile({
+          userId: userId,
+          formData: form,
+        }).unwrap();
+
         toast.success(res.message || 'Profile updated successfully');
+
+        // Update UI
         setProfile(res.user);
         setPreviewImage(null);
         setSelectedImage(null);
       } catch (err) {
-        console.error('Failed to update profile:', err);
         toast.error(err?.data?.message || 'Failed to update profile');
       }
     }
+
     setIsEditing(prev => !prev);
   };
 
@@ -78,6 +93,10 @@ const Profile = () => {
   );
 
   if (isLoading || !profile) return <Loader />;
+  const imageUrl = profile.image?.url.startsWith('http')
+    ? profile.image.url
+    : `${process.env.NEXT_PUBLIC_BASE_URL}${profile.image.url}`;
+  console.log('imageUrlimageUrlimageUrl', imageUrl);
 
   return (
     <div className="flex justify-center">
@@ -88,6 +107,7 @@ const Profile = () => {
             alt={formData.fullName}
             className="mb-4 size-32 rounded-full object-cover shadow md:size-52"
           />
+
           {isEditing && (
             <div className="mb-4">
               <input
@@ -98,6 +118,7 @@ const Profile = () => {
               />
             </div>
           )}
+
           <h2 className="mb-2 text-2xl font-bold">{formData.fullName}</h2>
         </div>
 
@@ -110,6 +131,7 @@ const Profile = () => {
                 value={formData.fullName}
                 onChange={handleChange}
               />
+
               <Input
                 label="Email"
                 name="email"
@@ -117,6 +139,7 @@ const Profile = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
+
               <Input
                 label="Phone Number"
                 name="phoneNumber"
@@ -124,6 +147,7 @@ const Profile = () => {
                 value={formData.phoneNumber}
                 onChange={handleChange}
               />
+
               <Input
                 label="Date of Birth"
                 name="dob"
@@ -131,6 +155,7 @@ const Profile = () => {
                 value={formData.dob}
                 onChange={handleChange}
               />
+
               <Input
                 label="Nationality"
                 name="nationality"

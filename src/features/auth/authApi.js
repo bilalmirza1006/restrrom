@@ -46,10 +46,10 @@ export const authApi = createApi({
 
     // 👤 USER PROFILE ENDPOINTS
     updateProfile: builder.mutation({
-      query: data => ({
-        url: '/user/profile',
+      query: ({ userId, formData }) => ({
+        url: `/user/profile/${userId}`,
         method: 'PUT',
-        body: data,
+        body: formData,
       }),
       invalidatesTags: ['Profile'],
     }),

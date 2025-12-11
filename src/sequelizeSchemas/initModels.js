@@ -1,10 +1,10 @@
 // initModels.js
-import { MODEL_CLASSES, globalModelOptions, baseAttrs } from './models.js';
+import { MODEL_CLASSES, globalModelOptions } from './models.js';
 
 export function initModels(sequelize) {
   const instances = {};
-  for (const { cls, name } of MODEL_CLASSES) {
-    cls.init(baseAttrs, {
+  for (const { cls, name, attrs } of MODEL_CLASSES) {
+    cls.init(attrs, {
       sequelize,
       modelName: name,
       ...globalModelOptions,

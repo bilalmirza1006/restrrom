@@ -8,24 +8,57 @@ import { NextResponse } from 'next/server';
 import { sequelize } from '@/configs/connectDb';
 import mongoose from 'mongoose';
 
+// Map sensorType to MySQL table name
+const sensorTypeToTable = {
+  door_queue: 'door_queue',
+  stall_status: 'stall_status',
+  occupancy: 'occupancy',
+  air_quality: 'air_quality',
+  toilet_paper: 'toilet_paper',
+  soap_dispenser: 'soap_dispenser',
+  water_leakage: 'water_leakage',
+};
+
 export const POST = asyncHandler(async req => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
   const ownerId = user._id;
   const body = await req.json();
-  console.log('iuygfdfghjkjhgfd', body);
+  console.log('Sensor request body:', body);
 
-  const { id, name, uniqueId, parameters, status } = body;
+  const { id, name, uniqueId, sensorType, status } = body;
+
+  // Validation
   if (!id) {
     // Create mode: require all fields
-    if (!name || !uniqueId || !parameters || !Array.isArray(parameters) || parameters.length === 0)
-      throw new customError(400, 'Please provide all fields, including parameters');
+    if (!name || !uniqueId || !sensorType)
+      throw new customError(
+        400,
+        'Please provide all required fields: name, uniqueId, and sensorType'
+      );
+
+    // Validate sensorType enum
+    const validSensorTypes = [
+      'door_queue',
+      'stall_status',
+      'occupancy',
+      'air_quality',
+      'toilet_paper',
+      'soap_dispenser',
+      'water_leakage',
+    ];
+    if (!validSensorTypes.includes(sensorType)) {
+      throw new customError(
+        400,
+        `Invalid sensorType. Must be one of: ${validSensorTypes.join(', ')}`
+      );
+    }
   }
 
   // Normalize uniqueId: replace all dash-like characters with standard hyphen-minus
   const normalizedUniqueId = uniqueId ? uniqueId.replace(/[‐‑‒–—―]/g, '-').trim() : undefined;
 
-  // 1. Check MySQL connection
+  // Check MySQL connection
   try {
     await sequelize.authenticate();
     console.log('MySQL database is connected');
@@ -33,27 +66,37 @@ export const POST = asyncHandler(async req => {
     throw new customError(500, 'MySQL database is not connected');
   }
 
-  // 2. Check uniqueId in each parameter table (only for create or if parameters are provided)
-  if (!id || (parameters && Array.isArray(parameters) && parameters.length > 0)) {
-    const missingTables = [];
-    for (const param of parameters || []) {
+  // Validate uniqueId exists in the MySQL table corresponding to sensorType
+  if (sensorType && normalizedUniqueId) {
+    const tableName = sensorTypeToTable[sensorType];
+    if (!tableName) {
+      throw new customError(400, `No MySQL table mapping found for sensorType: ${sensorType}`);
+    }
+
+    try {
       const [result] = await sequelize.query(
-        `SELECT 1 FROM \`${param}\` WHERE sensor_unique_id = :uniqueId LIMIT 1`,
+        `SELECT 1 FROM \`${tableName}\` WHERE sensorId = :uniqueId LIMIT 1`,
         { replacements: { uniqueId: normalizedUniqueId } }
       );
+
       if (!result || result.length === 0) {
-        missingTables.push(param);
+        throw new customError(
+          400,
+          `Sensor uniqueId "${normalizedUniqueId}" not found in the "${tableName}" table. Please ensure the sensor exists in the MySQL database.`
+        );
       }
-    }
-    if (missingTables.length > 0) {
+    } catch (error) {
+      // If it's already a customError, rethrow it
+      if (error.statusCode) throw error;
+      // Otherwise, it's a database error
       throw new customError(
-        400,
-        `Sensor uniqueId not found in the following parameter tables: ${missingTables.join(', ')}`
+        500,
+        `Error checking sensor in MySQL table "${tableName}": ${error.message}`
       );
     }
   }
 
-  // 3. Create or Edit sensor
+  // Create or Edit sensor
   let sensor;
   if (id) {
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -61,6 +104,7 @@ export const POST = asyncHandler(async req => {
     }
     sensor = await Sensor.findOne({ _id: id, ownerId });
     if (!sensor) throw new customError(404, 'Sensor not found for editing');
+
     // Only check for uniqueId if it's being changed and provided
     if (uniqueId && sensor.uniqueId !== uniqueId) {
       const isExist = await Sensor.findOne({ uniqueId });
@@ -68,8 +112,7 @@ export const POST = asyncHandler(async req => {
       sensor.uniqueId = uniqueId;
     }
     if (name) sensor.name = name;
-    if (parameters && Array.isArray(parameters) && parameters.length > 0)
-      sensor.parameters = parameters;
+    if (sensorType) sensor.sensorType = sensorType;
     if (typeof status !== 'undefined') sensor.status = status;
     await sensor.save();
     return sendResponse(NextResponse, 'Sensor updated successfully', '', accessToken);
@@ -81,7 +124,7 @@ export const POST = asyncHandler(async req => {
       name,
       uniqueId,
       ownerId,
-      parameters,
+      sensorType,
     });
     return sendResponse(NextResponse, 'Sensor created successfully', '', accessToken);
   }

@@ -9,8 +9,8 @@ import Dropdown from '@/components/global/small/Dropdown';
 const validate = formData => {
   if (!formData.name.trim()) return 'Sensor name is required';
   if (!formData.uniqueId.trim()) return 'Unique ID is required';
-  if (!formData.parameters || formData.parameters.length === 0)
-    return 'At least one parameter is required';
+  if (!formData.sensorType || !formData.sensorType.trim())
+    return 'Sensor type is required';
   return null;
 };
 
@@ -21,7 +21,7 @@ const EditSensor = ({ onClose, selectedSensor }) => {
     id: selectedSensor._id,
     name: selectedSensor?.name || '',
     uniqueId: selectedSensor?.uniqueId || '',
-    parameters: selectedSensor?.parameters || [],
+    sensorType: selectedSensor?.sensorType || '',
   });
 
   const handleChange = e => {
@@ -43,9 +43,6 @@ const EditSensor = ({ onClose, selectedSensor }) => {
       const payload = {
         id: selectedSensor._id,
         ...formData,
-        parameters: formData.parameters.map(p =>
-          typeof p === 'string' ? p.toLowerCase() : p.value.toLowerCase()
-        ),
       };
       console.log('Updating sensor:', payload);
       const res = await updateSensor(payload).unwrap();
@@ -70,19 +67,20 @@ const EditSensor = ({ onClose, selectedSensor }) => {
       </div>
       <div className="mt-1 lg:col-span-6">
         <Dropdown
-          multi={true}
-          defaultText={'Select'}
-          initialValue={formData.parameters}
+          multi={false}
+          defaultText={'Select Sensor Type'}
+          initialValue={formData.sensorType}
           options={[
-            { value: 'temperature', option: 'Temperature' },
-            { value: 'humidity', option: 'Humidity' },
-            { value: 'co', option: 'Co' },
-            { value: 'co2', option: 'Co2' },
-            { value: 'ch', option: 'Ch' },
-            { value: 'tvoc', option: 'Tvoc' },
+            { value: 'door_queue', option: 'Door Queue' },
+            { value: 'stall_status', option: 'Stall Status' },
+            { value: 'occupancy', option: 'Occupancy' },
+            { value: 'air_quality', option: 'Air Quality' },
+            { value: 'toilet_paper', option: 'Toilet Paper' },
+            { value: 'soap_dispenser', option: 'Soap Dispenser' },
+            { value: 'water_leakage', option: 'Water Leakage' },
           ]}
-          label="Sensor Parameters"
-          onSelect={values => setFormData(prev => ({ ...prev, parameters: values }))}
+          label="Sensor Type"
+          onSelect={value => setFormData(prev => ({ ...prev, sensorType: value }))}
         />
       </div>
       <div className="lg:col-span-12">

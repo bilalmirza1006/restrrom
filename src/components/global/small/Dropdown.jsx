@@ -95,7 +95,7 @@ const Dropdown = ({
       {/* ✅ Dropdown list */}
       {isOpen && (
         <ul
-          className="absolute z-10 mt-1 max-h-60 cursor-pointer overflow-auto rounded-[6px] border-[1px] border-[#54545433] bg-white shadow-md"
+          className="absolute z-10 mt-1 max-h-48 cursor-pointer overflow-auto rounded-[6px] border-[1px] border-[#54545433] bg-white shadow-md"
           style={{ width: width || '100%' }}
         >
           {options?.map(option => {

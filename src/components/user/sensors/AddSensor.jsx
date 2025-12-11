@@ -11,7 +11,7 @@ const AddSensor = ({ onClose }) => {
   const [formData, setFormData] = useState({
     name: '',
     uniqueId: '',
-    parameters: [],
+    sensorType: '',
   });
 
   const handleChange = e => {
@@ -47,19 +47,20 @@ const AddSensor = ({ onClose }) => {
       </div>
       <div className="mt-1 lg:col-span-6">
         <Dropdown
-          multi={true}
-          defaultText={'Select'}
-          initialValue={formData.parameters}
+          multi={false}
+          defaultText={'Select Sensor Type'}
+          initialValue={formData.sensorType}
           options={[
-            { value: 'temperature', option: 'Temperature' },
-            { value: 'humidity', option: 'Humidity' },
-            { value: 'co', option: 'Co' },
-            { value: 'co2', option: 'Co2' },
-            { value: 'ch', option: 'Ch' },
-            { value: 'tvoc', option: 'Tvoc' },
+            { value: 'door_queue', option: 'Door Queue' },
+            { value: 'stall_status', option: 'Stall Status' },
+            { value: 'occupancy', option: 'Occupancy' },
+            { value: 'air_quality', option: 'Air Quality' },
+            { value: 'toilet_paper', option: 'Toilet Paper' },
+            { value: 'soap_dispenser', option: 'Soap Dispenser' },
+            { value: 'water_leakage', option: 'Water Leakage' },
           ]}
-          label="Sensor Parameters"
-          onSelect={values => setFormData(prev => ({ ...prev, parameters: values }))}
+          label="Sensor Type"
+          onSelect={value => setFormData(prev => ({ ...prev, sensorType: value }))}
         />
       </div>
       <div className="lg:col-span-12">

@@ -1,9 +1,11 @@
 'use client';
+import Button from '@/components/global/small/Button';
 import Input from '@/components/global/small/Input';
 import { useUpdateProfileMutation } from '@/features/auth/authApi';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5';
+import { useSelector } from 'react-redux';
 
 const ChangePassword = () => {
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -14,6 +16,8 @@ const ChangePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
   console.log('oldPassword', oldPassword, confirmPassword);
+  const { user } = useSelector(state => state.auth);
+  const userId = user?.user?._id;
 
   const handleSubmit = async event => {
     event.preventDefault();
@@ -24,7 +28,7 @@ const ChangePassword = () => {
       const formData = new FormData();
       formData.append('oldPassword', oldPassword);
       formData.append('newPassword', newPassword);
-      const response = await updateProfile(formData).unwrap();
+      const response = await updateProfile({ userId: userId, formData }).unwrap();
       if (response?.success) {
         toast.success(response?.message);
         setOldPassword('');
@@ -83,14 +87,15 @@ const ChangePassword = () => {
           {showConfirmPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
         </div>
       </div>
-      <div className="mt-3">
-        <button
+      <div className="mt-3 flex items-center justify-end gap-4">
+        {/* <button
           disabled={isLoading}
           type="submit"
           className="w-full cursor-pointer rounded bg-[#03A5E030] px-6 py-3 text-[14px] text-[#03A5E0] disabled:cursor-not-allowed disabled:opacity-20 md:w-auto"
         >
           Change Password
-        </button>
+        </button> */}
+        <Button text="Change Password" type="submit" disabled={isLoading} width="!w-[180px]" />
       </div>
     </form>
   );

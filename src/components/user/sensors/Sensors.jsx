@@ -47,11 +47,17 @@ const Sensors = () => {
   const [updateSensor] = useUpdateSensorMutation();
   const [deleteSensor, { isLoading: deleteLoading }] = useDeleteSensorMutation();
 
-  // ✅ Dynamic sensors based on user role
   const sensors = useMemo(() => {
-    if (user?.role === 'admin') return adminSensors?.data || [];
-    if (user?.role === 'super_admin') return getAllSensors?.data || [];
-    return [];
+    let raw = [];
+
+    if (user?.role === 'admin') raw = adminSensors?.data || [];
+    if (user?.role === 'super_admin') raw = getAllSensors?.data || [];
+
+    // Convert status: "true" / "false" → boolean
+    return raw.map(s => ({
+      ...s,
+      status: s.status === true || s.status === 'true',
+    }));
   }, [user, adminSensors, getAllSensors]);
 
   // ✅ Modal control
@@ -76,23 +82,19 @@ const Sensors = () => {
   };
 
   // ✅ Status toggle
+  // ✅ Status toggle
   const handleStatusHandler = async sensor => {
     try {
       const payload = {
         id: sensor._id,
-        name: sensor.name,
-        uniqueId: sensor.uniqueId,
         status: !sensor.status,
-        parameters: sensor.parameters.map(p =>
-          typeof p === 'string' ? p.toLowerCase() : p.value.toLowerCase()
-        ),
       };
 
       const res = await updateSensor(payload).unwrap();
       toast.success(res.message || 'Sensor status updated');
     } catch (error) {
-      toast.error(error.message || 'Failed to update status');
-      console.error('Status update error:', error);
+      toast.error(error?.data?.message || 'Failed to update status');
+      console.error(error);
     }
   };
 
@@ -184,11 +186,8 @@ const tableColumns = (handleStatusHandler, modalOpenHandler, user, getSensorRout
     selector: row => row?.name,
   },
   {
-    name: 'Parameters',
-    selector: row =>
-      Array.isArray(row?.parameters) && row.parameters.length > 0
-        ? row.parameters.map(p => PARAMETER_LABELS[p] || p).join(', ')
-        : '-',
+    name: 'sensorType',
+    selector: row => row?.sensorType,
   },
   {
     name: 'Unique Id',

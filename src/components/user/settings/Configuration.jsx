@@ -20,7 +20,8 @@ const intervalTimesInSeconds = [
 const Configuration = () => {
   const [modal, setModal] = useState(false);
   const { user } = useSelector(state => state.auth);
-
+  console.log('useruseruser', user?.user?._id);
+  const userId = user?.user?._id;
   const [selectedOption, setSelectedOption] = useState();
   const [pendingOption, setPendingOption] = useState('');
   const hasSubscription = Boolean(user?.user?.subscriptionId);
@@ -109,7 +110,10 @@ const Configuration = () => {
         formData.append('interval', timeInterval);
       }
 
-      const response = await updateProfile(formData).unwrap();
+      const response = await updateProfile({
+        userId: userId,
+        formData,
+      }).unwrap();
 
       if (response?.success) {
         toast.success(response?.message);
