@@ -75,7 +75,7 @@ const ChangePassword = () => {
       </div>
       <div className="relative">
         <Input
-          label="Confrim New Password"
+          label="Confirm New Password"
           name="password"
           type={showConfirmPassword ? 'text' : 'password'}
           onChange={e => setConfirmPassword(e.target.value)}

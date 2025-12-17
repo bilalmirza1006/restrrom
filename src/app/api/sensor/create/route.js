@@ -27,7 +27,7 @@ export const POST = asyncHandler(async req => {
   console.log('Sensor request body:', body);
 
   const { id, name, uniqueId, sensorType, status } = body;
-
+  console.log('Parsed sensor data:', { id, name, uniqueId, sensorType, status });
   // Validation
   if (!id) {
     // Create mode: require all fields
@@ -75,7 +75,7 @@ export const POST = asyncHandler(async req => {
 
     try {
       const [result] = await sequelize.query(
-        `SELECT 1 FROM \`${tableName}\` WHERE sensorId = :uniqueId LIMIT 1`,
+        `SELECT 1 FROM \`${tableName}\` WHERE sensor_unique_id  = :uniqueId LIMIT 1`,
         { replacements: { uniqueId: normalizedUniqueId } }
       );
 

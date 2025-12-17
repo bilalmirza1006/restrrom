@@ -19,6 +19,7 @@ import {
 } from '@/features/inspection/inspectionApi';
 import ShowCanvasData from './ShowCanvasData';
 import Button from '@/components/global/small/Button';
+import Dropdown from '@/components/global/small/Dropdown';
 // import { toast } from 'react-toastify';
 
 const FloorActivityChart = dynamic(() => import('./FloorActivityChart'), { ssr: false });
@@ -34,7 +35,14 @@ const BuildingDetail = ({ building }) => {
   const editBuildingHandle = () => router.push(`/admin/buildings/edit-building/${building?._id}`);
   const [polygons, setPolygons] = useState([]);
   const [image, setImage] = useState('');
+  const [range, setRange] = useState('day');
+  console.log('range', range);
 
+  const options = [
+    { option: 'Day', value: 'day' },
+    { option: 'This Week', value: 'week' },
+    { option: 'This Month', value: 'month' },
+  ];
   console.log('buildingbuilding', building);
   console.log('inspectors data', inspectorsData?.data);
 
@@ -141,11 +149,19 @@ const BuildingDetail = ({ building }) => {
             />
           </div>
           <div className="mt-5 rounded-xl bg-white p-5">
-            <div className="flex justify-between">
+            <div className="flex items-center justify-between">
               <h1 className="text-[24px] font-semibold">Floors Activity</h1>
-              <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
+
+              <Dropdown
+                options={options}
+                defaultText="day"
+                initialValue="day"
+                width="180px"
+                onSelect={value => setRange(value)}
+              />
             </div>
-            <FloorActivityChart />
+
+            <FloorActivityChart range={range} />
           </div>
         </div>
         <div className="lg:col-span-4">

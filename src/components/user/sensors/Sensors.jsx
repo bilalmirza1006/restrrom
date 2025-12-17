@@ -195,9 +195,18 @@ const tableColumns = (handleStatusHandler, modalOpenHandler, user, getSensorRout
   },
   {
     name: 'Is Connected',
-    selector: row =>
-      row?.isConnected === true ? <span>Connected</span> : <span>Disconnected</span>,
+    selector: row => (
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2 w-2 rounded-full ${row?.isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+        />
+        <span className={`font-semibold ${row?.isConnected ? 'text-green-600' : 'text-red-600'}`}>
+          {row?.isConnected ? 'Connected' : 'Disconnected'}
+        </span>
+      </div>
+    ),
   },
+
   {
     name: 'Status',
     cell: row => (
