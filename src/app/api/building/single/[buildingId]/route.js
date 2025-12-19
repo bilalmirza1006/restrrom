@@ -14,6 +14,7 @@ import {
   getRestroomChartReport,
   getRestroomUsageReport,
   getSensorsAggregatedData,
+  getTotalToiletsByBuildingId,
   getWaterLeakageAggregatedData,
 } from '@/utils/getAggregatedSensorData';
 import sendResponse from '@/utils/sendResponse';
@@ -58,15 +59,15 @@ export const GET = asyncHandler(async (req, { params }) => {
     return sendResponse(NextResponse, 'Building fetched successfully', building, accessToken);
   }
 
-  const sensorAggregationArray = sensors
-    .filter(s => s.sensorType && s.uniqueId)
-    .map(s => ({
-      sensorType: s.sensorType,
-      uniqueId: s.uniqueId,
-      buildingId: s.buildingId,
-      restroomId: s.restroomId,
-      ownerId: s.ownerId,
-    }));
+  // const sensorAggregationArray = sensors
+  //   .filter(s => s.sensorType && s.uniqueId)
+  //   .map(s => ({
+  //     sensorType: s.sensorType,
+  //     uniqueId: s.uniqueId,
+  //     buildingId: s.buildingId,
+  //     restroomId: s.restroomId,
+  //     ownerId: s.ownerId,
+  //   }));
 
   // console.log('Sensor aggregation array:', sensorAggregationArray);
 
@@ -80,8 +81,74 @@ export const GET = asyncHandler(async (req, { params }) => {
   const doorQueueSensors = await getDoorQueueAndOccupancyStats(sensors);
   // console.log('sdsdsdsdsdsdsdssdsdsdsdsdsdsds:', doorQueueSensors);
 
-  const report = await getRestroomChartReport(sensors);
+  // Helper to get fillColor based on queueCount
+  const getRestroomFillColor = (queueCount, fillColorArray) => {
+    if (!fillColorArray || fillColorArray.length === 0) return null;
 
+    // Find the first range that fits the queueCount
+    let colorObj = fillColorArray.find(
+      c => queueCount >= Number(c.min) && queueCount <= Number(c.max)
+    );
+
+    // If count is greater than the last range, use the last color
+    if (!colorObj) {
+      const lastColor = fillColorArray[fillColorArray.length - 1];
+      if (queueCount > Number(lastColor.max)) colorObj = lastColor;
+    }
+
+    return colorObj ? colorObj.color : null;
+  };
+
+  // === Add restroomFillColor and queueCount to buildingCoordinates ===
+  if (
+    building.buildingCoordinates &&
+    building.buildingCoordinates.length > 0 &&
+    doorQueueSensors?.restrooms
+  ) {
+    building.buildingCoordinates = building.buildingCoordinates.map(polygon => {
+      const restroomStats = doorQueueSensors.restrooms.find(
+        r => r.restroomId?.toString() === polygon.restroomId?.toString()
+      );
+
+      const restroomFillColor = restroomStats
+        ? getRestroomFillColor(restroomStats.queueCount, polygon.fillColor)
+        : null;
+
+      return {
+        ...polygon,
+        restroomFillColor,
+        queueCount: restroomStats ? restroomStats.queueCount : 0,
+      };
+    });
+  }
+
+  const restrooms = await RestRoom.find(
+    { buildingId },
+    {
+      _id: 1,
+      name: 1,
+      restroomId: 1,
+    }
+  ).lean();
+  const restroomMap = restrooms.reduce((acc, r) => {
+    acc[r._id.toString()] = r;
+    if (r.restroomId) {
+      acc[r.restroomId.toString()] = r;
+    }
+    return acc;
+  }, {});
+
+  const report = await getRestroomChartReport(sensors);
+  const mostUsedRestroom = report.map(item => {
+    const restroom = restroomMap[item.name]; // item.name == restroomId
+
+    return {
+      restroomId: restroom?._id || item.name,
+      restroomName: restroom?.name || 'Unknown Restroom',
+      percentage: item.percentage,
+      chartData: item.chartData,
+    };
+  });
   console.log('Restroom Usage Report:', report);
 
   // // Function to map count to color
@@ -133,7 +200,8 @@ export const GET = asyncHandler(async (req, { params }) => {
     groupBy: 'month',
     scope: 'building',
   });
-
+  const totalToilets = await getTotalToiletsByBuildingId(buildingId);
+  // console.log(totalToilets); // 36
   // console.log('latestDaylatestDaylatestDays:', dayData);
   // console.log('latestWeeklatestWeeklatestWeeks:', weekData);
   // console.log('latestMonthlatestMonthlatestMonthlatestMonths:', monthData);
@@ -149,8 +217,10 @@ export const GET = asyncHandler(async (req, { params }) => {
   // console.log('Structured waterLeakageData:', waterLeakageData);
 
   // You can then attach it to the building object
+  building.totalSensors = sensors.length;
+  building.totalToilets = totalToilets;
   building.sensorData = waterLeakageData;
-  building.mostUsedRestroom = report;
+  building.mostUsedRestroom = mostUsedRestroom;
   building.queuingStats = doorQueueSensors;
 
   return sendResponse(NextResponse, 'Building fetched successfully', building, accessToken);

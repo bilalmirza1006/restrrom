@@ -1,4 +1,4 @@
-// 'use client';
+'use client';
 import CustomDropdown from '@/components/global/CustomDropdown';
 import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import dynamic from 'next/dynamic';
@@ -20,9 +20,13 @@ import {
 import ShowCanvasData from './ShowCanvasData';
 import Button from '@/components/global/small/Button';
 import Dropdown from '@/components/global/small/Dropdown';
+import Skeleton from 'react-loading-skeleton';
 // import { toast } from 'react-toastify';
 
-const FloorActivityChart = dynamic(() => import('./FloorActivityChart'), { ssr: false });
+const FloorActivityChart = dynamic(() => import('./FloorActivityChart'), {
+  ssr: false,
+  loading: () => <Skeleton height={300} />,
+});
 
 const BuildingDetail = ({ building }) => {
   const router = useRouter();
@@ -71,7 +75,7 @@ const BuildingDetail = ({ building }) => {
   };
 
   return (
-    <div className="">
+    <div>
       {user?.role === 'admin' && (
         <div className="my-2 flex justify-end gap-4">
           <button
@@ -120,38 +124,37 @@ const BuildingDetail = ({ building }) => {
         <div className="lg:col-span-8">
           <div className="flex flex-wrap gap-4">
             <BuildingCard
-              title={'Total Floors'}
-              borderColor={'border-[#078E9B]'}
-              hoverColor={'hover:bg-[#078E9B15]'}
-              count={building?.totalFloors}
-              icon={'/svgs/user/green-step.svg'}
+              title="Total Toilets"
+              borderColor="border-[#078E9B]"
+              hoverColor="hover:bg-[#078E9B15]"
+              count={building?.totalToilets || 0}
+              icon="/svgs/user/green-step.svg"
             />
             <BuildingCard
-              title={'Total Restrooms'}
-              borderColor={'border-[#A449EB]'}
-              hoverColor={'hover:bg-[#A449EB15]'}
-              count={building?.numberOfRooms}
-              icon={'/svgs/user/purple-restroom.svg'}
+              title="Total Restrooms"
+              borderColor="border-[#A449EB]"
+              hoverColor="hover:bg-[#A449EB15]"
+              count={building?.numberOfRooms || 0}
+              icon="/svgs/user/purple-restroom.svg"
             />
             <BuildingCard
-              title={'Restrooms In Use'}
-              borderColor={'border-[#FF9500]'}
-              hoverColor={'hover:bg-[#FF950015]'}
-              count={building?.totalFloors}
-              icon={'/svgs/user/yellow-toilet.svg'}
+              title="Restrooms In Use"
+              borderColor="border-[#FF9500]"
+              hoverColor="hover:bg-[#FF950015]"
+              count={building?.queuingStats?.totalOccupied || 0}
+              icon="/svgs/user/yellow-toilet.svg"
             />
             <BuildingCard
-              title={'Total Sensors'}
-              borderColor={'border-[#FF4D85]'}
-              hoverColor={'hover:bg-[#FF4D8515]'}
-              count={building?.totalFloors}
-              icon={'/svgs/user/pink-buzzer.svg'}
+              title="Total Sensors"
+              borderColor="border-[#FF4D85]"
+              hoverColor="hover:bg-[#FF4D8515]"
+              count={building?.totalSensors || 0}
+              icon="/svgs/user/pink-buzzer.svg"
             />
           </div>
           <div className="mt-5 rounded-xl bg-white p-5">
             <div className="flex items-center justify-between">
-              <h1 className="text-[24px] font-semibold">Floors Activity</h1>
-
+              <h1 className="text-[24px] font-semibold">Water leakage activity</h1>
               <Dropdown
                 options={options}
                 defaultText="day"
@@ -161,11 +164,12 @@ const BuildingDetail = ({ building }) => {
               />
             </div>
 
-            <FloorActivityChart range={range} />
+            <FloorActivityChart range={range} sensorData={building?.sensorData} />
           </div>
         </div>
+
         <div className="lg:col-span-4">
-          <MostUsedRooms />
+          <MostUsedRooms mostUsedRestroom={building?.mostUsedRestroom} />
         </div>
         <div className="rounded-xl bg-white p-5 lg:col-span-12">
           <h6 className="mb-6 text-lg font-semibold text-black md:text-2xl">All Floors</h6>
@@ -180,7 +184,7 @@ const BuildingDetail = ({ building }) => {
       {/* Inspector Assignment Modal */}
       {inspectorModel && (
         <Modal
-          title={'Assign Inspector'}
+          title="Assign Inspector"
           isOpen={inspectorModel}
           onClose={() => setInspectorModel(false)}
         >
@@ -191,7 +195,7 @@ const BuildingDetail = ({ building }) => {
               </div>
             ) : inspectorsData?.data?.length > 0 ? (
               <div className="grid gap-4">
-                {inspectorsData.data.map((inspector, i) => (
+                {inspectorsData.data.map(inspector => (
                   <InspectorCard
                     key={inspector._id}
                     data={inspector}
@@ -211,12 +215,10 @@ const BuildingDetail = ({ building }) => {
   );
 };
 
-// Enhanced InspectorCard Component
+// InspectorCard remains unchanged, only make sure toast is imported
 const InspectorCard = ({ data, onAssign, buildingId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [unAssignBuilding] = useUnAssignBuildingToInspectorMutation();
-
-  // Check if building is already assigned
   const isAlreadyAssigned = data?.assignedBuildings?.includes(buildingId);
 
   const handleAssignClick = async () => {

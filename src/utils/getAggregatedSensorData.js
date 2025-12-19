@@ -1,310 +1,9 @@
-// import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
-// import { fn, col, Op } from 'sequelize';
-
-// import { initModels } from '@/sequelizeSchemas/initModels';
-// import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
-// import { fn, col, Op, Sequelize } from 'sequelize';
-// import { sequelize } from '@/configs/connectDb';
-// import { Sequelize } from 'sequelize';
-// import { initModels } from './initModels.js';
-
-// /**
-//  * Get aggregated sensor data for a list of sensors
-//  * @param {Object} params
-//  * @param {Array} params.sensors - array of sensors [{ sensorType, uniqueId, buildingId, restroomId, ownerId }]
-//  * @param {'day'|'week'|'month'} params.groupBy
-//  */
-// export const getSensorsAggregatedData = async ({ sensors, groupBy = 'day' }) => {
-//   if (!sensors || sensors.length === 0) return [];
-
-//   // Labels & date format
-//   let dateFormat, labels;
-//   switch (groupBy) {
-//     case 'day':
-//       dateFormat = '%H';
-//       labels = Array.from({ length: 24 }, (_, i) => `${i} ${i < 12 ? 'AM' : 'PM'}`);
-//       break;
-//     case 'week':
-//       dateFormat = '%w';
-//       labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-//       break;
-//     case 'month':
-//       dateFormat = '%u';
-//       labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-//       break;
-//     default:
-//       throw new Error('Invalid groupBy');
-//   }
-
-//   // Group sensors by type
-//   const sensorsByType = {};
-//   sensors.forEach(s => {
-//     if (!s.sensorType || !s.uniqueId) return; // skip invalid
-//     if (!sensorsByType[s.sensorType]) sensorsByType[s.sensorType] = [];
-//     sensorsByType[s.sensorType].push(s);
-//   });
-
-//   const results = await Promise.all(
-//     Object.entries(sensorsByType).map(async ([type, sensorList]) => {
-//       try {
-//         console.log(`Processing sensor type: ${type}`); // Debug log
-
-//         const modelInfo = MODEL_CLASSES.find(m => m.name === type);
-//         if (!modelInfo) {
-//           console.log(`Model info not found for type: ${type}`);
-//           return { type, map: {} };
-//         }
-
-//         const Model = modelInfo.cls;
-//         if (!Model || typeof Model.findAll !== 'function') {
-//           console.log(`Model or findAll not available for type: ${type}`);
-//           return { type, map: {} };
-//         }
-
-//         // Get numeric columns - simplified approach
-//         const knownNumericColumns = {
-//           door_queue: ['count', 'windowCount'],
-//           stall_status: ['usageCount'],
-//           occupancy: ['occupancyDuration'],
-//           air_quality: ['tvoc', 'eCO2', 'pm2_5', 'aqi'],
-//           toilet_paper: ['level'],
-//           soap_dispenser: ['level'],
-//           water_leakage: ['waterLevel_mm'],
-//         };
-
-//         const numericCols = knownNumericColumns[type] || [];
-
-//         const uniqueIds = sensorList.map(s => s.uniqueId);
-//         const buildingIds = sensorList.map(s => s.buildingId).filter(Boolean);
-//         const restroomIds = sensorList.map(s => s.restroomId).filter(Boolean);
-//         const ownerIds = sensorList.map(s => s.ownerId).filter(Boolean);
-
-//         const where = {};
-//         if (buildingIds.length)
-//           where.buildingId = buildingIds.length > 1 ? { [Op.in]: buildingIds } : buildingIds[0];
-//         if (restroomIds.length)
-//           where.restroomId = restroomIds.length > 1 ? { [Op.in]: restroomIds } : restroomIds[0];
-//         if (ownerIds.length)
-//           where.ownerId = ownerIds.length > 1 ? { [Op.in]: ownerIds } : ownerIds[0];
-//         if (uniqueIds.length)
-//           where.sensor_unique_id = uniqueIds.length > 1 ? { [Op.in]: uniqueIds } : uniqueIds[0];
-
-//         // Attributes for aggregation
-//         const attributes = [[fn('DATE_FORMAT', col('timestamp'), dateFormat), 'period']];
-//         if (numericCols.length > 0) {
-//           numericCols.forEach(c => attributes.push([fn('AVG', col(c)), c]));
-//         } else {
-//           attributes.push([fn('COUNT', '*'), 'count']);
-//         }
-
-//         console.log(`Fetching data for ${type} with where:`, where); // Debug log
-
-//         const data = await Model.findAll({
-//           where,
-//           attributes,
-//           group: ['period'],
-//           order: [['period', 'ASC']],
-//           raw: true,
-//         });
-
-//         console.log(`Data fetched for ${type}:`, data.length, 'records'); // Debug log
-
-//         // Map period => data
-//         const map = {};
-//         data.forEach(d => {
-//           if (d.period !== null && d.period !== undefined) {
-//             map[d.period] = d;
-//           }
-//         });
-
-//         return { type, map };
-//       } catch (error) {
-//         console.error(`Error processing sensor type ${type}:`, error);
-//         return { type, map: {} };
-//       }
-//     })
-//   );
-
-//   // Merge results into final array
-//   const merged = labels.map((label, i) => {
-//     const obj = { name: label };
-//     results.forEach(r => {
-//       let key =
-//         groupBy === 'day'
-//           ? i.toString().padStart(2, '0')
-//           : groupBy === 'week'
-//             ? i.toString()
-//             : (i + 1).toString();
-//       obj[r.type] = r.map[key] || {};
-//     });
-//     return obj;
-//   });
-
-//   return merged;
-// };
-/////
-
-// import { initModels } from '@/sequelizeSchemas/initModels';
-// import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
-// import { fn, col, Op } from 'sequelize';
-// import { sequelize } from '@/configs/connectDb';
-
-// export const getSensorsAggregatedData = async ({ sensors, groupBy = 'day' }) => {
-//   // Initialize models
-//   const models = initModels(sequelize);
-
-//   // Optional: test connection
-//   await sequelize.authenticate();
-//   console.log('✅ Sequelize connected and models initialized');
-
-//   if (!sensors || sensors.length === 0) {
-//     console.log('No sensors provided.');
-//     return [];
-//   }
-
-//   console.log(
-//     'Aggregating data for sensors:',
-//     sensors.map(s => s.uniqueId)
-//   );
-
-//   // Labels & date format
-//   let dateFormat, labels;
-//   switch (groupBy) {
-//     case 'day':
-//       dateFormat = '%H';
-//       labels = Array.from({ length: 24 }, (_, i) => `${i} ${i < 12 ? 'AM' : 'PM'}`);
-//       break;
-//     case 'week':
-//       dateFormat = '%w';
-//       labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-//       break;
-//     case 'month':
-//       dateFormat = '%u';
-//       labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-//       break;
-//     default:
-//       throw new Error('Invalid groupBy');
-//   }
-
-//   // Group sensors by type
-//   const sensorsByType = {};
-//   sensors.forEach(s => {
-//     if (!s.sensorType || !s.uniqueId) {
-//       console.log('Skipping invalid sensor:', s);
-//       return;
-//     }
-//     if (!sensorsByType[s.sensorType]) sensorsByType[s.sensorType] = [];
-//     sensorsByType[s.sensorType].push(s);
-//   });
-
-//   console.log('Sensors grouped by type:', sensorsByType);
-
-//   const knownNumericColumns = {
-//     door_queue: ['count', 'windowCount'],
-//     stall_status: ['usageCount'],
-//     occupancy: ['occupancyDuration'],
-//     air_quality: ['tvoc', 'eCO2', 'pm2_5', 'aqi'],
-//     toilet_paper: ['level'],
-//     soap_dispenser: ['level'],
-//     water_leakage: ['waterLevel_mm'],
-//   };
-
-//   const results = await Promise.all(
-//     Object.entries(sensorsByType).map(async ([type, sensorList]) => {
-//       try {
-//         console.log(`\nProcessing sensor type: ${type}`);
-
-//         // Get Sequelize model for this sensor type
-//         const modelInfo = MODEL_CLASSES.find(m => m.name === type);
-//         if (!modelInfo) {
-//           console.log(`Model info not found for type: ${type}`);
-//           return { type, map: {} };
-//         }
-
-//         const ModelClass = modelInfo.cls;
-//         if (!ModelClass || typeof ModelClass.findAll !== 'function') {
-//           console.log(`Model class not available for type: ${type}`);
-//           return { type, map: {} };
-//         }
-
-//         // Prepare numeric columns
-//         const numericCols = knownNumericColumns[type] || [];
-
-//         // Prepare IDs for filtering
-//         const uniqueIds = sensorList.map(s => s.uniqueId).filter(Boolean);
-//         const buildingIds = sensorList.map(s => s.buildingId).filter(Boolean);
-//         const restroomIds = sensorList.map(s => s.restroomId).filter(Boolean);
-//         const ownerIds = sensorList.map(s => s.ownerId).filter(Boolean);
-
-//         // Build where clause
-//         const where = {};
-//         if (buildingIds.length) where.buildingId = { [Op.in]: buildingIds };
-//         if (restroomIds.length) where.restroomId = { [Op.in]: restroomIds };
-//         if (ownerIds.length) where.ownerId = { [Op.in]: ownerIds };
-//         if (uniqueIds.length) where.sensor_unique_id = { [Op.in]: uniqueIds };
-
-//         console.log(`Where clause for ${type}:`, where);
-
-//         // Attributes to fetch
-//         const attributes = [[fn('DATE_FORMAT', col('timestamp'), dateFormat), 'period']];
-//         if (numericCols.length > 0) {
-//           numericCols.forEach(c => attributes.push([fn('AVG', col(c)), c]));
-//         } else {
-//           attributes.push([fn('COUNT', '*'), 'count']);
-//         }
-
-//         // Fetch data from database
-//         const data = await ModelClass.findAll({
-//           where,
-//           attributes,
-//           group: ['period'],
-//           order: [['period', 'ASC']],
-//           raw: true,
-//         });
-
-//         console.log(`Data fetched for ${type}:`, data.length, 'records', data);
-
-//         // Convert data array to map by period
-//         const map = {};
-//         data.forEach(d => {
-//           if (d.period !== null && d.period !== undefined) map[d.period] = d;
-//         });
-
-//         return { type, map };
-//       } catch (error) {
-//         console.error(`Error processing sensor type ${type}:`, error);
-//         return { type, map: {} };
-//       }
-//     })
-//   );
-
-//   console.log('Aggregation results:', results);
-
-//   // Merge data by labels
-//   const merged = labels.map((label, i) => {
-//     const obj = { name: label };
-//     results.forEach(r => {
-//       let key =
-//         groupBy === 'day'
-//           ? i.toString().padStart(2, '0')
-//           : groupBy === 'week'
-//             ? i.toString()
-//             : (i + 1).toString();
-//       obj[r.type] = r.map[key] || {};
-//     });
-//     return obj;
-//   });
-
-//   console.log('Merged sensor data:', merged);
-
-//   return merged;
-// };
-///
-
 import { initModels } from '@/sequelizeSchemas/initModels';
 import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
 import { fn, col, Op, Sequelize } from 'sequelize';
 import { sequelize } from '@/configs/connectDb';
+import { RestRoom } from '@/models/restroom.model';
+import mongoose from 'mongoose';
 
 export const getSensorsAggregatedData = async ({
   sensors,
@@ -495,20 +194,27 @@ export const getSensorsAggregatedData = async ({
 
 export const getDoorQueueAndOccupancyStats = async sensorArray => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) {
-    return { totalOccupied: 0, totalVacant: 0, totalPeopleInQueue: 0, totalFlowCount: 0 };
+    return {
+      totalOccupied: 0,
+      totalVacant: 0,
+      totalPeopleInQueue: 0,
+      totalFlowCount: 0,
+      restrooms: [], // new nested object
+    };
   }
 
-  // Initialize models
   initModels(sequelize);
 
-  // Separate sensors by type
   const doorQueueSensors = sensorArray.filter(s => s.sensorType === 'door_queue' && s.uniqueId);
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
 
   let totalPeopleInQueue = 0;
+  let totalOccupancySensors = 0;
   let totalFlowCount = 0;
   let totalOccupied = 0;
   let totalVacant = 0;
+
+  const restrooms = []; // new array to hold restroom info
 
   // === Door Queue ===
   const DoorQueueModelEntry = MODEL_CLASSES.find(m => m.name === 'door_queue');
@@ -525,7 +231,6 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
       raw: true,
     });
 
-    // Keep only latest per sensor
     const latestDQ = {};
     dqRecords.forEach(r => {
       if (!latestDQ[r.sensor_unique_id]) latestDQ[r.sensor_unique_id] = r;
@@ -534,6 +239,17 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
     Object.values(latestDQ).forEach(r => {
       totalPeopleInQueue += r.count || 0;
       totalFlowCount += r.windowCount || 0;
+
+      // Find the restroom info from sensorArray
+      const sensorInfo = doorQueueSensors.find(s => s.uniqueId === r.sensor_unique_id);
+      if (sensorInfo) {
+        restrooms.push({
+          restroomId: sensorInfo.restroomId || null,
+          restroomName: sensorInfo.restroomName || null,
+          queueCount: r.count || 0,
+          flowCount: r.windowCount || 0,
+        });
+      }
     });
   }
 
@@ -541,6 +257,7 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
   const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
   if (OccupancyModelEntry?.cls && occupancySensors.length > 0) {
     const uniqueIds = occupancySensors.map(s => s.uniqueId);
+    totalOccupancySensors = uniqueIds.length;
 
     const occRecords = await OccupancyModelEntry.cls.findAll({
       where: { sensor_unique_id: { [Op.in]: uniqueIds } },
@@ -558,12 +275,22 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
     });
 
     Object.values(latestOcc).forEach(r => {
-      totalOccupied += r.occupied ? 1 : 0;
-      totalVacant += r.occupied === false ? 1 : 0;
+      if (Number(r.occupied) === 1) {
+        totalOccupied += 1;
+      } else if (Number(r.occupied) === 0) {
+        totalVacant += 1;
+      }
     });
   }
 
-  return { totalOccupied, totalVacant, totalPeopleInQueue, totalFlowCount };
+  return {
+    totalOccupancySensors,
+    totalOccupied,
+    totalVacant,
+    totalPeopleInQueue,
+    totalFlowCount,
+    restrooms, // nested object per restroom
+  };
 };
 
 // export const getWaterLeakageAggregatedData = async ({ sensors, groupBy = 'day' }) => {
@@ -868,4 +595,94 @@ export const getRestroomChartReport = async sensorArray => {
   report.sort((a, b) => parseInt(b.percentage) - parseInt(a.percentage));
 
   return report;
+};
+
+export const getTotalToiletsByBuildingId = async buildingId => {
+  if (!buildingId) return 0;
+
+  const result = await RestRoom.aggregate([
+    {
+      $match: {
+        buildingId: new mongoose.Types.ObjectId(buildingId),
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalToilets: {
+          $sum: { $ifNull: ['$numOfToilets', 0] },
+        },
+      },
+    },
+  ]);
+
+  return result[0]?.totalToilets || 0;
+};
+
+export const getOccupancyStats = async sensorArray => {
+  if (!Array.isArray(sensorArray) || sensorArray.length === 0) {
+    return {
+      totalOccupancySensors: 0,
+      totalOccupied: 0,
+      totalVacant: 0,
+    };
+  }
+
+  // Init sequelize models
+  initModels(sequelize);
+
+  // ✅ Filter occupancy sensors only
+  const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
+
+  if (occupancySensors.length === 0) {
+    return {
+      totalOccupancySensors: 0,
+      totalOccupied: 0,
+      totalVacant: 0,
+    };
+  }
+
+  const uniqueIds = occupancySensors.map(s => s.uniqueId);
+
+  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
+  if (!OccupancyModelEntry?.cls) {
+    return {
+      totalOccupancySensors: uniqueIds.length,
+      totalOccupied: 0,
+      totalVacant: 0,
+    };
+  }
+
+  // ✅ Get latest record per sensor
+  const records = await OccupancyModelEntry.cls.findAll({
+    where: { sensor_unique_id: { [Op.in]: uniqueIds } },
+    attributes: ['sensor_unique_id', 'occupied', 'timestamp'],
+    order: [
+      ['sensor_unique_id', 'ASC'],
+      ['timestamp', 'DESC'],
+    ],
+    raw: true,
+  });
+
+  // Keep only latest row per sensor
+  const latestBySensor = {};
+  for (const r of records) {
+    if (!latestBySensor[r.sensor_unique_id]) {
+      latestBySensor[r.sensor_unique_id] = r;
+    }
+  }
+
+  let totalOccupied = 0;
+  let totalVacant = 0;
+
+  Object.values(latestBySensor).forEach(r => {
+    if (Number(r.occupied) === 1) totalOccupied++;
+    else if (Number(r.occupied) === 0) totalVacant++;
+  });
+
+  return {
+    totalOccupancySensors: uniqueIds.length,
+    totalOccupied,
+    totalVacant,
+  };
 };

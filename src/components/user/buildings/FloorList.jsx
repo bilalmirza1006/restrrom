@@ -45,8 +45,16 @@ const FloorList = ({ data, buildingId }) => {
         />
       </div>
 
-      <List icon="/svgs/user/occupied.svg" title="Occupied Restrooms" value={1} />
-      <List icon="/svgs/user/toilet.svg" title="Free Restrooms" value={1} />
+      <List
+        icon="/svgs/user/occupied.svg"
+        title="Occupied Restrooms"
+        value={data?.occupancyStats?.totalOccupied}
+      />
+      <List
+        icon="/svgs/user/toilet.svg"
+        title="Free Restrooms"
+        value={data?.occupancyStats?.totalVacant}
+      />
       <List icon="/svgs/user/sensors.svg" title="Active Sensors" value={data?.sensors?.length} />
 
       <div className="mt-4 flex items-center justify-center md:mt-6">

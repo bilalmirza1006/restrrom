@@ -7,9 +7,17 @@ import { use } from 'react';
 
 const BuildingDetailsPage = ({ params }) => {
   const { buildingId } = use(params);
-  const { data } = useGetBuildingQuery(buildingId);
+  const { data, isLoading, isError } = useGetBuildingQuery(buildingId);
+
+  if (isLoading) {
+    return <p>Loading building details...</p>; // Show loading state
+  }
+
+  if (isError) {
+    return <p>Error loading building details.</p>; // Show error state
+  }
+
   return <BuildingDetail building={data?.data} />;
 };
 
-// export default BuildingDetailsPage;
 export default withPageGuard(BuildingDetailsPage, '/admin/buildings/building-detail/[buildingId]');
