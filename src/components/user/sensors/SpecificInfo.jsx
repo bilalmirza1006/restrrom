@@ -1,9 +1,27 @@
-const SpecificInfo = () => {
+// import { SENSOR_UI_CONFIG } from './sensorConfig';
+
+import { SENSOR_UI_CONFIG } from './SensorConfig';
+
+const SpecificInfo = ({ sensorType, sensorData }) => {
+  // console.log('sensorType in SpecificInfo:', sensorType);
+  // console.log('sensorData in SpecificInfo:', sensorData);
+  const fields = SENSOR_UI_CONFIG[sensorType];
+
+  if (!fields) {
+    return (
+      <div className="rounded-[15px] border p-4">
+        <p className="text-sm text-gray-500">No sensor-specific information available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
       <h6 className="text-primary text-base font-semibold">Sensor-Specific Information</h6>
-      <List title="Current Occupancy" value="03" />
-      <List title="Peak Occupancy" value="10" />
+
+      {fields.map((item, index) => (
+        <List key={index} title={item.label} value={item.value(sensorData) ?? '-'} />
+      ))}
     </div>
   );
 };

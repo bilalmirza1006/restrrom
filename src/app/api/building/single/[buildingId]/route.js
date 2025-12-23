@@ -46,11 +46,6 @@ export const GET = asyncHandler(async (req, { params }) => {
   }
 
   const sensors = await Sensor.find({ buildingId }).lean();
-  // console.log(
-  //   'Fetched sensors:',
-  //   sensors.length,
-  //   sensors.map(s => s.uniqueId)
-  // );
 
   building.sensors = sensors;
 
@@ -59,29 +54,8 @@ export const GET = asyncHandler(async (req, { params }) => {
     return sendResponse(NextResponse, 'Building fetched successfully', building, accessToken);
   }
 
-  // const sensorAggregationArray = sensors
-  //   .filter(s => s.sensorType && s.uniqueId)
-  //   .map(s => ({
-  //     sensorType: s.sensorType,
-  //     uniqueId: s.uniqueId,
-  //     buildingId: s.buildingId,
-  //     restroomId: s.restroomId,
-  //     ownerId: s.ownerId,
-  //   }));
-
-  // console.log('Sensor aggregation array:', sensorAggregationArray);
-
-  // const sensorData = await getSensorsAggregatedData({
-  //   sensors: sensorAggregationArray,
-  //   groupBy: period,
-  //   scope: 'building', // building | restroom | sensor | owner
-  // });
-  // // console.log('sensorssensorssensorssensorssensors', sensors);
-
   const doorQueueSensors = await getDoorQueueAndOccupancyStats(sensors);
-  // console.log('sdsdsdsdsdsdsdssdsdsdsdsdsdsds:', doorQueueSensors);
 
-  // Helper to get fillColor based on queueCount
   const getRestroomFillColor = (queueCount, fillColorArray) => {
     if (!fillColorArray || fillColorArray.length === 0) return null;
 
@@ -139,52 +113,19 @@ export const GET = asyncHandler(async (req, { params }) => {
   }, {});
 
   const report = await getRestroomChartReport(sensors);
+  console.log('Restroom Chart Report:', report);
   const mostUsedRestroom = report.map(item => {
-    const restroom = restroomMap[item.name]; // item.name == restroomId
+    // Use the restroomId from the report
+    const restroom = restroomMap[item.restroomId?.toString()];
 
     return {
-      restroomId: restroom?._id || item.name,
+      restroomId: item.restroomId || null,
       restroomName: restroom?.name || 'Unknown Restroom',
       percentage: item.percentage,
       chartData: item.chartData,
     };
   });
-  console.log('Restroom Usage Report:', report);
 
-  // // Function to map count to color
-  // // Attach restroomId from the original sensors to avoid undefined errors
-  // const doorQueueSensorsWithRestroom = doorQueueSensors.map(sensor => {
-  //   const originalSensor = sensors.find(s => s.uniqueId === sensor.sensor_unique_id);
-  //   return {
-  //     ...sensor,
-  //     restroomId: originalSensor?.restroomId,
-  //   };
-  // });
-
-  // // Helper function to map count to color
-  // const getDoorQueueColor = (count, polygon) => {
-  //   if (!polygon?.color || polygon.color.length === 0) return null;
-  //   const colorObj = polygon.color.find(c => count >= Number(c.min) && count <= Number(c.max));
-  //   return colorObj ? colorObj.color : null;
-  // };
-
-  // Map colors to door queue sensors
-  // const doorQueueSensorsWithColor = doorQueueSensorsWithRestroom.map(sensor => {
-  //   const polygon = building.buildingCoordinates.find(
-  //     p => p.restroomId?.toString() === sensor.restroomId?.toString()
-  //   );
-
-  //   const color = getDoorQueueColor(sensor.count, polygon);
-
-  //   return {
-  //     ...sensor,
-  //     color,
-  //   };
-  // });
-
-  // console.log('Door Queue Sensors with Color:', doorQueueSensorsWithColor);
-
-  // building.sensorData = sensorData;
   const dayData = await getWaterLeakageAggregatedData({
     sensors,
     groupBy: 'day',

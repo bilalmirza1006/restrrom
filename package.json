@@ -17,6 +17,7 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.0",
     "datauri": "^4.1.0",
+    "dayjs": "^1.11.19",
     "jsonwebtoken": "^9.0.2",
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",

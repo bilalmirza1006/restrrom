@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import Twomen from '@/assets/default/Twomen';
-// import CustomAreaChart from '@/components/global/charts/CustomAreaChart';
 import Dropdown from '@/components/global/small/Dropdown';
 import CustomAreaChart from '@/components/global/charts/CustomLineChart';
 
@@ -13,11 +12,11 @@ const timeOptions = [
 ];
 
 const MostUsedRooms = ({ mostUsedRestroom }) => {
-  const [selectedTime, setSelectedTime] = useState('hour'); // default chart view
+  const [selectedTime, setSelectedTime] = useState('hour');
 
   return (
     <div className="scroll-0 overflow-y-scroll rounded-xl bg-white p-5">
-      {/* Header with Dropdown */}
+      {/* Header */}
       <div className="flex items-center justify-between gap-1">
         <div className="flex items-center gap-1">
           <Twomen />
@@ -33,11 +32,15 @@ const MostUsedRooms = ({ mostUsedRestroom }) => {
         </div>
       </div>
 
-      {/* List of Restrooms */}
+      {/* List */}
       <div className="mt-5 flex h-[615px] flex-col gap-5 overflow-y-auto">
-        {mostUsedRestroom.map((item, i) => (
-          <List item={item} key={i} selectedTime={selectedTime} />
-        ))}
+        {Array.isArray(mostUsedRestroom) && mostUsedRestroom.length > 0 ? (
+          mostUsedRestroom.map((item, i) => (
+            <List item={item} key={i} selectedTime={selectedTime} />
+          ))
+        ) : (
+          <p className="text-center text-sm text-gray-400">No restroom usage data available</p>
+        )}
       </div>
     </div>
   );
@@ -46,18 +49,29 @@ const MostUsedRooms = ({ mostUsedRestroom }) => {
 export default MostUsedRooms;
 
 const List = ({ item, selectedTime }) => {
-  // Transform data to consistent keys: x & value
-  const data =
-    item.chartData[selectedTime]?.map(d => {
-      const xKey = Object.keys(d).find(key => key !== 'value'); // hour/day/week/month
-      return { x: d[xKey], value: d.value };
-    }) || [];
+  if (!item) return null;
+
+  const rawChartData = item?.chartData?.[selectedTime];
+
+  const data = Array.isArray(rawChartData)
+    ? rawChartData
+        .map(d => {
+          if (!d || typeof d !== 'object') return null;
+
+          const xKey = Object.keys(d).find(key => key !== 'value');
+          return xKey ? { x: d[xKey], value: d.value ?? 0 } : null;
+        })
+        .filter(Boolean)
+    : [];
 
   return (
     <div className="flex items-center justify-between border-b border-gray-300 py-2">
       {/* Restroom Info */}
       <div className="flex flex-col">
-        <h4 className="text-[14px] font-[700]">{item.restroomName}</h4>
+        <h4 className="text-[14px] font-[700]">
+          {(item?.restroomName || item?.sensorName) ?? 'Unnamed Restroom'}
+        </h4>
+
         <h6 className="text-[12px] font-[500]">Floor info</h6>
       </div>
 
@@ -68,7 +82,7 @@ const List = ({ item, selectedTime }) => {
 
       {/* Usage Percentage */}
       <div>
-        <h4 className="text-[14px] font-[700]">{item.percentage}</h4>
+        <h4 className="text-[14px] font-[700]">{item?.percentage ?? '0%'}</h4>
       </div>
     </div>
   );

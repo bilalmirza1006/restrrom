@@ -3,52 +3,67 @@ import React, { useEffect, useRef, useState } from 'react';
 import FloorList from '../buildings/FloorList';
 import MostUsedRooms from '../buildings/MostUsedRooms';
 import CustomDropdown from '@/components/global/CustomDropdown';
-import FloorActivityChart from '../buildings/FloorActivityChart';
+// import FloorActivityChart from '../buildings/FloorActivityChart';
 import InfoCards from './InfoCards';
 import ActiveAlerts from './ActiveAlerts';
 import Button from '@/components/global/small/Button';
 import Link from 'next/link';
 import SensorTable from './SensorTable';
+import FloorActivityChart from '../buildings/FloorActivityChart';
+import Dropdown from '@/components/global/small/Dropdown';
+import RestroomShowCanvasData from './RestrromShowCanvasData';
 // import SensorTable from './SensorTable';
 
 const buildingImage =
   'https://res.cloudinary.com/hamzanafasat/image/upload/v1755063318/rest-room/building-models/xmjx04gv73z6rnycrurl.jpg';
 
-function RestRoomDetails() {
+function RestRoomDetails({ restRoom }) {
   const [popupData, setPopupData] = useState(null);
+  const [image, setImage] = useState('');
+  const [polygons, setPolygons] = useState([]);
+  console.log('imageimageimage', image);
+  console.log('polygonspolygonspolygons', polygons);
+  console.log('restroomrestroomrestroomrestroomrestroomrestroomrestroom', restRoom);
+  const [range, setRange] = useState('day');
+  const options = [
+    { option: 'Day', value: 'day' },
+    { option: 'This Week', value: 'week' },
+    { option: 'This Month', value: 'month' },
+  ];
   const data = {
     stats: [
       {
         id: 1,
-        title: 'Total Floors',
-        borderColor: 'border-[#078E9B]',
-        hoverColor: 'hover:bg-[#078E9B15]',
-        count: '2',
-        icon: '/svgs/user/green-step.svg',
+        title: 'Total Sensors',
+        borderColor: 'border-[#FF4D85]',
+        hoverColor: 'hover:bg-[#FF4D8515]',
+        count: restRoom?.data?.totalSensors ?? 0,
+        icon: '/svgs/user/pink-buzzer.svg',
       },
       {
         id: 2,
-        title: 'Total Restrooms',
+        title: 'Total Slates',
         borderColor: 'border-[#A449EB]',
         hoverColor: 'hover:bg-[#A449EB15]',
-        count: '4',
+        count: restRoom?.data?.occupancyStats?.totalOccupancySensors ?? 0,
         icon: '/svgs/user/purple-restroom.svg',
       },
       {
         id: 3,
-        title: 'Restrooms In Use',
-        borderColor: 'border-[#FF9500]',
-        hoverColor: 'hover:bg-[#FF950015]',
-        count: '6',
-        icon: '/svgs/user/yellow-toilet.svg',
+        title: 'Total Vacant',
+        borderColor: 'border-[#078E9B]',
+        hoverColor: 'hover:bg-[#078E9B15]',
+        count: restRoom?.data?.occupancyStats?.totalVacant ?? 0,
+        icon: '/svgs/user/green-step.svg',
       },
+
       {
         id: 4,
-        title: 'Total Sensors',
-        borderColor: 'border-[#FF4D85]',
-        hoverColor: 'hover:bg-[#FF4D8515]',
-        count: '8',
-        icon: '/svgs/user/pink-buzzer.svg',
+        title: 'Slates In Use',
+        borderColor: 'border-[#FF9500]',
+        hoverColor: 'hover:bg-[#FF950015]',
+        count: restRoom?.data?.occupancyStats?.totalOccupied ?? 0,
+        icon: '/svgs/user/yellow-toilet.svg',
       },
     ],
     image: '/Frame 2085666687.png',
@@ -121,6 +136,12 @@ function RestRoomDetails() {
   };
 
   const canvasRef = useRef();
+  useEffect(() => {
+    if (restRoom?.data) {
+      setImage(restRoom.data.modelImage?.[0]?.url || '');
+      setPolygons(restRoom.data.modelCoordinates || []);
+    }
+  }, [restRoom]);
 
   useEffect(() => {
     const image = new Image();
@@ -159,46 +180,13 @@ function RestRoomDetails() {
   return (
     <div className="grid grid-cols-12 gap-5">
       <div className="relative col-span-12 rounded-2xl bg-white p-7.5 shadow-md lg:col-span-8">
-        <canvas
-          onClick={event =>
-            handleCanvasClick({
-              event,
-              canvasRef,
-              polygons: data.sensors, // ✅ your polygons come from sensors
-              setPopupData,
-              // other params...
-            })
-          }
-          className="h-full w-full"
-          ref={canvasRef}
-        />
-        {popupData && (
-          <div
-            style={{
-              top: popupData.y + 90,
-              left: popupData.x - 90,
-            }}
-            className={`absolute z-10 flex flex-col gap-3 rounded-2xl bg-white p-5`}
-          >
-            <div className="flex items-center justify-between gap-15">
-              <p className="text-primary text-xl font-semibold">{popupData.polygon.name}</p>
-              <p className="text-primary font-semibold">{popupData.polygon.value}</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <p className="text-primary text-xl font-semibold">Parameters</p>
-              {popupData.polygon.parameters.map(item => (
-                <p className="text-xs font-medium">{item}</p>
-              ))}
-            </div>
-            <Link
-              className="bg-primary border-primary flex h-[50px] w-full cursor-pointer items-center rounded-[10px] border px-4 text-center text-base font-bold text-white transition-all duration-150 hover:opacity-60"
-              href={`/user/sensors/sensor-detail/${popupData.polygon.id}`}
-            >
-              see Full detail
-            </Link>
-          </div>
+        {image && polygons.length ? (
+          <RestroomShowCanvasData image={image} polygons={polygons} />
+        ) : (
+          <p className="mt-20 text-center text-gray-400">Loading restroom model...</p>
         )}
       </div>
+
       <div className="col-span-12 lg:col-span-4">
         <ActiveAlerts />
       </div>
@@ -216,21 +204,26 @@ function RestRoomDetails() {
               />
             ))}
           </div>
-          <div>
-            <div className="rounded-xl bg-white p-5">
-              <div className="flex justify-between">
-                <h1 className="text-[24px] font-semibold">Floors Activity</h1>
-                <CustomDropdown lists={['This Month', 'This Week', 'This Year']} />
-              </div>
-              <FloorActivityChart />
+          <div className="mt-5 rounded-xl bg-white p-5">
+            <div className="flex items-center justify-between">
+              <h1 className="text-[24px] font-semibold">Water leakage activity</h1>
+              <Dropdown
+                options={options}
+                defaultText="day"
+                initialValue="day"
+                width="180px"
+                onSelect={value => setRange(value)}
+              />
             </div>
+
+            <FloorActivityChart range={range} sensorData={restRoom?.data?.waterLeakageData} />
           </div>
         </div>
         <div className="col-span-12 lg:col-span-4">
-          <MostUsedRooms />
+          <MostUsedRooms mostUsedRestroom={restRoom?.data?.sensorReport} />
         </div>
         <div className="col-span-12 rounded-2xl bg-white p-5">
-          <SensorTable />
+          <SensorTable data={restRoom?.data?.sensors} />
         </div>
       </div>
     </div>

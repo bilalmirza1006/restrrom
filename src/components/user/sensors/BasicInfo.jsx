@@ -3,7 +3,7 @@ const BasicInfo = ({ sensorInfo }) => {
     <div className="rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
       <h6 className="text-primary text-base font-semibold">Basic Sensor Information</h6>
       <List title="Sensor Name" value={sensorInfo?.name} />
-      <List title="Sensor Type" value={sensorInfo?.type} />
+      <List title="Sensor Type" value={sensorInfo?.sensorType} />
       <List title="Unique Id" value={sensorInfo?.uniqueId} />
     </div>
   );

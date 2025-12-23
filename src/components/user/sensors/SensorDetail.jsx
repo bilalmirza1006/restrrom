@@ -12,7 +12,7 @@ const SensorDetail = ({ id }) => {
   const { data, isLoading, error } = useGetSingleSensorQuery(id);
   const [sensorData, setSensorData] = useState({});
 
-  console.log('SensorDetail', sensorData);
+  console.log('SensorDetail', data);
 
   useEffect(() => {
     if (data?.data) {
@@ -29,12 +29,12 @@ const SensorDetail = ({ id }) => {
       ) : (
         <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className="flex flex-col gap-5">
-            <BasicInfo sensorInfo={sensorData} />
-            <StatusAndData sensorInfo={sensorData} />
-            <SpecificInfo />
+            <BasicInfo sensorInfo={data?.sensor} />
+            <StatusAndData sensorType={data?.sensor?.sensorType} sensorInfo={data?.latestValue} />
+            <SpecificInfo sensorType={data?.sensor?.sensorType} sensorData={data?.latestValue} />
           </div>
           <div className="flex flex-col gap-5">
-            <HistoryData />
+            <HistoryData datas={data?.historicalCounts} />
             <AlertHistory />
           </div>
         </div>

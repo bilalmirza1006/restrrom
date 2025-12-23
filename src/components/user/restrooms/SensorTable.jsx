@@ -1,97 +1,104 @@
+'use client';
 import React from 'react';
 import DataTable from 'react-data-table-component';
 import { tableStyles } from '@/data/data';
 import Link from 'next/link';
 import { HiOutlineEye } from 'react-icons/hi2';
+import { useSelector } from 'react-redux';
+import { useUpdateSensorMutation } from '@/features/sensor/sensorApi';
+import ToggleButton from '@/components/global/small/ToggleButton';
+import toast from 'react-hot-toast';
+// import { toast } from 'react-toastify';
 
-const sensors = [
-  {
-    name: 's1',
-    id: '6891ada378bf2c8a69875dd7',
-    parameters: ['temperature', 'humidity', 'co2'],
-    uniqueId: 'SENSOR-1',
-    isConnected: true,
-    status: 'Activated',
-  },
-  {
-    name: 's2',
-    id: '6891adb478bf2c8a69875ddd',
-    parameters: ['temperature', 'humidity', 'co', 'ch'],
-    uniqueId: 'SENSOR-2',
-    isConnected: true,
-    status: 'Deactivated',
-  },
-  {
-    name: 's3',
-    id: '6891add678bf2c8a69875de3',
-    parameters: ['temperature', 'tvoc'],
-    uniqueId: 'SENSOR-3',
-    isConnected: true,
-    status: 'Activated',
-  },
-  {
-    name: 's4',
-    id: '6891adeb78bf2c8a69875de9',
-    parameters: ['co', 'tvoc'],
-    uniqueId: 'SENSOR-4',
-    isConnected: true,
-    status: 'Deactivated',
-  },
-  {
-    name: 's5',
-    id: '6891ae2d78bf2c8a69875def',
-    parameters: ['co2', 'tvoc', 'ch'],
-    uniqueId: 'SENSOR-5',
-    isConnected: false,
-    status: 'Activated',
-  },
-];
-
-const tableColumns = [
+const tableColumns = (handleStatusHandler, user, getSensorRoute) => [
   {
     name: 'Sensor Name',
     selector: row => row?.name,
   },
-  {
-    name: 'Parameters',
-    selector: row => (
-      <div>
-        {row.parameters.map(item => (
-          <>{item},</>
-        ))}
-      </div>
-    ),
-  },
+
   {
     name: 'Unique Id',
     selector: row => row?.uniqueId,
   },
   {
     name: 'Is Connected',
-    selector: row =>
-      row?.isConnected === true ? <span>Connected</span> : <span>Disconnected</span>,
+    cell: row => (
+      <div className="flex items-center gap-2">
+        <span
+          className={`h-2 w-2 rounded-full ${row?.isConnected ? 'bg-green-500' : 'bg-red-500'}`}
+        />
+        <span className={`font-semibold ${row?.isConnected ? 'text-green-600' : 'text-red-600'}`}>
+          {row?.isConnected ? 'Connected' : 'Disconnected'}
+        </span>
+      </div>
+    ),
   },
   {
     name: 'Status',
     cell: row => (
-      <div className={`${row.status === 'Activated' ? 'text-[#50D450]' : 'text-[#FF0000]'}`}>
-        {row.status}
+      <div>
+        <ToggleButton
+          role={user?.role}
+          isChecked={row.status === 'Activated'}
+          onToggle={() => handleStatusHandler(row)}
+        />
       </div>
+    ),
+  },
+  {
+    name: 'Action',
+    cell: row => (
+      <Link href={getSensorRoute(user?.role, row._id)}>
+        <div className="cursor-pointer">
+          <HiOutlineEye fontSize={20} />
+        </div>
+      </Link>
     ),
   },
 ];
 
-function SensorTable() {
+function SensorTable({ data }) {
+  const [updateSensor] = useUpdateSensorMutation();
+  const { user } = useSelector(state => state.auth);
+
+  const handleStatusHandler = async sensor => {
+    try {
+      const payload = {
+        id: sensor._id,
+        status: sensor.status === 'Activated' ? 'Deactivated' : 'Activated',
+      };
+
+      const res = await updateSensor(payload).unwrap();
+      toast.success(res.message || 'Sensor status updated');
+    } catch (error) {
+      toast.error(error?.data?.message || 'Failed to update status');
+      console.error(error);
+    }
+  };
+
+  const getSensorRoute = (role, id) => {
+    switch (role) {
+      case 'admin':
+        return `/admin/sensors/sensor-details/${id}`;
+      case 'super_admin':
+        return `/super-admin/sensors/sensor-detail/${id}`;
+      case 'building_inspector':
+        return `/inspectionist/sensors/sensor-details/${id}`;
+      default:
+        return `/sensors/sensor-details/${id}`;
+    }
+  };
+
   return (
     <div>
       <DataTable
-        data={sensors}
-        columns={tableColumns}
+        data={data}
+        columns={tableColumns(handleStatusHandler, user, getSensorRoute)}
         customStyles={tableStyles}
         pagination
         fixedHeader
         fixedHeaderScrollHeight="60vh"
-        selectableRows
+        // selectableRows
       />
     </div>
   );

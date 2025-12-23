@@ -1,4 +1,5 @@
 'use client';
+import Dropdown from '@/components/global/small/Dropdown';
 import React, { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -11,19 +12,6 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
-
-const data = [
-  { date: '3 May', bar: 28, line: 25 },
-  { date: '4 May', bar: 40, line: 32 },
-  { date: '5 May', bar: 22, line: 20 },
-  { date: '6 May', bar: 33, line: 25 },
-  { date: '7 May', bar: 26, line: 19 },
-  { date: '8 May', bar: 31, line: 24 },
-  { date: '9 May', bar: 40, line: 35 },
-  { date: '10 May', bar: 27, line: 24 },
-  { date: '11 May', bar: 33, line: 28 },
-  { date: '12 May', bar: 29, line: 19 },
-];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -38,12 +26,33 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const HistoryData = () => {
+const HistoryData = ({ datas }) => {
   const [activeIndex, setActiveIndex] = useState(null);
+  const [range, setRange] = useState('day');
+
+  const options = [
+    { option: 'Hour', value: 'hour' },
+    { option: 'Day', value: 'day' },
+    { option: 'This Week', value: 'week' },
+    { option: 'This Month', value: 'month' },
+  ];
+
+  // Transform the data for the chart
+  const data = mapDataForChart(datas[range] || []);
 
   return (
     <div className="h-[333px] w-full rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
-      <h6 className="text-primary mb-5 text-base font-semibold">Historical Data</h6>
+      <div className="mb-5 flex items-center justify-between">
+        <h6 className="text-primary text-base font-semibold">Historical Data</h6>
+        <Dropdown
+          options={options}
+          defaultText="day"
+          initialValue="day"
+          width="180px"
+          onSelect={value => setRange(value)}
+        />
+      </div>
+
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={data}
@@ -62,11 +71,11 @@ const HistoryData = () => {
             padding={{ left: 10, right: 10 }}
           />
           <YAxis
-            domain={[0, 55]} // increase range to give space for thick line
+            domain={[0, 55]}
             axisLine={false}
             tickLine={false}
             tick={{ fill: '#A449EB', fontSize: 12 }}
-            tickFormatter={val => `${val}%`}
+            tickFormatter={val => `${val}C`}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
           <Bar dataKey="bar" barSize={36}>
@@ -99,3 +108,11 @@ const HistoryData = () => {
 };
 
 export default HistoryData;
+// Function to map raw data to chart format
+const mapDataForChart = dataArray => {
+  return dataArray.map(item => ({
+    date: item.date,
+    bar: item.count, // For the Bar chart
+    line: item.count, // For the Line chart (if needed)
+  }));
+};

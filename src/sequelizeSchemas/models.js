@@ -71,13 +71,13 @@ export const waterLeakageAttrs = {
   waterLevel_mm: { type: DataTypes.FLOAT },
 };
 
-export class DoorQueue extends Model { }
-export class StallStatus extends Model { }
-export class Occupancy extends Model { }
-export class AirQuality extends Model { }
-export class ToiletPaper extends Model { }
-export class SoapDispenser extends Model { }
-export class WaterLeakage extends Model { }
+export class DoorQueue extends Model {}
+export class StallStatus extends Model {}
+export class Occupancy extends Model {}
+export class AirQuality extends Model {}
+export class ToiletPaper extends Model {}
+export class SoapDispenser extends Model {}
+export class WaterLeakage extends Model {}
 
 export const MODEL_CLASSES = [
   { cls: DoorQueue, name: 'door_queue', attrs: doorQueueAttrs },

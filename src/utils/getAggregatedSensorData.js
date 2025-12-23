@@ -1,10 +1,13 @@
 import { initModels } from '@/sequelizeSchemas/initModels';
 import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
-import { fn, col, Op, Sequelize } from 'sequelize';
+import { fn, col, Op, Sequelize, literal } from 'sequelize';
+
 import { sequelize } from '@/configs/connectDb';
 import { RestRoom } from '@/models/restroom.model';
 import mongoose from 'mongoose';
-
+import dayjs from 'dayjs';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+dayjs.extend(weekOfYear);
 export const getSensorsAggregatedData = async ({
   sensors,
   groupBy = 'day',
@@ -503,8 +506,8 @@ export const getRestroomChartReport = async sensorArray => {
 
   initModels(sequelize);
 
+  // Filter occupancy sensors
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
-
   if (occupancySensors.length === 0) return [];
 
   const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
@@ -528,39 +531,48 @@ export const getRestroomChartReport = async sensorArray => {
     raw: true,
   });
 
-  const restroomsMap = {};
+  if (!records.length) return [];
 
+  // Use only the first valid restroomId (assuming all sensors are in the same restroom)
+  const restroomId = records.find(r => r.restroomId)?.restroomId;
+  if (!restroomId) return [];
+
+  // Optional: fetch actual restroom name
+  const restroom = await RestRoom.findOne({
+    where: { id: restroomId },
+    attributes: ['id', 'name'],
+    raw: true,
+  });
+  const restroomName = restroom?.name || restroomId;
+
+  // Initialize aggregation maps
+  const rr = {
+    name: restroomName,
+    totalOccupied: 0,
+    totalRecords: 0,
+    chartData: {
+      hour: [],
+      day: [],
+      week: [],
+      month: [],
+    },
+    _hourMap: {},
+    _dayMap: {},
+    _weekMap: {},
+    _monthMap: {},
+  };
+
+  // Aggregate records
   records.forEach(r => {
-    const id = r.restroomId;
-    if (!restroomsMap[id]) {
-      restroomsMap[id] = {
-        name: id, // fallback to restroomId
-        totalOccupied: 0,
-        totalRecords: 0,
-        chartData: {
-          hour: [],
-          day: [],
-          week: [],
-          month: [],
-        },
-        _hourMap: {},
-        _dayMap: {},
-        _weekMap: {},
-        _monthMap: {},
-      };
-    }
-
-    const rr = restroomsMap[id];
-
     const occupied = r.occupied ? 1 : 0;
     rr.totalOccupied += occupied;
     rr.totalRecords += 1;
 
     const date = new Date(r.timestamp);
     const hour = date.getHours();
-    const day = date.getDate(); // 1-31
-    const week = Math.ceil(date.getDate() / 7); // 1-5
-    const month = date.getMonth() + 1; // 1-12
+    const day = date.getDate();
+    const week = Math.ceil(date.getDate() / 7);
+    const month = date.getMonth() + 1;
 
     rr._hourMap[hour] = (rr._hourMap[hour] || 0) + occupied;
     rr._dayMap[day] = (rr._dayMap[day] || 0) + occupied;
@@ -568,30 +580,149 @@ export const getRestroomChartReport = async sensorArray => {
     rr._monthMap[month] = (rr._monthMap[month] || 0) + occupied;
   });
 
-  // Transform maps to arrays for chart data
-  const report = Object.values(restroomsMap).map(r => {
-    const percentage = r.totalRecords
-      ? Math.round((r.totalOccupied / r.totalRecords) * 100) + '%'
-      : '0%';
+  // Transform maps to arrays
+  rr.chartData.hour = Object.entries(rr._hourMap).map(([hour, value]) => ({
+    hour: parseInt(hour),
+    value,
+  }));
+  rr.chartData.day = Object.entries(rr._dayMap).map(([day, value]) => ({
+    day: parseInt(day),
+    value,
+  }));
+  rr.chartData.week = Object.entries(rr._weekMap).map(([week, value]) => ({
+    week: parseInt(week),
+    value,
+  }));
+  rr.chartData.month = Object.entries(rr._monthMap).map(([month, value]) => ({
+    month: parseInt(month),
+    value,
+  }));
 
-    const chartData = {
-      hour: Object.entries(r._hourMap).map(([hour, value]) => ({ hour: parseInt(hour), value })),
-      day: Object.entries(r._dayMap).map(([day, value]) => ({ day: parseInt(day), value })),
-      week: Object.entries(r._weekMap).map(([week, value]) => ({ week: parseInt(week), value })),
-      month: Object.entries(r._monthMap).map(([month, value]) => ({
-        month: parseInt(month),
-        value,
-      })),
-    };
+  // Calculate percentage
+  const percentage = rr.totalRecords
+    ? Math.round((rr.totalOccupied / rr.totalRecords) * 100) + '%'
+    : '0%';
+
+  return [
+    {
+      restroomId: rr.name,
+      percentage,
+      chartData: rr.chartData,
+    },
+  ];
+};
+
+export const getSlateChartReport = async sensorArray => {
+  if (!Array.isArray(sensorArray) || sensorArray.length === 0) return [];
+
+  initModels(sequelize);
+
+  // Only occupancy sensors
+  const occupancySensors = sensorArray.filter(
+    s => s.sensorType === 'occupancy' && s.uniqueId && s._id
+  );
+
+  if (occupancySensors.length === 0) return [];
+
+  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
+  if (!OccupancyModelEntry?.cls) return [];
+
+  // Map SQL uniqueId -> Mongo Sensor _id and sensor object
+  const uniqueIdToSensor = {};
+  occupancySensors.forEach(s => {
+    uniqueIdToSensor[s.uniqueId] = s;
+  });
+
+  const uniqueIds = Object.keys(uniqueIdToSensor);
+
+  const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+
+  // Fetch occupancy records from SQL
+  const records = await OccupancyModelEntry.cls.findAll({
+    where: {
+      sensor_unique_id: { [Op.in]: uniqueIds },
+      timestamp: { [Op.gte]: startOfYear },
+    },
+    attributes: [
+      'sensor_unique_id',
+      'occupied',
+      'restroomId', // if available
+      [fn('DATE_FORMAT', col('timestamp'), '%Y-%m-%d %H:%i:%s'), 'timestamp'],
+    ],
+    raw: true,
+  });
+
+  const sensorMap = {};
+
+  records.forEach(r => {
+    const sensorObj = uniqueIdToSensor[r.sensor_unique_id];
+    if (!sensorObj) return;
+
+    const mongoSensorId = String(sensorObj._id);
+
+    if (!sensorMap[mongoSensorId]) {
+      sensorMap[mongoSensorId] = {
+        sensorId: mongoSensorId,
+        sensorName: sensorObj.name || null,
+        // restroomName: sensorObj.restroomName || null, // assuming you have this in sensorArray
+        totalOccupied: 0,
+        totalRecords: 0,
+        _hourMap: {},
+        _dayMap: {},
+        _weekMap: {},
+        _monthMap: {},
+      };
+    }
+
+    const s = sensorMap[mongoSensorId];
+    const occupied = r.occupied ? 1 : 0;
+
+    s.totalOccupied += occupied;
+    s.totalRecords += 1;
+
+    const date = new Date(r.timestamp);
+    const hour = date.getHours();
+    const day = date.getDate();
+    const week = Math.ceil(day / 7);
+    const month = date.getMonth() + 1;
+
+    s._hourMap[hour] = (s._hourMap[hour] || 0) + occupied;
+    s._dayMap[day] = (s._dayMap[day] || 0) + occupied;
+    s._weekMap[week] = (s._weekMap[week] || 0) + occupied;
+    s._monthMap[month] = (s._monthMap[month] || 0) + occupied;
+  });
+
+  // Transform map into array
+  const report = Object.values(sensorMap).map(s => {
+    const percentage = s.totalRecords ? Math.round((s.totalOccupied / s.totalRecords) * 100) : 0;
 
     return {
-      name: r.name,
-      percentage,
-      chartData,
+      sensorId: s.sensorId,
+      sensorName: s.sensorName,
+      // restroomName: s.restroomName,
+      percentage: `${percentage}%`,
+      chartData: {
+        hour: Object.entries(s._hourMap).map(([hour, value]) => ({
+          hour: Number(hour),
+          value,
+        })),
+        day: Object.entries(s._dayMap).map(([day, value]) => ({
+          day: Number(day),
+          value,
+        })),
+        week: Object.entries(s._weekMap).map(([week, value]) => ({
+          week: Number(week),
+          value,
+        })),
+        month: Object.entries(s._monthMap).map(([month, value]) => ({
+          month: Number(month),
+          value,
+        })),
+      },
     };
   });
 
-  // Sort by percentage descending
+  // Sort by highest occupancy percentage
   report.sort((a, b) => parseInt(b.percentage) - parseInt(a.percentage));
 
   return report;
@@ -685,4 +816,175 @@ export const getOccupancyStats = async sensorArray => {
     totalOccupied,
     totalVacant,
   };
+};
+
+export const getSensorHistory = async (SqlModel, sensor, range = 'day') => {
+  if (!SqlModel || !sensor) return [];
+
+  let dateFrom;
+
+  const now = new Date();
+
+  switch (range) {
+    case 'hour':
+      dateFrom = new Date(now.getTime() - 60 * 60 * 1000); // last 1 hour
+      break;
+    case 'day':
+      dateFrom = new Date(now.getTime() - 24 * 60 * 60 * 1000); // last 24h
+      break;
+    case 'week':
+      dateFrom = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // last 7 days
+      break;
+    case 'month':
+      dateFrom = new Date(now.getFullYear(), now.getMonth(), 1); // start of this month
+      break;
+    default:
+      dateFrom = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  }
+
+  // Fetch data
+  const data = await SqlModel.findAll({
+    where: {
+      sensor_unique_id: sensor.uniqueId,
+      timestamp: { [Op.gte]: dateFrom },
+    },
+    order: [['timestamp', 'ASC']],
+    raw: true,
+  });
+
+  // Aggregate per time unit
+  const grouped = {};
+
+  data.forEach(d => {
+    let key;
+    const ts = new Date(d.timestamp);
+
+    switch (range) {
+      case 'hour':
+        key = `${ts.getHours()} AM`;
+        break;
+      case 'day':
+        key = `${ts.getDate()} ${ts.toLocaleString('default', { month: 'short' })}`;
+        break;
+      case 'week':
+        const weekNumber = Math.ceil(ts.getDate() / 7);
+        key = `Week ${weekNumber}`;
+        break;
+      case 'month':
+        key = ts.toLocaleString('default', { month: 'short' });
+        break;
+    }
+
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(d);
+  });
+
+  // Transform into chart data
+  return Object.entries(grouped).map(([date, records]) => {
+    const bar = records.length;
+    const line = records.reduce((sum, r) => sum + (r.value || 0), 0) / (records.length || 1);
+    return { date, bar, line: Math.round(line) };
+  });
+};
+// import { Op, fn, col, literal } from 'sequelize';
+
+/**
+ * Returns record counts per time interval for a sensor
+ * @param {Sequelize.Model} SqlModel - the Sequelize model
+ * @param {Object} sensor - the Mongo sensor object
+ * @param {string} range - 'hour' | 'day' | 'week' | 'month'
+ */
+// import { Op, fn, col, literal } from 'sequelize';
+
+// import { Op, fn, col, literal } from 'sequelize';
+
+/**
+ * Returns record counts per time interval for a sensor, filling missing periods with 0
+ */
+// import { Op, fn, col, literal } from 'sequelize';
+
+/**
+ * Returns record counts per time interval for a sensor, filling missing periods with 0
+ */
+// import dayjs from 'dayjs';
+// import { Op, fn, col, literal } from 'sequelize';
+
+export const getSensorCounts = async (SqlModel, sensor, range = 'day') => {
+  if (!SqlModel || !sensor) return [];
+
+  const now = dayjs();
+  let dateFrom;
+  let periodKeys = [];
+  let groupBy;
+
+  switch (range) {
+    // 🔹 LAST 3 HOURS (2–3 hours)
+    case 'hour': {
+      dateFrom = now.subtract(3, 'hour').startOf('hour').toDate();
+
+      periodKeys = Array.from({ length: 3 }, (_, i) => now.subtract(2 - i, 'hour').hour());
+
+      groupBy = literal('HOUR(timestamp)');
+      break;
+    }
+
+    // 🔹 LAST 24 HOURS (HOURLY)
+
+    case 'day': {
+      dateFrom = now.subtract(24, 'hour').startOf('hour').toDate();
+      periodKeys = Array.from({ length: 24 }, (_, i) => now.subtract(23 - i, 'hour').hour());
+      groupBy = literal('HOUR(timestamp)');
+      break;
+    }
+
+    // 🔹 LAST 4 WEEKS
+    case 'week': {
+      dateFrom = now.subtract(4, 'week').startOf('week').toDate();
+
+      periodKeys = Array.from({ length: 4 }, (_, i) => now.subtract(3 - i, 'week').week());
+
+      groupBy = literal('WEEK(timestamp)');
+      break;
+    }
+
+    // 🔹 FULL CURRENT MONTH (DAILY)
+    case 'month': {
+      dateFrom = now.startOf('month').toDate();
+      const daysInMonth = now.daysInMonth();
+      periodKeys = Array.from({ length: daysInMonth }, (_, i) => i + 1); // 1…daysInMonth
+      groupBy = literal('DAY(timestamp)');
+      break;
+    }
+    default:
+      return [];
+  }
+
+  // 🔹 Fetch counts from DB
+  const counts = await SqlModel.findAll({
+    attributes: [
+      [groupBy, 'period'],
+      [fn('COUNT', col('idPrimary')), 'count'],
+    ],
+    where: {
+      ownerId: sensor.ownerId.toString(),
+      sensorId: sensor._id.toString(),
+      sensor_unique_id: sensor.uniqueId,
+      timestamp: { [Op.gte]: dateFrom },
+    },
+    group: ['period'],
+    order: [['period', 'ASC']],
+    raw: true,
+  });
+
+  // 🔹 Normalize results
+  const countsMap = {};
+  counts.forEach(c => {
+    countsMap[c.period] = Number(c.count);
+  });
+
+  // 🔹 Fill missing periods with 0
+  return periodKeys.map(k => ({
+    date: k,
+    count: countsMap[k] || 0,
+  }));
 };

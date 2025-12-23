@@ -1,4 +1,4 @@
-'use client'; // Only if using client-side features like window or charts
+'use client';
 import React from 'react';
 import {
   LineChart,
@@ -13,11 +13,21 @@ import {
 
 const FloorActivityChart = ({ range, sensorData }) => {
   console.log('FloorActivityChart props:', { range, sensorData });
-  const data = sensorData[range] || [];
+
+  // ✅ Safe data extraction
+  const data = Array.isArray(sensorData?.[range]) ? sensorData[range] : [];
+
   console.log('FloorActivityChart data:', data);
 
+  // ✅ Safe key extraction
   const waterLeakageKeys = Array.from(
-    new Set(data.flatMap(obj => Object.keys(obj).filter(key => key.includes('water_leakage'))))
+    new Set(
+      data.flatMap(obj =>
+        obj && typeof obj === 'object'
+          ? Object.keys(obj).filter(key => key.includes('water_leakage'))
+          : []
+      )
+    )
   );
 
   const colors = ['#FF4C85', '#FF7300', '#1F2253', '#00C49F', '#0088FE', '#AA00FF', '#FFBB28'];
@@ -32,16 +42,17 @@ const FloorActivityChart = ({ range, sensorData }) => {
           <Tooltip />
           <Legend />
 
-          {waterLeakageKeys.map((key, index) => (
-            <Line
-              key={key}
-              type="monotone"
-              dataKey={key}
-              stroke={colors[index % colors.length]}
-              strokeWidth={3}
-              dot={false}
-            />
-          ))}
+          {waterLeakageKeys.length > 0 &&
+            waterLeakageKeys.map((key, index) => (
+              <Line
+                key={key}
+                type="monotone"
+                dataKey={key}
+                stroke={colors[index % colors.length]}
+                strokeWidth={3}
+                dot={false}
+              />
+            ))}
         </LineChart>
       </ResponsiveContainer>
     </section>
