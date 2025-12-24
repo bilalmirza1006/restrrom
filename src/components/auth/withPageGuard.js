@@ -52,6 +52,10 @@ export const PAGE_PERMISSIONS = {
     roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
     exact: false,
   },
+  '/admin/alerts': {
+    roles: ['admin', 'building_manager'],
+    exact: false,
+  },
 };
 
 const withPageGuard = (WrappedComponent, requiredPath) => {

@@ -220,7 +220,7 @@ function RestRoomDetails({ restRoom }) {
           </div>
         </div>
         <div className="col-span-12 lg:col-span-4">
-          <MostUsedRooms mostUsedRestroom={restRoom?.data?.sensorReport} />
+          <MostUsedRooms mostUsedRestroom={restRoom?.data?.mostUseSlate} />
         </div>
         <div className="col-span-12 rounded-2xl bg-white p-5">
           <SensorTable data={restRoom?.data?.sensors} />

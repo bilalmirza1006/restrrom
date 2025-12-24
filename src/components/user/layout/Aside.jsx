@@ -51,6 +51,13 @@ const pages = [
     roles: ['admin', 'building_manager'],
   },
   {
+    id: 9,
+    title: 'Alerts',
+    link: ['/admin/alerts'],
+    icon: <SensorsIcon />,
+    roles: ['admin', 'building_manager'],
+  },
+  {
     id: 5,
     title: 'Reports',
     link: ['/admin/reports'],

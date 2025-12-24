@@ -74,3 +74,109 @@ export const SENSOR_UI_CONFIG = {
 
   water_leakage: [{ label: 'Water Level (mm)', value: d => d.waterLevel_mm }],
 };
+
+export const RULE_SENSOR_CONFIG = {
+  occupancy: {
+    label: 'Occupancy',
+    fields: [
+      {
+        field: 'occupied',
+        label: 'Occupied',
+        type: 'boolean',
+        operators: ['='],
+      },
+      {
+        field: 'occupancyDuration',
+        label: 'Occupancy Duration (sec)',
+        type: 'number',
+        operators: ['>', '<', '>=', '<='],
+      },
+    ],
+  },
+
+  waterLeakage: {
+    label: 'Water Leakage',
+    fields: [
+      {
+        field: 'waterDetected',
+        label: 'Water Detected',
+        type: 'boolean',
+        operators: ['='],
+      },
+      {
+        field: 'waterLevel_mm',
+        label: 'Water Level (mm)',
+        type: 'number',
+        operators: ['>', '<'],
+      },
+    ],
+  },
+
+  airQuality: {
+    label: 'Air Quality',
+    fields: [
+      { field: 'tvoc', label: 'TVOC', type: 'number', operators: ['>', '<'] },
+      { field: 'eCO2', label: 'eCO₂', type: 'number', operators: ['>', '<'] },
+      { field: 'pm2_5', label: 'PM 2.5', type: 'number', operators: ['>', '<'] },
+      { field: 'aqi', label: 'AQI', type: 'number', operators: ['>', '<'] },
+      {
+        field: 'smellLevel',
+        label: 'Smell Level',
+        type: 'string',
+        operators: ['='],
+      },
+    ],
+  },
+
+  toiletPaper: {
+    label: 'Toilet Paper',
+    fields: [
+      { field: 'level', label: 'Level (%)', type: 'number', operators: ['<'] },
+      { field: 'status', label: 'Status', type: 'string', operators: ['='] },
+    ],
+  },
+
+  soapDispenser: {
+    label: 'Soap Dispenser',
+    fields: [
+      { field: 'level', label: 'Level (%)', type: 'number', operators: ['<'] },
+      {
+        field: 'dispenseEvent',
+        label: 'Dispense Event',
+        type: 'string',
+        operators: ['='],
+      },
+    ],
+  },
+
+  doorQueue: {
+    label: 'Door Queue',
+    fields: [
+      { field: 'count', label: 'People Count', type: 'number', operators: ['>'] },
+      {
+        field: 'queueState',
+        label: 'Queue State',
+        type: 'string',
+        operators: ['='],
+      },
+    ],
+  },
+
+  stallStatus: {
+    label: 'Stall Status',
+    fields: [
+      {
+        field: 'state',
+        label: 'State',
+        type: 'string',
+        operators: ['='],
+      },
+      {
+        field: 'usageCount',
+        label: 'Usage Count',
+        type: 'number',
+        operators: ['>'],
+      },
+    ],
+  },
+};

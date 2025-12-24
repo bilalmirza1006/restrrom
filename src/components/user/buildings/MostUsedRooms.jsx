@@ -13,7 +13,7 @@ const timeOptions = [
 
 const MostUsedRooms = ({ mostUsedRestroom }) => {
   const [selectedTime, setSelectedTime] = useState('hour');
-
+  console.log('MostUsedRooms - mostUsedRestroom:', mostUsedRestroom);
   return (
     <div className="scroll-0 overflow-y-scroll rounded-xl bg-white p-5">
       {/* Header */}

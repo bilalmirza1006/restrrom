@@ -10,6 +10,8 @@ import { restroomApis } from './features/restroom/restroomApi';
 import { inspectionApis } from './features/inspection/inspectionApi';
 import { subscriptionApis } from './features/subscription/subscriptionApi';
 import { superAdminApis } from './features/superAdmin/superAdminApi';
+import { alertsApi } from './features/alerts/alertsApi';
+import { ruleEngineApi } from './features/ruleEngine/ruleEngine';
 
 const store = configureStore({
   reducer: {
@@ -22,6 +24,8 @@ const store = configureStore({
     [inspectionApis.reducerPath]: inspectionApis.reducer,
     [subscriptionApis.reducerPath]: subscriptionApis.reducer,
     [superAdminApis.reducerPath]: superAdminApis.reducer,
+    [alertsApi.reducerPath]: alertsApi.reducer,
+    [ruleEngineApi.reducerPath]: ruleEngineApi.reducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({ serializableCheck: false })
@@ -31,7 +35,9 @@ const store = configureStore({
       .concat(restroomApis.middleware)
       .concat(inspectionApis.middleware)
       .concat(subscriptionApis.middleware)
-      .concat(superAdminApis.middleware),
+      .concat(superAdminApis.middleware)
+      .concat(alertsApi.middleware)
+      .concat(ruleEngineApi.middleware),
 });
 
 const StoreProvider = ({ children }) => {
