@@ -12,6 +12,7 @@ import { subscriptionApis } from './features/subscription/subscriptionApi';
 import { superAdminApis } from './features/superAdmin/superAdminApi';
 import { alertsApi } from './features/alerts/alertsApi';
 import { ruleEngineApi } from './features/ruleEngine/ruleEngine';
+import { reportsApi } from './features/reports/reportsApi';
 
 const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
     [superAdminApis.reducerPath]: superAdminApis.reducer,
     [alertsApi.reducerPath]: alertsApi.reducer,
     [ruleEngineApi.reducerPath]: ruleEngineApi.reducer,
+    [reportsApi.reducerPath]: reportsApi.reducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({ serializableCheck: false })
@@ -37,7 +39,8 @@ const store = configureStore({
       .concat(subscriptionApis.middleware)
       .concat(superAdminApis.middleware)
       .concat(alertsApi.middleware)
-      .concat(ruleEngineApi.middleware),
+      .concat(ruleEngineApi.middleware)
+      .concat(reportsApi.middleware),
 });
 
 const StoreProvider = ({ children }) => {

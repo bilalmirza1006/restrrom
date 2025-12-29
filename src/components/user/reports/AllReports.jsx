@@ -9,177 +9,348 @@ import {
   TemperatureIcon,
   TvocIcon,
 } from '@/assets/icon';
-import { reportsLists } from '@/data/data';
-import React from 'react';
+import React, { useState } from 'react';
 import DataTable from 'react-data-table-component';
+import { useGetBuildingSensorsReportQuery } from '@/features/reports/reportsApi';
+import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
+import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
+import { useGetAllSensorsQuery } from '@/features/sensor/sensorApi';
+import dayjs from 'dayjs';
 
-const columns = [
+// Helper to format sensor type names
+const formatSensorType = type => {
+  return type
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+// --- Column Definitions for Each Sensor Type ---
+
+const commonColumns = [
   {
     name: 'Date',
-    selector: row => <p className="text-sm font-bold text-[#060606cc]">{row.date}</p>,
+    selector: row => (
+      <p className="text-sm font-bold text-[#060606cc]">
+        {dayjs(row.timestamp).format('DD-MMM-YYYY hh:mm a')}
+      </p>
+    ),
+    sortable: true,
+    minWidth: '180px',
   },
   {
-    name: 'Tempareture',
+    name: 'Location',
     selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.temperature}°F</p>
-        <TemperatureIcon temperature={row.temperature} />
+      <div className="flex flex-col">
+        {row.restroomId && (
+          <span className="text-xs text-gray-500">Restroom: {row.restroomId}</span>
+        )}
+        {row.stallId && <span className="text-xs text-gray-500">Stall: {row.stallId}</span>}
       </div>
     ),
-  },
-  {
-    name: 'TVOC',
-    selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.tvoc}°F</p>
-        <TvocIcon temperature={row.tvoc} />
-      </div>
-    ),
-  },
-  {
-    name: 'CO2',
-    selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.co2}°F</p>
-        <Co2Icon temperature={row.co2} />
-      </div>
-    ),
-  },
-  {
-    name: 'Humidity',
-    selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.humidity}%</p>
-        <HumidityIcon temperature={row.humidity} />
-      </div>
-    ),
-  },
-  {
-    name: 'CO',
-    selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.co}%</p>
-        <CoIcon temperature={row.co} />
-      </div>
-    ),
-  },
-  {
-    name: 'CH4',
-    selector: row => (
-      <div className="flex items-center gap-1">
-        <p className="text-sm font-bold text-[#060606cc]">{row.ch4}%</p>
-        <Ch4Icon temperature={row.ch4} />
-      </div>
-    ),
-  },
-  {
-    name: 'Performance',
-    selector: row => (
-      <div className="flex flex-col items-center">
-        <p className="text-[10px] font-medium text-[#292d32cc] capitalize">{row.performance}</p>
-        {row.performance === 'excellent' && <p className="text-lg">😊</p>}
-        {row.performance === 'good' && <p className="text-lg">😊</p>}
-        {row.performance === 'average' && <p className="text-lg">😐</p>}
-        {row.performance === 'bad' && <p className="text-lg">😶</p>}
-      </div>
-    ),
-    center: true,
+    minWidth: '150px',
   },
 ];
 
+const sensorTypeColumns = {
+  door_queue: [
+    ...commonColumns,
+    { name: 'Event', selector: row => <span className="capitalize">{row.event || '-'}</span> },
+    { name: 'Count', selector: row => row.count ?? '-' },
+    {
+      name: 'Queue State',
+      selector: row => <span className="capitalize">{row.queueState || '-'}</span>,
+    },
+    { name: 'Window Count', selector: row => row.windowCount ?? '-' },
+  ],
+  stall_status: [
+    ...commonColumns,
+    { name: 'State', selector: row => <span className="capitalize">{row.state || '-'}</span> },
+    { name: 'Usage Count', selector: row => row.usageCount ?? '-' },
+  ],
+  occupancy: [
+    ...commonColumns,
+    { name: 'Status', selector: row => (row.occupied ? 'Occupied' : 'Vacant') },
+    { name: 'Duration (s)', selector: row => row.occupancyDuration ?? '-' },
+  ],
+  air_quality: [
+    ...commonColumns,
+    {
+      name: 'TVOC',
+      selector: row => (
+        <div className="flex items-center gap-1">
+          <span>{row.tvoc ?? '-'}</span>
+          {row.tvoc && <TvocIcon />}
+        </div>
+      ),
+    },
+    {
+      name: 'CO2',
+      selector: row => (
+        <div className="flex items-center gap-1">
+          <span>{row.eCO2 ?? '-'}</span>
+          {row.eCO2 && <Co2Icon />}
+        </div>
+      ),
+    },
+    { name: 'PM2.5', selector: row => row.pm2_5 ?? '-' },
+    { name: 'AQI', selector: row => row.aqi ?? '-' },
+    { name: 'Smell', selector: row => <span className="capitalize">{row.smellLevel || '-'}</span> },
+  ],
+  toilet_paper: [
+    ...commonColumns,
+    { name: 'Level', selector: row => row.level ?? '-' },
+    { name: 'Status', selector: row => <span className="capitalize">{row.status || '-'}</span> },
+  ],
+  soap_dispenser: [
+    ...commonColumns,
+    {
+      name: 'Event',
+      selector: row => <span className="capitalize">{row.dispenseEvent || '-'}</span>,
+    },
+    { name: 'Level', selector: row => row.level ?? '-' },
+    { name: 'Status', selector: row => <span className="capitalize">{row.status || '-'}</span> },
+  ],
+  water_leakage: [
+    ...commonColumns,
+    { name: 'Status', selector: row => (row.waterDetected ? 'Leak Detected' : 'Normal') },
+    { name: 'Water Level (mm)', selector: row => row.waterLevel_mm ?? '-' },
+  ],
+};
+
 const Reports = () => {
+  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [selectedRestroom, setSelectedRestroom] = useState('');
+  const [selectedSensor, setSelectedSensor] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // 1. Fetch Buildings
+  const { data: buildingsData } = useGetAllBuildingsQuery();
+  const buildingsList = buildingsData?.data || [];
+
+  // 2. Fetch Restrooms (dependent on selectedBuilding)
+  const { data: restroomsData } = useGetAllRestroomsQuery(selectedBuilding, {
+    skip: !selectedBuilding,
+  });
+  const restroomsList = restroomsData?.data?.restRooms || [];
+
+  // 3. Fetch Sensors (Pre-fetch all to filter client-side since API returns all)
+  const { data: sensorsData } = useGetAllSensorsQuery();
+  const allSensors = sensorsData?.data || [];
+
+  // Filter sensors by selected restroom
+  const filteredSensors = selectedRestroom
+    ? allSensors.filter(s => s.restroomId === selectedRestroom)
+    : [];
+
+  const {
+    data: reportData,
+    isLoading,
+    isFetching,
+  } = useGetBuildingSensorsReportQuery({
+    buildingId: selectedBuilding,
+    restroomId: selectedRestroom,
+    sensorId: selectedSensor,
+    startDate,
+    endDate,
+  });
+
+  console.log('Report API Data:', reportData);
+  console.log('Selected selectedSensor:', selectedSensor);
+  console.log('Selected filteredSensors:', filteredSensors);
+  const reportsLists =
+    reportData?.data?.map(building => {
+      const sensorsObj = building.sensors || {};
+      const totalRecords = Object.values(sensorsObj).reduce(
+        (acc, curr) => acc + (Array.isArray(curr) ? curr.length : 0),
+        0
+      );
+
+      return {
+        title: building.name,
+        location: building.location || 'Location N/A',
+        totalRecords,
+        image: building.image || '/images/default/header-bg.png',
+        sensors: sensorsObj,
+      };
+    }) || [];
+
   return (
-    <div className="flex flex-col gap-4">
-      {reportsLists.map((list, i) => (
-        <div key={i} className="rounded-[20px] border-[2px] border-[#00000012] bg-white p-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <img
-                src={list.image}
-                alt="image"
-                className="h-[106px] w-[186px] rounded-xl object-cover"
-              />
-              <div>
-                <h5 className="text-sm font-bold text-[#2e2e2e] md:text-base">{list.title}</h5>
-                <div className="flex items-center gap-1 py-1">
-                  <MapIcon />
-                  <p className="text-[10px] font-semibold text-[#060606cc]">{list.location}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <SensorIcon />
-                  <div className="font-bold text-[#292d32]">
-                    <p className="text-sm md:text-base">Total No. of Sensors</p>
-                    <p className="text-base md:text-xl">{list.totalSensors}</p>
+    <div className="flex flex-col gap-8">
+      {/* Filters */}
+      <div className="grid grid-cols-1 gap-4 rounded-lg bg-white p-4 shadow-sm md:grid-cols-5">
+        {/* ... filters ... */}
+        {/* Building Filter */}
+        <div>
+          <h1 className="text-bold text-lg">Select Building</h1>
+          <select
+            className="mt-3 w-full rounded border px-3 py-2 text-sm"
+            value={selectedBuilding}
+            onChange={e => {
+              setSelectedBuilding(e.target.value);
+              setSelectedRestroom(''); // Reset dependent filters
+              setSelectedSensor('');
+            }}
+          >
+            <option value="">All Buildings</option>
+            {buildingsList.map(b => (
+              <option key={b._id} value={b._id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Restroom Filter */}
+        <div>
+          <h1 className="text-bold text-lg">Select Restroom</h1>
+          <select
+            className="mt-3 w-full rounded border px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-400"
+            value={selectedRestroom}
+            onChange={e => {
+              setSelectedRestroom(e.target.value);
+              setSelectedSensor(''); // Reset sensor
+            }}
+            disabled={!selectedBuilding}
+          >
+            <option value="">All Restrooms</option>
+            {restroomsList.map(r => (
+              <option key={r._id} value={r._id}>
+                {r.name} ({r.floor})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Sensor Filter */}
+        <div>
+          <h1 className="text-bold text-lg">Select Sensor</h1>
+
+          <select
+            className="mt-3 w-full rounded border px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-400"
+            value={selectedSensor}
+            onChange={e => setSelectedSensor(e.target.value)}
+            disabled={!selectedRestroom}
+          >
+            <option value="">All Sensors</option>
+            {filteredSensors.map(s => (
+              <option key={s._id} value={s._id}>
+                {s.name} ({formatSensorType(s.sensorType || s.type || '')})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Date Filters */}
+        <div>
+          <h1 className="text-bold text-lg">Select Date Range</h1>
+          <div className="mt-3 flex items-center gap-2">
+            <label className="text-sm font-medium whitespace-nowrap">Start:</label>
+            <input
+              type="date"
+              className="w-full rounded border px-3 py-2 text-sm"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="mt-10 flex items-center gap-2">
+          <label className="text-sm font-medium whitespace-nowrap">End:</label>
+          <input
+            type="date"
+            className="w-full rounded border px-3 py-2 text-sm"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {(isLoading || isFetching) && (
+        <div className="flex justify-center p-8">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
+          <span className="ml-2 text-gray-600">Loading reports...</span>
+        </div>
+      )}
+
+      {!isLoading &&
+        !isFetching &&
+        reportsLists.map((list, i) => (
+          <div key={i} className="rounded-[20px] border-[2px] border-[#00000012] bg-white p-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <img
+                  src={list.image}
+                  alt="image"
+                  className="h-[106px] w-[186px] rounded-xl object-cover"
+                />
+                <div>
+                  <h5 className="text-sm font-bold text-[#2e2e2e] md:text-base">{list.title}</h5>
+                  <div className="flex items-center gap-1 py-1">
+                    <MapIcon />
+                    <p className="text-[10px] font-semibold text-[#060606cc]">{list.location}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <SensorIcon />
+                    <div className="font-bold text-[#292d32]">
+                      <p className="text-sm md:text-base">Total Records</p>
+                      <p className="text-base md:text-xl">{list.totalRecords}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex h-full flex-col justify-between gap-8">
-              <div className="flex items-center justify-end gap-2">
-                <button className="flex h-[38px] cursor-default items-center gap-1 rounded-md border border-[#414141] px-6 py-2 text-xs font-bold">
-                  <div className="bg-primary-lightBlue h-[10px] w-[10px] rounded-full"></div>
-                  Active
-                </button>
-                {/* <Button text="Export" height="h-[35px]" /> */}
-              </div>
-              <div className="flex items-center gap-3 md:justify-end">
-                <Ratings title="Good" color="rgba(122, 255, 60, 1)" />
-                <Ratings title="Average" color="rgba(255, 199, 115, 1)" />
-                <Ratings title="Bad" color="rgba(238, 14, 0, 1)" />
-              </div>
+
+            {/* Render a Separate Table for Each Sensor Type */}
+            <div className="flex flex-col gap-8">
+              {Object.keys(list.sensors).map(sensorType => {
+                const sensorData = list.sensors[sensorType];
+                if (!Array.isArray(sensorData) || sensorData.length === 0) return null;
+
+                // Use specific columns if defined, otherwise fallback to simple JSON dump or common columns
+                const columns = sensorTypeColumns[sensorType] || [
+                  ...commonColumns,
+                  { name: 'Data', selector: row => JSON.stringify(row) },
+                ];
+
+                return (
+                  <div key={sensorType} className="rounded-lg border bg-gray-50 p-4">
+                    <h3 className="mb-2 border-l-4 border-blue-500 px-2 text-lg font-bold text-[#414141]">
+                      {formatSensorType(sensorType)}
+                    </h3>
+                    <DataTable
+                      columns={columns}
+                      data={sensorData}
+                      customStyles={tableStyles}
+                      // pagination
+                      // paginationPerPage={5}
+                      selectableRows={false}
+                    />
+                  </div>
+                );
+              })}
+              {/* Show message if no sensors found */}
+              {Object.keys(list.sensors).length === 0 && (
+                <p className="text-center text-gray-500 italic">
+                  No sensor data available for this selection.
+                </p>
+              )}
             </div>
           </div>
-          <div className="mt-4">
-            <DataTable
-              columns={columns}
-              data={list.listData}
-              customStyles={tableStyles}
-              pagination
-              selectableRows
-              selectableRowsHighlight
-            />
-          </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 };
 
 export default Reports;
 
-const Ratings = ({ color, title }) => {
-  return (
-    <div className="flex items-center gap-1">
-      <div className="h-[10px] w-[10px] rounded-sm" style={{ background: color }}></div>
-      <p className="text-xs font-bold text-[#414141cc]">{title}</p>
-    </div>
-  );
-};
-
 const tableStyles = {
   headCells: {
     style: {
-      fontSize: '16px',
+      fontSize: '14px',
       fontWeight: 700,
       color: '#ffffff',
       background: 'rgba(3, 165, 224, 1)',
     },
   },
-  // rows: {
-  //   style: {
-  //     background: "rgba(123, 192, 247, 0.15)",
-  //     borderRadius: "6px",
-  //     padding: "14px 0",
-  //     margin: "10px 0",
-  //     borderBottomWidth: "0 !important",
-  //   },
-  // },
-  // cells: {
-  //   style: {
-  //     color: "rgba(17, 17, 17, 1)",
-  //     fontSize: "14px",
-  //   },
-  // },
 };
-
-// export default Reports;
