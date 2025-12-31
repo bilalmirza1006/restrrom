@@ -1,3 +1,8 @@
 {
-  "cSpell.words": ["numberoftiolets"]
+  "cSpell.words": ["numberoftiolets"],
+
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
 }

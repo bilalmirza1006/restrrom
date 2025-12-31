@@ -16,6 +16,8 @@ import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
 import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import { useGetAllSensorsQuery } from '@/features/sensor/sensorApi';
 import dayjs from 'dayjs';
+import Dropdown from '@/components/global/small/Dropdown';
+import Input from '@/components/global/small/Input';
 
 // Helper to format sensor type names
 const formatSensorType = type => {
@@ -171,10 +173,32 @@ const Reports = () => {
         title: building.name,
         location: building.location || 'Location N/A',
         totalRecords,
-        image: building.image || '/images/default/header-bg.png',
+        image: building.buildingThumbnail.url || '/images/default/header-bg.png',
         sensors: sensorsObj,
       };
     }) || [];
+  const buildingOptions = [
+    { option: 'All Buildings', value: '' },
+    ...buildingsList.map(b => ({
+      option: b.name,
+      value: b._id,
+    })),
+  ];
+
+  const restroomOptions = [
+    { option: 'All Restrooms', value: '' },
+    ...restroomsList.map(r => ({
+      option: `${r.name} `,
+      value: r._id,
+    })),
+  ];
+  const sensorOptions = [
+    { option: 'All Sensors', value: '' },
+    ...filteredSensors.map(s => ({
+      option: `${s.name} (${formatSensorType(s.sensorType || s.type || '')})`,
+      value: s._id,
+    })),
+  ];
 
   return (
     <div className="flex flex-col gap-8">
@@ -182,97 +206,54 @@ const Reports = () => {
       <div className="grid grid-cols-1 gap-4 rounded-lg bg-white p-4 shadow-sm md:grid-cols-5">
         {/* ... filters ... */}
         {/* Building Filter */}
-        <div>
-          <h1 className="text-bold text-lg">Select Building</h1>
-          <select
-            className="mt-3 w-full rounded border px-3 py-2 text-sm"
-            value={selectedBuilding}
-            onChange={e => {
-              setSelectedBuilding(e.target.value);
-              setSelectedRestroom(''); // Reset dependent filters
-              setSelectedSensor('');
-            }}
-          >
-            <option value="">All Buildings</option>
-            {buildingsList.map(b => (
-              <option key={b._id} value={b._id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Dropdown
+          label="Select Building"
+          options={buildingOptions}
+          initialValue={selectedBuilding}
+          onSelect={value => {
+            setSelectedBuilding(value);
+            setSelectedRestroom('');
+            setSelectedSensor('');
+          }}
+        />
+        <Dropdown
+          label="Select Restroom"
+          options={selectedBuilding ? restroomOptions : []}
+          initialValue={selectedRestroom}
+          onSelect={value => {
+            setSelectedRestroom(value);
+            setSelectedSensor('');
+          }}
+          disabled={!selectedBuilding}
+        />
 
-        {/* Restroom Filter */}
-        <div>
-          <h1 className="text-bold text-lg">Select Restroom</h1>
-          <select
-            className="mt-3 w-full rounded border px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-400"
-            value={selectedRestroom}
-            onChange={e => {
-              setSelectedRestroom(e.target.value);
-              setSelectedSensor(''); // Reset sensor
-            }}
-            disabled={!selectedBuilding}
-          >
-            <option value="">All Restrooms</option>
-            {restroomsList.map(r => (
-              <option key={r._id} value={r._id}>
-                {r.name} ({r.floor})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Sensor Filter */}
-        <div>
-          <h1 className="text-bold text-lg">Select Sensor</h1>
-
-          <select
-            className="mt-3 w-full rounded border px-3 py-2 text-sm disabled:bg-gray-100 disabled:text-gray-400"
-            value={selectedSensor}
-            onChange={e => setSelectedSensor(e.target.value)}
-            disabled={!selectedRestroom}
-          >
-            <option value="">All Sensors</option>
-            {filteredSensors.map(s => (
-              <option key={s._id} value={s._id}>
-                {s.name} ({formatSensorType(s.sensorType || s.type || '')})
-              </option>
-            ))}
-          </select>
-        </div>
-
+        <Dropdown
+          label="Select Sensor"
+          options={selectedRestroom ? sensorOptions : []}
+          initialValue={selectedSensor}
+          onSelect={value => setSelectedSensor(value)}
+          disabled={!selectedRestroom}
+        />
         {/* Date Filters */}
-        <div>
-          <h1 className="text-bold text-lg">Select Date Range</h1>
-          <div className="mt-3 flex items-center gap-2">
-            <label className="text-sm font-medium whitespace-nowrap">Start:</label>
-            <input
-              type="date"
-              className="w-full rounded border px-3 py-2 text-sm"
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="mt-10 flex items-center gap-2">
-          <label className="text-sm font-medium whitespace-nowrap">End:</label>
-          <input
-            type="date"
-            className="w-full rounded border px-3 py-2 text-sm"
-            value={endDate}
-            onChange={e => setEndDate(e.target.value)}
-          />
-        </div>
+        <Input
+          label="Start Date"
+          type="date"
+          value={startDate}
+          onChange={e => setStartDate(e.target.value)}
+        />
+        <Input
+          label="End Date"
+          type="date"
+          value={endDate}
+          onChange={e => setEndDate(e.target.value)}
+        />
       </div>
-
       {(isLoading || isFetching) && (
         <div className="flex justify-center p-8">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-500"></div>
           <span className="ml-2 text-gray-600">Loading reports...</span>
         </div>
       )}
-
       {!isLoading &&
         !isFetching &&
         reportsLists.map((list, i) => (
@@ -322,8 +303,6 @@ const Reports = () => {
                       columns={columns}
                       data={sensorData}
                       customStyles={tableStyles}
-                      // pagination
-                      // paginationPerPage={5}
                       selectableRows={false}
                     />
                   </div>

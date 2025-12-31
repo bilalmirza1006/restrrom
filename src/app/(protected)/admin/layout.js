@@ -39,7 +39,7 @@ const Admins = ({ children }) => {
         <Aside />
         <div className="flex-1">
           <Header />
-          <main className="scroll-0 h-[calc(100vh-197px)] overflow-x-hidden overflow-y-scroll rounded-lg pt-4">
+          <main className="h-[calc(100vh-197px)] overflow-x-hidden overflow-y-scroll rounded-lg pt-4">
             {children}
           </main>
         </div>

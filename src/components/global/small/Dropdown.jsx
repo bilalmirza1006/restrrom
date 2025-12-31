@@ -10,25 +10,22 @@ const Dropdown = ({
   width,
   label,
   multi = false,
+  disabled = false, // ✅ NEW
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // ✅ Keep only values (single = value, multi = array of values)
   const [selected, setSelected] = useState(multi ? initialValue || [] : initialValue || null);
 
   const dropdownRef = useRef(null);
 
-  // ✅ Sync with external value (Redux, props, etc.)
   useEffect(() => {
-    if (multi) {
-      setSelected(initialValue || []);
-    } else {
-      setSelected(initialValue || null);
-    }
+    if (multi) setSelected(initialValue || []);
+    else setSelected(initialValue || null);
   }, [initialValue, multi]);
 
-  // ✅ Toggle option selection
+  // ✅ Toggle option selection (blocked if disabled)
   const toggleOption = option => {
+    if (disabled) return;
+
     if (multi) {
       let updatedSelection;
       if (selected.includes(option.value)) {
@@ -45,7 +42,6 @@ const Dropdown = ({
     }
   };
 
-  // ✅ Get display text
   const getSelectedText = () => {
     if (multi) {
       if (!selected.length) return defaultText;
@@ -58,26 +54,29 @@ const Dropdown = ({
     return matched?.option || defaultText;
   };
 
-  // ✅ Close on outside click
+  // ✅ Outside click (ignored if disabled)
   useEffect(() => {
     const handleClickOutside = e => {
+      if (disabled) return;
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [disabled]);
 
   return (
     <div className="relative" ref={dropdownRef} style={{ width: width || '100%' }}>
       {label && <label className="mb-2 block text-sm font-medium text-[#11111199]">{label}</label>}
+
       <button
         type="button"
-        className="flex items-center justify-between gap-[5px] rounded-[10px] border-[1px] border-[#54545499] px-[20px] py-[12px] text-sm text-[#54545499] shadow-sm md:text-base"
-        onClick={() => setIsOpen(!isOpen)}
+        disabled={disabled} // ✅ NEW
+        onClick={() => {
+          if (!disabled) setIsOpen(!isOpen); // ✅ block open
+        }}
+        className={`flex items-center justify-between gap-[5px] rounded-[10px] border-[1px] px-[20px] py-[12px] text-sm shadow-sm md:text-base ${disabled ? 'cursor-not-allowed border-[#d1d5db] opacity-60' : 'border-[#54545499]'} `}
         style={{ width: width || '100%' }}
       >
         <span
@@ -87,13 +86,14 @@ const Dropdown = ({
         >
           {getSelectedText()}
         </span>
+
         <div className={`transition-all duration-300 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
           <FaChevronDown />
         </div>
       </button>
 
       {/* ✅ Dropdown list */}
-      {isOpen && (
+      {isOpen && !disabled && (
         <ul
           className="absolute z-10 mt-1 max-h-48 cursor-pointer overflow-auto rounded-[6px] border-[1px] border-[#54545433] bg-white shadow-md"
           style={{ width: width || '100%' }}
@@ -104,10 +104,10 @@ const Dropdown = ({
             return (
               <li
                 key={option.value}
+                onClick={() => toggleOption(option)}
                 className={`flex items-center gap-2 border-b border-gray-100 px-3 py-2 text-sm hover:bg-[#00000005] ${
                   isChecked ? 'bg-[#e5f0ff]' : ''
                 }`}
-                onClick={() => toggleOption(option)}
               >
                 {multi && (
                   <input type="checkbox" readOnly checked={isChecked} className="accent-blue-500" />
