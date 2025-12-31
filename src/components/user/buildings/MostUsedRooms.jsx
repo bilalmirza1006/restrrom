@@ -14,13 +14,28 @@ const timeOptions = [
 const MostUsedRooms = ({ mostUsedRestroom }) => {
   const [selectedTime, setSelectedTime] = useState('hour');
   console.log('MostUsedRooms - mostUsedRestroom:', mostUsedRestroom);
+  const label = mostUsedRestroom?.restroomName
+    ? `Restroom: ${mostUsedRestroom.restroomName}`
+    : mostUsedRestroom?.sensorName
+      ? `Slate: ${mostUsedRestroom.sensorName}`
+      : 'Unnamed Restroom';
+  console.log('MostUsedRooms - label:', label);
   return (
     <div className="scroll-0 overflow-y-scroll rounded-xl bg-white p-5">
       {/* Header */}
       <div className="flex items-center justify-between gap-1">
         <div className="flex items-center gap-1">
           <Twomen />
-          <h2 className="text-xl font-medium">Most Used Restrooms</h2>
+          <h2 className="text-xl font-medium">
+            Most Used{' '}
+            {mostUsedRestroom && mostUsedRestroom.length > 0
+              ? mostUsedRestroom[0]?.restroomName
+                ? 'Restrooms'
+                : mostUsedRestroom[0]?.sensorName
+                  ? 'Slates'
+                  : 'Restrooms'
+              : 'Restrooms'}
+          </h2>
         </div>
         <div className="w-40">
           <Dropdown

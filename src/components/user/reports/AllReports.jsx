@@ -146,17 +146,30 @@ const Reports = () => {
     ? allSensors.filter(s => s.restroomId === selectedRestroom)
     : [];
 
+  const hasOtherFilters = Boolean(selectedBuilding || selectedRestroom || selectedSensor);
+
+  const hasValidDateRange = Boolean(startDate && endDate);
+
+  const shouldFetchReports = hasOtherFilters || hasValidDateRange;
+
+  const isInvalidDateSelection = (startDate && !endDate) || (!startDate && endDate);
+
   const {
     data: reportData,
     isLoading,
     isFetching,
-  } = useGetBuildingSensorsReportQuery({
-    buildingId: selectedBuilding,
-    restroomId: selectedRestroom,
-    sensorId: selectedSensor,
-    startDate,
-    endDate,
-  });
+  } = useGetBuildingSensorsReportQuery(
+    {
+      buildingId: selectedBuilding,
+      restroomId: selectedRestroom,
+      sensorId: selectedSensor,
+      startDate,
+      endDate,
+    },
+    {
+      skip: isInvalidDateSelection,
+    }
+  );
 
   console.log('Report API Data:', reportData);
   console.log('Selected selectedSensor:', selectedSensor);
@@ -169,14 +182,21 @@ const Reports = () => {
         0
       );
 
+      // Determine if this is a restroom or building
+      const isRestroom = !!building?.restroomDetails;
+
       return {
-        title: building.name,
-        location: building.location || 'Location N/A',
+        title: isRestroom ? building.restroomDetails.name : building.name,
+        label: isRestroom ? 'Restroom' : 'Building', // <-- new label field
+        location: isRestroom ? building.restroomDetails.name : building.location || 'Location N/A',
         totalRecords,
-        image: building.buildingThumbnail.url || '/images/default/header-bg.png',
+        image: isRestroom
+          ? building.restroomDetails.modelImage?.[0]?.url
+          : building.buildingThumbnail?.url || '/images/default/header-bg.png',
         sensors: sensorsObj,
       };
     }) || [];
+
   const buildingOptions = [
     { option: 'All Buildings', value: '' },
     ...buildingsList.map(b => ({
@@ -239,13 +259,17 @@ const Reports = () => {
           label="Start Date"
           type="date"
           value={startDate}
-          onChange={e => setStartDate(e.target.value)}
+          onChange={e => {
+            setStartDate(e.target.value);
+            setEndDate('');
+          }}
         />
         <Input
           label="End Date"
           type="date"
           value={endDate}
           onChange={e => setEndDate(e.target.value)}
+          disabled={!startDate}
         />
       </div>
       {(isLoading || isFetching) && (

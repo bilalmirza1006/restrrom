@@ -42,6 +42,8 @@ export const GET = asyncHandler(async (req, { params }) => {
     groupBy: 'day',
     scope: 'building',
   });
+  console.log('dayData', dayData);
+
   const weekData = await getWaterLeakageAggregatedData({
     sensors: restroom.sensors,
     groupBy: 'week',

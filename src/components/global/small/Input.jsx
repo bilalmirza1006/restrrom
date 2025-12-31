@@ -5,15 +5,17 @@ const Input = ({
   leftIcon,
   rightIcon,
   className = '',
+  disabled = false, // ✅ NEW
   ...rest
 }) => {
   return (
     <div>
-      {label && <label className="text-sm text-[#666666] lg:text-base">{label}</label>}
-      <div className="relative mt-2">
+      {label && <label className="mb-2 block text-sm font-medium text-[#11111199]">{label}</label>}
+
+      <div className="relative">
         {/* Left Icon */}
         {leftIcon && (
-          <span className="absolute top-1/2 left-3 -translate-y-1/2 text-[#666666]">
+          <span className="absolute top-1/2 left-4 -translate-y-1/2 text-[#666666]">
             {leftIcon}
           </span>
         )}
@@ -21,14 +23,21 @@ const Input = ({
         <input
           {...rest}
           type={type}
-          className={`h-[50px] w-full rounded-xl border-[0.5px] border-[#66666659] px-4 text-sm text-[#3a3a3a] outline-none lg:text-base ${
-            shadow && 'shadow-input'
-          } ${leftIcon ? 'pl-10' : ''} ${rightIcon ? 'pr-10' : ''} ${className}`}
+          disabled={disabled}
+          className={`h-11 w-full rounded-[10px] border px-4 text-sm transition-all outline-none md:text-base ${
+            disabled
+              ? 'cursor-not-allowed border-[#d1d5db] bg-[#f5f5f5] opacity-60'
+              : 'border-[#54545499] focus:border-[#545454]'
+          } ${shadow && !disabled ? 'shadow-sm' : ''} ${leftIcon ? 'pl-11' : ''} ${rightIcon ? 'pr-11' : ''} ${className} `}
         />
 
         {/* Right Icon */}
         {rightIcon && (
-          <span className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-[#666666]">
+          <span
+            className={`absolute top-1/2 right-4 -translate-y-1/2 ${
+              disabled ? 'cursor-not-allowed text-[#999]' : 'cursor-pointer text-[#666666]'
+            }`}
+          >
             {rightIcon}
           </span>
         )}

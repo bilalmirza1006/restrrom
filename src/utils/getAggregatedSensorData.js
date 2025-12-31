@@ -14,7 +14,6 @@ export const getSensorsAggregatedData = async ({
   scope = 'building',
 }) => {
   const models = initModels(sequelize);
-  //   console.log('groupBygroupBygroupBy', groupBy);
 
   // Optional: test connection
   await sequelize.authenticate();
@@ -24,11 +23,6 @@ export const getSensorsAggregatedData = async ({
     console.log('No sensors provided.');
     return [];
   }
-
-  //   console.log(
-  //     'Aggregating data for sensors:',
-  //     sensors.map(s => s.uniqueId)
-  //   );
 
   // Labels & date format
   let dateFormat, labels;
@@ -295,86 +289,6 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
     restrooms, // nested object per restroom
   };
 };
-
-// export const getWaterLeakageAggregatedData = async ({ sensors, groupBy = 'day' }) => {
-//   const models = initModels(sequelize);
-//   await sequelize.authenticate();
-
-//   if (!Array.isArray(sensors) || sensors.length === 0) return [];
-
-//   // Filter water_leakage sensors
-//   const waterLeakageSensors = sensors.filter(s => s.sensorType === 'water_leakage' && s.uniqueId);
-//   if (waterLeakageSensors.length === 0) return [];
-
-//   // Get model
-//   const ModelClass = MODEL_CLASSES.find(m => m.name === 'water_leakage')?.cls;
-//   if (!ModelClass) {
-//     console.error('water_leakage model not found');
-//     return [];
-//   }
-
-//   // Unique IDs
-//   const uniqueIds = waterLeakageSensors.map(s => s.uniqueId);
-
-//   // Determine period format
-//   let dateFormat, labels;
-//   switch (groupBy) {
-//     case 'day':
-//       dateFormat = '%H';
-//       labels = Array.from({ length: 24 }, (_, i) => `${i} ${i < 12 ? 'AM' : 'PM'}`);
-//       break;
-//     case 'week':
-//       dateFormat = '%w';
-//       labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-//       break;
-//     case 'month':
-//       dateFormat = '%u';
-//       labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4'];
-//       break;
-//     default:
-//       throw new Error('Invalid groupBy');
-//   }
-
-//   // 1️⃣ Fetch per-sensor data
-//   const sensorData = await ModelClass.findAll({
-//     where: { sensor_unique_id: { [Op.in]: uniqueIds } },
-//     attributes: [
-//       'sensor_unique_id',
-//       'waterLevel_mm',
-//       [fn('DATE_FORMAT', col('timestamp'), dateFormat), 'period'],
-//     ],
-//     raw: true,
-//     logging: false,
-//   });
-
-//   // 2️⃣ Map per period
-//   const periodMap = {};
-//   labels.forEach((label, idx) => {
-//     const key =
-//       groupBy === 'day'
-//         ? idx.toString().padStart(2, '0')
-//         : groupBy === 'week'
-//           ? idx.toString()
-//           : (idx + 1).toString();
-//     periodMap[key] = { name: label, water_leakage_avg: 0, sensors: {} };
-//   });
-
-//   // 3️⃣ Fill data
-//   sensorData.forEach(record => {
-//     const { period, sensor_unique_id, waterLevel_mm } = record;
-//     if (!periodMap[period]) return;
-//     periodMap[period].sensors[sensor_unique_id] = waterLevel_mm;
-//   });
-
-//   // 4️⃣ Compute average per period
-//   Object.values(periodMap).forEach(p => {
-//     const values = Object.values(p.sensors);
-//     p.water_leakage_avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-//   });
-
-//   // 5️⃣ Return array
-//   return Object.values(periodMap);
-// };
 
 export const getWaterLeakageAggregatedData = async ({
   sensors,
@@ -886,28 +800,6 @@ export const getSensorHistory = async (SqlModel, sensor, range = 'day') => {
     return { date, bar, line: Math.round(line) };
   });
 };
-// import { Op, fn, col, literal } from 'sequelize';
-
-/**
- * Returns record counts per time interval for a sensor
- * @param {Sequelize.Model} SqlModel - the Sequelize model
- * @param {Object} sensor - the Mongo sensor object
- * @param {string} range - 'hour' | 'day' | 'week' | 'month'
- */
-// import { Op, fn, col, literal } from 'sequelize';
-
-// import { Op, fn, col, literal } from 'sequelize';
-
-/**
- * Returns record counts per time interval for a sensor, filling missing periods with 0
- */
-// import { Op, fn, col, literal } from 'sequelize';
-
-/**
- * Returns record counts per time interval for a sensor, filling missing periods with 0
- */
-// import dayjs from 'dayjs';
-// import { Op, fn, col, literal } from 'sequelize';
 
 export const getSensorCounts = async (SqlModel, sensor, range = 'day') => {
   if (!SqlModel || !sensor) return [];
@@ -988,3 +880,37 @@ export const getSensorCounts = async (SqlModel, sensor, range = 'day') => {
     count: countsMap[k] || 0,
   }));
 };
+
+// Define max values for each sensor type
+export const SENSOR_MAX_VALUES = {
+  door_queue: 25, // count max
+  stall_status: 500, // usageCount max
+  occupancy: 1800, // occupancyDuration max (seconds)
+  air_quality: 300, // aqi max
+  toilet_paper: 100, // level max
+  soap_dispenser: 100, // level max
+  water_leakage: 250, // waterLevel_mm max
+};
+
+/**
+ * Calculates top buildings based on sensor data
+ * @param {Array} sensorsArray - array of sensor objects
+ * @returns {Array} - sorted array of buildings with score
+ */
+export function getTopBuildings(sensorsArray) {
+  const buildingScores = {};
+
+  sensorsArray.forEach(sensor => {
+    const buildingId = sensor.buildingId;
+    const type = sensor.sensorType;
+
+    if (!buildingScores[buildingId]) buildingScores[buildingId] = 0;
+
+    const maxVal = SENSOR_MAX_VALUES[type] || 0;
+    buildingScores[buildingId] += maxVal;
+  });
+
+  return Object.entries(buildingScores)
+    .map(([buildingId, score]) => ({ buildingId, score }))
+    .sort((a, b) => b.score - a.score);
+}
