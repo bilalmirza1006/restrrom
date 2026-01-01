@@ -12,13 +12,13 @@ import { NextResponse } from 'next/server';
 
 // Ensure Node.js runtime (required for Stripe's signature verification)
 export const runtime = 'nodejs';
+
 // Always treat this route as dynamic (no caching)
 export const dynamic = 'force-dynamic';
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+
+// Disable body parsing for raw body access (replaces the old config.api.bodyParser = false)
+export const maxDuration = 30; // Optional: set max duration for the route
+
 // Healthcheck GET to confirm routing/ngrok reachability (no Stripe verification)
 export async function GET() {
   console.log('[Stripe Webhook][GET] >>> HIT (healthcheck)', new Date().toISOString());
@@ -44,6 +44,8 @@ export const POST = asyncHandler(async req => {
     throw new customError(400, 'Signature not found');
   }
 
+  // In Next.js 16, bodyParser is automatically disabled when you use request.text()
+  // No need for the old config.api.bodyParser = false
   const body = await req.text();
 
   let event;
@@ -80,4 +82,3 @@ export const POST = asyncHandler(async req => {
     throw new customError(500, `Error processing webhook: ${error.message}`);
   }
 });
-//sdsd
