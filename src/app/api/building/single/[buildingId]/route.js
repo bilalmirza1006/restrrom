@@ -1,5 +1,5 @@
 // import {Floor} from "@/components/user/buildings/Floor";
-import { connectDb } from '@/configs/connectDb';
+import { connectCustomMySqll, connectDb } from '@/configs/connectDb';
 import { configureCloudinary, removeFromCloudinary, uploadOnCloudinary } from '@/lib/cloudinary';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Building } from '@/models/building.model';
@@ -24,7 +24,8 @@ import { NextResponse } from 'next/server';
 export const GET = asyncHandler(async (req, { params }) => {
   await connectDb();
   const { user, accessToken } = await isAuthenticated();
-  const { buildingId } = params;
+  const { models } = await connectCustomMySqll(user._id);
+  const { buildingId } = await params;
 
   console.log('Building ID from params:', buildingId);
 
@@ -142,13 +143,7 @@ export const GET = asyncHandler(async (req, { params }) => {
     scope: 'building',
   });
   const totalToilets = await getTotalToiletsByBuildingId(buildingId);
-  // console.log(totalToilets); // 36
-  // console.log('latestDaylatestDaylatestDays:', dayData);
-  // console.log('latestWeeklatestWeeklatestWeeks:', weekData);
-  // console.log('latestMonthlatestMonthlatestMonthlatestMonths:', monthData);
-  // dayData,weekData,monthData  send in a structured way name is waterLeakageData
 
-  // console.log('Final building.sensorData:', building.sensorData);
   const waterLeakageData = {
     day: dayData,
     week: weekData,

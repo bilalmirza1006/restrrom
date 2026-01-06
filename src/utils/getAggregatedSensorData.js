@@ -1,12 +1,12 @@
 import { initModels } from '@/sequelizeSchemas/initModels';
 import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
-import { fn, col, Op, Sequelize, literal } from 'sequelize';
+import { col, fn, literal, Op } from 'sequelize';
 
 import { sequelize } from '@/configs/connectDb';
 import { RestRoom } from '@/models/restroom.model';
-import mongoose from 'mongoose';
 import dayjs from 'dayjs';
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import mongoose from 'mongoose';
 dayjs.extend(weekOfYear);
 export const getSensorsAggregatedData = async ({
   sensors,
@@ -892,25 +892,331 @@ export const SENSOR_MAX_VALUES = {
   water_leakage: 250, // waterLevel_mm max
 };
 
-/**
- * Calculates top buildings based on sensor data
- * @param {Array} sensorsArray - array of sensor objects
- * @returns {Array} - sorted array of buildings with score
- */
-export function getTopBuildings(sensorsArray) {
-  const buildingScores = {};
+// export const getTopBuildings = sensorsArray => {
+//   const buildingScores = {};
 
-  sensorsArray.forEach(sensor => {
-    const buildingId = sensor.buildingId;
-    const type = sensor.sensorType;
+//   sensorsArray.forEach(sensor => {
+//     const { buildingId, sensorType } = sensor;
+//     const maxVal = SENSOR_MAX_VALUES[sensorType] || 0;
+//     if (!buildingScores[buildingId]) buildingScores[buildingId] = 0;
 
-    if (!buildingScores[buildingId]) buildingScores[buildingId] = 0;
+//     // Add normalized value or max potential
+//     let value = 0;
+//     switch (sensorType) {
+//       case 'door_queue':
+//         value = sensor.count || 0;
+//         break;
+//       case 'stall_status':
+//         value = sensor.usageCount || 0;
+//         break;
+//       case 'occupancy':
+//         value = sensor.occupancyDuration || 0;
+//         break;
+//       case 'air_quality':
+//         value = sensor.aqi || 0;
+//         break;
+//       case 'toilet_paper':
+//       case 'soap_dispenser':
+//         value = sensor.level || 0;
+//         break;
+//       case 'water_leakage':
+//         value = sensor.waterLevel_mm || 0;
+//         break;
+//       default:
+//         value = 0;
+//     }
 
-    const maxVal = SENSOR_MAX_VALUES[type] || 0;
-    buildingScores[buildingId] += maxVal;
+//     const normalized = maxVal ? Math.min(value / maxVal, 1) : 0;
+//     buildingScores[buildingId] += normalized;
+//   });
+
+//   // Sort buildings by total normalized score
+//   return Object.entries(buildingScores)
+//     .map(([buildingId, score]) => ({ buildingId, score: +score.toFixed(2) }))
+//     .sort((a, b) => b.score - a.score);
+// };
+export function getTopBuildings(allSensors) {
+  const SENSOR_MAX_VALUES = {
+    door_queue: 25,
+    stall_status: 500,
+    occupancy: 1800,
+    air_quality: 300,
+    toilet_paper: 100,
+    soap_dispenser: 100,
+    water_leakage: 250,
+  };
+
+  // Group sensors by building
+  const buildingMap = {};
+
+  allSensors.forEach(sensor => {
+    if (!sensor.buildingId) return; // skip sensors without building
+
+    if (!buildingMap[sensor.buildingId]) {
+      buildingMap[sensor.buildingId] = { buildingId: sensor.buildingId, score: 0, count: 0 };
+    }
+
+    const building = buildingMap[sensor.buildingId];
+    const sensorType = sensor.sensorType;
+
+    if (!SENSOR_MAX_VALUES[sensorType]) return;
+
+    // Determine value based on sensor type
+    let value = 0;
+    switch (sensorType) {
+      case 'door_queue':
+        value = sensor.count || 0;
+        break;
+      case 'stall_status':
+        value = sensor.usageCount || 0;
+        break;
+      case 'occupancy':
+        value = sensor.occupancyDuration || 0;
+        break;
+      case 'air_quality':
+        value = sensor.aqi || 0;
+        break;
+      case 'toilet_paper':
+      case 'soap_dispenser':
+        value = sensor.level || 0;
+        break;
+      case 'water_leakage':
+        value = SENSOR_MAX_VALUES.water_leakage - (sensor.waterLevel_mm || 0); // invert
+        break;
+      default:
+        value = 0;
+    }
+
+    // Normalize and add to score
+    const normalized = value / SENSOR_MAX_VALUES[sensorType];
+    building.score += normalized;
+    building.count += 1;
   });
 
-  return Object.entries(buildingScores)
-    .map(([buildingId, score]) => ({ buildingId, score }))
-    .sort((a, b) => b.score - a.score);
+  // Compute average score per building
+  const buildings = Object.values(buildingMap).map(b => ({
+    buildingId: b.buildingId,
+    performanceScore: b.count ? b.score / b.count : 0,
+  }));
+
+  // Sort descending and take top 3
+  return buildings.sort((a, b) => b.performanceScore - a.performanceScore).slice(0, 3);
 }
+
+// export const getBuildingPerformanceFromSensors = async sensorsArray => {
+//   if (!sensorsArray || !sensorsArray.length) return [];
+
+//   // Initialize models
+//   const models = initModels(sequelize);
+
+//   // Group sensors by type
+//   const sensorsByType = {};
+//   sensorsArray.forEach(sensor => {
+//     const { sensorType } = sensor;
+//     if (!sensorType) return;
+//     const type = sensorType.toLowerCase();
+//     if (!sensorsByType[type]) sensorsByType[type] = [];
+//     sensorsByType[type].push(sensor);
+//   });
+
+//   const buildingData = {};
+
+//   // Loop over each sensor type
+//   for (const [type, sensors] of Object.entries(sensorsByType)) {
+//     const modelInfo = MODEL_CLASSES.find(m => m.name === type);
+//     if (!modelInfo) continue;
+
+//     const ModelClass = models[type];
+//     if (!ModelClass) continue;
+
+//     const sensorIds = sensors.map(s => s.uniqueId).filter(Boolean);
+//     if (!sensorIds.length) continue;
+
+//     // Fetch latest records per sensor in a single query
+//     const latestRecords = await ModelClass.findAll({
+//       where: { sensor_unique_id: { [Op.in]: sensorIds } },
+//       order: [['timestamp', 'DESC']],
+//       group: ['sensor_unique_id'],
+//       raw: true,
+//     });
+
+//     // Map latest records to building performance
+//     latestRecords.forEach(record => {
+//       const sensor = sensors.find(s => s.uniqueId === record.sensor_unique_id);
+//       if (!sensor) return;
+
+//       const buildingId = sensor.buildingId;
+//       let value = 0;
+
+//       // Determine value based on sensor type
+//       switch (type) {
+//         case 'door_queue':
+//           value = record.count || 0;
+//           break;
+//         case 'stall_status':
+//           value = record.usageCount || 0;
+//           break;
+//         case 'occupancy':
+//           value = record.occupancyDuration || 0;
+//           break;
+//         case 'air_quality':
+//           value = record.aqi || 0;
+//           break;
+//         case 'toilet_paper':
+//         case 'soap_dispenser':
+//           value = record.level || 0;
+//           break;
+//         case 'water_leakage':
+//           value = record.waterLevel_mm || 0;
+//           break;
+//         default:
+//           value = 0;
+//       }
+
+//       // Normalize value
+//       const maxVal = SENSOR_MAX_VALUES[type] || 0;
+//       const normalized = maxVal ? Math.min(value / maxVal, 1) : 0;
+
+//       // Aggregate per building
+//       if (!buildingData[buildingId]) buildingData[buildingId] = { total: 0, count: 0 };
+//       buildingData[buildingId].total += normalized;
+//       buildingData[buildingId].count += 1;
+//     });
+//   }
+
+//   // Convert to array and calculate % performance
+//   return Object.entries(buildingData)
+//     .map(([buildingId, { total, count }]) => ({
+//       buildingId,
+//       performance: count > 0 ? +((total / count) * 100).toFixed(2) : 0,
+//     }))
+//     .sort((a, b) => b.performance - a.performance);
+// };
+
+// import { initModels } from './initModels.js';
+// import { MODEL_CLASSES } from './models.js';
+// import { Op, literal } from 'sequelize';
+// import sequelize from './db.js';
+// import { SENSOR_MAX_VALUES } from './constants.js';
+
+// import { initModels } from './initModels.js';
+// import { MODEL_CLASSES } from './models.js';
+// import { Op, fn, col, literal } from 'sequelize';
+// import sequelize from './db.js';
+// import { SENSOR_MAX_VALUES } from './constants.js';
+
+// export const getBuildingPeriodPerformance = async (sensorsArray, period) => {
+//   const models = initModels(sequelize);
+//   const sensorsByType = {};
+
+//   sensorsArray.forEach(sensor => {
+//     const type = sensor.sensorType?.toLowerCase();
+//     if (!type) return;
+//     if (!sensorsByType[type]) sensorsByType[type] = [];
+//     sensorsByType[type].push(sensor);
+//   });
+
+//   const now = new Date();
+//   let dateFilter = {};
+//   let periodFormat = '';
+//   let labels = [];
+
+//   switch (period) {
+//     case 'day':
+//       dateFilter = {
+//         timestamp: {
+//           [Op.between]: [
+//             new Date(now.getFullYear(), now.getMonth(), now.getDate()),
+//             new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59),
+//           ],
+//         },
+//       };
+//       periodFormat = '%H';
+//       labels = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+//       break;
+
+//     case 'week': {
+//       const start = new Date(now);
+//       start.setDate(now.getDate() - now.getDay());
+//       start.setHours(0, 0, 0, 0);
+//       const end = new Date(start);
+//       end.setDate(start.getDate() + 6);
+//       end.setHours(23, 59, 59, 999);
+//       dateFilter = { timestamp: { [Op.between]: [start, end] } };
+//       periodFormat = '%w';
+//       labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+//       break;
+//     }
+
+//     case 'month': {
+//       const start = new Date(now.getFullYear(), now.getMonth(), 1);
+//       const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+//       dateFilter = { timestamp: { [Op.between]: [start, end] } };
+//       periodFormat = '%u';
+//       labels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+//       break;
+//     }
+
+//     default:
+//       throw new Error('Invalid period');
+//   }
+
+//   const results = [];
+
+//   for (const [type, sensors] of Object.entries(sensorsByType)) {
+//     const ModelClass = models[type];
+//     if (!ModelClass) continue;
+
+//     const sensorIds = sensors.map(s => s.uniqueId).filter(Boolean);
+//     if (!sensorIds.length) continue;
+
+//     const numericCols =
+//       {
+//         door_queue: ['count'],
+//         stall_status: ['usageCount'],
+//         occupancy: ['occupancyDuration'],
+//         air_quality: ['aqi'],
+//         toilet_paper: ['level'],
+//         soap_dispenser: ['level'],
+//         water_leakage: ['waterLevel_mm'],
+//       }[type] || [];
+
+//     const attributes = [[fn('DATE_FORMAT', col('timestamp'), periodFormat), 'period']];
+//     numericCols.forEach(c => attributes.push([fn('AVG', col(c)), c]));
+
+//     const data = await ModelClass.findAll({
+//       where: {
+//         sensor_unique_id: { [Op.in]: sensorIds },
+//         ...dateFilter,
+//       },
+//       attributes,
+//       group: ['period'],
+//       order: [['period', 'ASC']],
+//       raw: true,
+//     });
+
+//     const map = {};
+//     data.forEach(d => (map[d.period] = d));
+//     results.push({ type, map });
+//   }
+
+//   return labels.map((label, i) => {
+//     const obj = { name: label };
+//     results.forEach(r => {
+//       const key =
+//         period === 'day'
+//           ? i.toString().padStart(2, '0')
+//           : period === 'week'
+//             ? i.toString()
+//             : (i + 1).toString();
+
+//       const record = r.map[key];
+//       if (!record) return;
+
+//       const value = Object.values(record).find(v => typeof v === 'number') || 0;
+//       const max = SENSOR_MAX_VALUES[r.type] || 1;
+//       obj[r.type] = +Math.min(value / max, 1).toFixed(2);
+//     });
+//     return obj;
+//   });
+// };

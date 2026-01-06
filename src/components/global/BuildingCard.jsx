@@ -1,8 +1,10 @@
 /* eslint-disable react/prop-types */
 import Image from 'next/image';
 import { IoLocationSharp } from 'react-icons/io5';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-const BuildingCard = ({ data }) => {
+const BuildingCard = ({ data, loading = false }) => {
   const getButtonColor = type => {
     switch (type?.toLowerCase()) {
       case 'public':
@@ -15,8 +17,41 @@ const BuildingCard = ({ data }) => {
         return 'bg-blue-500';
     }
   };
-  console.log('datadata', data);
 
+  if (loading) {
+    // Skeleton version
+    return (
+      <div className="overflow-hidden rounded-[20px] bg-gray-100">
+        <div className="relative">
+          <Skeleton height={200} width="100%" />
+        </div>
+        <div className="relative top-[-25px] rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
+          <div className="flex w-full flex-wrap items-center justify-between">
+            <div className="space-y-1 text-center sm:text-left">
+              <div className="flex items-center gap-1">
+                <Skeleton width={80} height={12} />
+              </div>
+              <Skeleton width={120} height={20} />
+            </div>
+            <Skeleton width={60} height={24} className="rounded" />
+          </div>
+
+          <div className="gid-cols-1 mt-4 grid gap-4 lg:grid-cols-2">
+            <div className="box flex flex-col items-center gap-2 rounded-[7px] bg-[#E8E2FF] p-2">
+              <Skeleton width={40} height={24} />
+              <Skeleton width={80} height={12} />
+            </div>
+            <div className="box flex flex-col items-center gap-2 rounded-[7px] bg-[#E8E2FF] p-2">
+              <Skeleton width={40} height={24} />
+              <Skeleton width={80} height={12} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Normal rendering
   return (
     <div className="overflow-hidden rounded-[20px]">
       <div>
@@ -41,15 +76,7 @@ const BuildingCard = ({ data }) => {
           </div>
 
           <div
-            className={`${
-              data?.type == 'Commercial'
-                ? 'bg-secondary'
-                : data?.type === 'Private'
-                  ? 'bg-red-600'
-                  : data?.type === 'Public'
-                    ? 'bg-yellow-600'
-                    : ''
-            } w-fit rounded-[11px] px-4 py-2 text-sm text-white capitalize`}
+            className={`${getButtonColor(data?.type)} w-fit rounded-[11px] px-4 py-2 text-sm text-white capitalize`}
           >
             {data?.type}
           </div>

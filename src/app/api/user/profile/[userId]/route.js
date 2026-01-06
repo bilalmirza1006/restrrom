@@ -46,8 +46,8 @@ export const PUT = asyncHandler(async (req, { params }) => {
   await connectDb();
   await configureCloudinary(); // ensure Cloudinary is configured
 
-  const { userId } = params;
-
+  const { userId } = await params;
+  console.log('userIddd', userId);
   const { user: currentUser } = await isAuthenticated();
   if (!currentUser) throw new customError(401, 'Please login first');
 

@@ -11,7 +11,7 @@ import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 
 const LoadingSkeletonCard = () => (
-  <div className="rounded-xl lp-4">
+  <div className="lp-4 rounded-xl">
     <Skeleton height={150} className="mb-4" />
     <Skeleton height={20} width={`80%`} className="mb-2" />
     <Skeleton height={20} width={`60%`} />
@@ -41,15 +41,21 @@ const AllBuildings = () => {
     return [];
   }, [user, assignData, allData, allAdminBuildings]);
 
-  const getRouteByRole = (role, id) => {
+  const getRouteByRole = (role, buildingId) => {
+    console.log('Navigating to building ID:', buildingId);
+
     switch (role) {
       case 'admin':
-        return `/admin/buildings/building-detail/${id}`;
+        console.log('Role is admin');
+        return `/admin/buildings/building-detail/${buildingId}`;
       case 'building_inspector':
-        return `/inspectionist/checkinlist/${id}`;
+        console.log('Role is building_inspector');
+        return `/inspectionist/checkinlist/${buildingId}`;
       case 'super_admin':
-        return `/super-admin/buildings/building-details/${id}`;
+        console.log('Role is super_admin');
+        return `/super-admin/buildings/building-details/${buildingId}`;
       default:
+        console.log('Role is unknown:', role);
         return '';
     }
   };

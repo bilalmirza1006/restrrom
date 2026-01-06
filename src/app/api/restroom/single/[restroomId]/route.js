@@ -20,7 +20,7 @@ export const GET = asyncHandler(async (req, { params }) => {
   const { user, accessToken } = await isAuthenticated();
 
   // DO NOT use await on params
-  const { restroomId } = params;
+  const { restroomId } = await params;
 
   if (!isValidObjectId(restroomId)) {
     throw new customError(400, 'Invalid restroom id');

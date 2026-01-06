@@ -2,16 +2,16 @@
 import withPageGuard from '@/components/auth/withPageGuard';
 import RestRoomDetails from '@/components/user/restrooms/RestRoomDetails';
 import { useGetRestroomQuery } from '@/features/restroom/restroomApi';
-import React from 'react';
+import React, { use } from 'react';
 
 function FloorDetail({ params }) {
-  const { floorById } = params;
-  const [buildingId, floorId] = floorById.split('--');
+  const { floorById } = use(params);
+  // const [buildingId, floorId] = floorById.split('--');
 
-  console.log('Building ID:', buildingId);
-  console.log('Floor ID:', floorId);
+  console.log('Building ID:', floorById);
+  // console.log('Floor ID:', floorId);
 
-  const { data: restroom, isLoading, isError, error } = useGetRestroomQuery(buildingId);
+  const { data: restroom, isLoading, isError, error } = useGetRestroomQuery(floorById);
 
   console.log('Restroom Data:', restroom);
 

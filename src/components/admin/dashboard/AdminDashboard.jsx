@@ -34,7 +34,7 @@ const Dashboard = () => {
       </div>
       <div className="col-span-12 flex flex-col justify-around rounded-2xl bg-white p-4 shadow-md md:p-5 lg:col-span-4">
         <h6 className="mb-5 flex items-center gap-1 text-base font-medium text-black md:text-xl">
-          <BuildingIcon isLinkActive />
+          <BuildingIcon />
           Top Buildings
         </h6>
         <PieChartComponent

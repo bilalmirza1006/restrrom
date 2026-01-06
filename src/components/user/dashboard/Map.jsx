@@ -1,104 +1,147 @@
 'use client';
+
 import L from 'leaflet';
 import { useEffect, useState } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { FaMapMarkerAlt } from 'react-icons/fa';
-import { MapContainer, Marker, TileLayer, Tooltip, useMap } from 'react-leaflet';
-
-// Create a custom icon using an icon from react-icons.
+import { MapContainer, Marker, TileLayer, Popup, useMap } from 'react-leaflet';
+import { FaBuilding } from 'react-icons/fa';
+import Button from '@/components/global/small/Button';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+// ---------- Custom Building Icon ----------
 const iconMarkup = renderToStaticMarkup(
-  <FaMapMarkerAlt style={{ color: 'red', fontSize: '2rem' }} />
+  <FaBuilding style={{ color: '#2563eb', fontSize: '28px' }} />
 );
-const customDivIcon = L.divIcon({
+
+const buildingIcon = L.divIcon({
   html: iconMarkup,
   className: '',
   iconSize: [30, 30],
   iconAnchor: [15, 30],
-  popupAnchor: [0, -30],
+  popupAnchor: [0, -28],
 });
 
-// Optional: A helper component to recenter the map automatically.
-const RecenterAutomatically = ({ latlng }) => {
+// ---------- Auto Center Map ----------
+const FitBounds = ({ points }) => {
   const map = useMap();
+
   useEffect(() => {
-    map.setView(latlng);
-  }, [latlng, map]);
+    if (points.length > 0) {
+      const bounds = L.latLngBounds(points);
+      map.fitBounds(bounds, { padding: [40, 40] });
+    }
+  }, [points, map]);
+
   return null;
 };
 
+// ---------- Geocoding (fallback only) ----------
 const getCoordinates = async locationName => {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-    locationName
-  )}&limit=1`;
   try {
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.length > 0) {
-      const { lat, lon } = data[0];
-      return [parseFloat(lat), parseFloat(lon)];
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        locationName
+      )}&limit=1`
+    );
+    const data = await res.json();
+
+    if (data?.length > 0) {
+      return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
     }
-  } catch (error) {
-    console.error('Error fetching coordinates:', error);
+  } catch (err) {
+    console.error('Geocoding error:', err);
   }
   return null;
 };
 
-const HouseMap = ({ location, name, status }) => {
-  const [position, setPosition] = useState(null);
-  const [error, setError] = useState('');
-  const defaultCenter = [51.505, -0.09];
+// ---------- Main Component ----------
+const BuildingMap = ({ locationData = [], user, loading = false }) => {
+  const [markers, setMarkers] = useState([]);
+
+  // ---------- Keep all your existing functions as-is ----------
+  const getRouteByRole = (role, buildingId) => {
+    switch (role) {
+      case 'admin':
+        return `/admin/buildings/building-detail/${buildingId}`;
+      case 'building_inspector':
+        return `/inspectionist/checkinlist/${buildingId}`;
+      case 'super_admin':
+        return `/super-admin/buildings/building-details/${buildingId}`;
+      default:
+        return '';
+    }
+  };
 
   useEffect(() => {
-    if (location) {
-      getCoordinates(location).then(coords => {
-        if (coords) {
-          setPosition(coords);
-          setError('');
-        } else {
-          setError('Location not found');
-          setPosition(null);
-        }
-      });
-    }
-  }, [location]);
+    if (loading) return; // skip marker resolution if loading
 
-  // Prevent rendering on server-side if window is not defined.
-  if (typeof window === 'undefined') {
-    return null;
+    const resolveLocations = async () => {
+      const resolved = await Promise.all(
+        locationData.map(async item => {
+          if (typeof item.latitude === 'number' && typeof item.longitude === 'number') {
+            return { ...item, position: [item.latitude, item.longitude] };
+          }
+          if (item.locationName) {
+            const coords = await getCoordinates(item.locationName);
+            if (coords) return { ...item, position: coords };
+          }
+          return null;
+        })
+      );
+      setMarkers(resolved.filter(Boolean));
+    };
+
+    resolveLocations();
+  }, [locationData, loading]);
+
+  if (typeof window === 'undefined') return null;
+
+  // ---------- Skeleton Loading ----------
+  if (loading) {
+    return (
+      <div className="flex h-[300px] w-full items-center justify-center md:h-[450px]">
+        <Skeleton width="100%" height="100%" />
+      </div>
+    );
   }
 
+  // ---------- Normal Map Rendering ----------
   return (
-    <div className="h-[300px] w-full md:h-[400px]">
+    <div className="h-[300px] w-full rounded-2xl md:h-[450px]">
       <MapContainer
-        center={position || defaultCenter}
-        zoom={13}
+        center={[30.3753, 69.3451]} // Pakistan center
+        zoom={6}
         scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%' }}
-        attributionControl={false}
+        style={{ height: '100%', width: '100%', borderRadius: '16px' }}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://carto.com/">CARTO</a> contributors'
-        />
-        {position && <RecenterAutomatically latlng={position} />}
-        {position && (
-          <Marker
-            position={position}
-            icon={customDivIcon}
-            eventHandlers={{
-              mouseover: e => {
-                e.target.openTooltip();
-              },
-              mouseout: e => {
-                e.target.closeTooltip();
-              },
-            }}
-          ></Marker>
-        )}
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
+        <FitBounds points={markers.map(m => m.position)} />
+        {markers.map(item => (
+          <Marker key={item.buildingId} position={item.position} icon={buildingIcon}>
+            <Popup maxWidth={220}>
+              <div className="space-y-2">
+                <img
+                  src={item.buildingThumbnail}
+                  alt={item.locationName}
+                  className="h-28 w-full rounded object-cover"
+                />
+                <p className="text-sm font-semibold">{item.locationName}</p>
+                <Button
+                  text="View Building"
+                  size="sm"
+                  onClick={() => {
+                    const url = getRouteByRole(user?.role, item.buildingId);
+                    window.location.href = url;
+                  }}
+                  fullWidth
+                />
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
-      {error && <p style={{ color: 'red', marginTop: '10px' }}>{error}</p>}
     </div>
   );
 };
 
-export default HouseMap;
+export default BuildingMap;

@@ -18,6 +18,7 @@ import { useGetAllSensorsQuery } from '@/features/sensor/sensorApi';
 import dayjs from 'dayjs';
 import Dropdown from '@/components/global/small/Dropdown';
 import Input from '@/components/global/small/Input';
+import LazyDataTable from './LazyDataTable';
 
 // Helper to format sensor type names
 const formatSensorType = type => {
@@ -319,16 +320,17 @@ const Reports = () => {
                 ];
 
                 return (
-                  <div key={sensorType} className="rounded-lg border bg-gray-50 p-4">
+                  <div key={sensorType} className="rounded-lg bg-gray-50 p-4 shadow-2xl">
                     <h3 className="mb-2 border-l-4 border-blue-500 px-2 text-lg font-bold text-[#414141]">
                       {formatSensorType(sensorType)}
                     </h3>
-                    <DataTable
+                    {/* <DataTable
                       columns={columns}
                       data={sensorData}
                       customStyles={tableStyles}
                       selectableRows={false}
-                    />
+                    /> */}
+                    <LazyDataTable columns={columns} data={sensorData} />
                   </div>
                 );
               })}
