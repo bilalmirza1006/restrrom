@@ -133,10 +133,16 @@ async function buildBuildingPerformance(models, sensors, periodConfig) {
   });
 }
 
-export const getBuildingPerformanceFromSensors = async (sensorsArray, period = 'day') => {
+export const getBuildingPerformanceFromSensors = async (models, sensorsArray, period = 'day') => {
   if (!sensorsArray?.length) return [];
+  // models should be passed in. Fallback for legacy calls (optional, but better to enforce passing)
+  // const models = initModels(sequelize); 
 
-  const models = initModels(sequelize);
+  if (!models) {
+    console.error("Models not provided to getBuildingPerformanceFromSensors");
+    return [];
+  }
+
   const periodConfig = getPeriodConfig(period);
 
   // Group sensors by building
@@ -163,10 +169,14 @@ export const getBuildingPerformanceFromSensors = async (sensorsArray, period = '
   return response;
 };
 
-export const getLatestBuildingPerformance = async sensorsArray => {
+export const getLatestBuildingPerformance = async (models, sensorsArray) => {
   if (!sensorsArray?.length) return [];
 
-  const models = initModels(sequelize);
+  if (!models) {
+    console.error("Models not provided to getLatestBuildingPerformance");
+    return [];
+  }
+
 
   // Group sensors by building
   const sensorsByBuilding = {};

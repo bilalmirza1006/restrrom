@@ -3,10 +3,21 @@ import Modal from '@/components/global/Modal';
 import Button from '@/components/global/small/Button';
 import Dropdown from '@/components/global/small/Dropdown';
 import Input from '@/components/global/small/Input';
-import { useUpdateProfileMutation } from '@/features/auth/authApi';
+import { adminApi } from '@/features/admin/adminApi';
+import { alertsApi } from '@/features/alerts/alertsApi';
+import { authApi, useUpdateProfileMutation } from '@/features/auth/authApi';
+import { setUser } from '@/features/auth/authSlice';
+import { buildingApis } from '@/features/building/buildingApi';
+import { inspectionApis } from '@/features/inspection/inspectionApi';
+import { reportsApi } from '@/features/reports/reportsApi';
+import { restroomApis } from '@/features/restroom/restroomApi';
+import { ruleEngineApi } from '@/features/ruleEngine/ruleEngine';
+import { sensorApi } from '@/features/sensor/sensorApi';
+import { subscriptionApis } from '@/features/subscription/subscriptionApi';
+import { superAdminApis } from '@/features/superAdmin/superAdminApi';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const intervalTimesInSeconds = [
   { option: '3 minutes', value: '180000' },
@@ -19,6 +30,7 @@ const intervalTimesInSeconds = [
 
 const Configuration = () => {
   const [modal, setModal] = useState(false);
+  const dispatch = useDispatch();
   const { user } = useSelector(state => state.auth);
   console.log('useruseruser', user?.user?._id);
   const userId = user?.user?._id;
@@ -88,6 +100,7 @@ const Configuration = () => {
         }
 
         formData.append('isCustomDb', 'true');
+        formData.append('isCustomDbConnected', 'true');
         formData.append('customDbHost', hostName);
         formData.append('customDbPort', portNumber);
         formData.append('customDbUsername', userName);
@@ -98,6 +111,7 @@ const Configuration = () => {
       if (selectedOption === 'Local Database') {
         // No validation required, but still send null or empty values to reset
         formData.append('isCustomDb', 'false');
+        formData.append('isCustomDbConnected', 'false');
         formData.append('customDbHost', hostName || '');
         formData.append('customDbPort', portNumber || '');
         formData.append('customDbUsername', userName || '');
@@ -117,52 +131,26 @@ const Configuration = () => {
 
       if (response?.success) {
         toast.success(response?.message);
-        // Optionally re-fetch user data
-        // await refetch(); // Uncomment if needed
+        dispatch(setUser(response?.data));
+
+        // 🔄 Reset all API caches to force re-fetch from new DB
+        dispatch(authApi.util.resetApiState());
+        dispatch(sensorApi.util.resetApiState());
+        dispatch(buildingApis.util.resetApiState());
+        dispatch(restroomApis.util.resetApiState());
+        dispatch(reportsApi.util.resetApiState());
+        dispatch(adminApi.util.resetApiState());
+        dispatch(alertsApi.util.resetApiState());
+        dispatch(inspectionApis.util.resetApiState());
+        dispatch(subscriptionApis.util.resetApiState());
+        dispatch(superAdminApis.util.resetApiState());
+        dispatch(ruleEngineApi.util.resetApiState());
       }
     } catch (error) {
       toast.error(error?.data?.message || 'Error while updating profile');
       console.error('Error while updating profile:', error);
     }
   };
-
-  // useEffect(() => {
-
-  //   if (user?.user) {
-  //     setFormValues({
-  //       hostName: user?.user?.customDbHost || '',
-  //       portNumber: user?.user?.customDbPort || '',
-  //       userName: user?.user?.customDbUsername || '',
-  //       password: user?.user?.customDbPassword || '',
-  //       dbName: user?.user?.customDbName || '',
-  //       timeInterval: '', // preserve or set explicitly if needed
-  //     });
-  //     setSelectedOption(user?.user?.isCustomDb ? 'Remote Database' : 'Local Database');
-  //   }
-  //   if (user?.user?.interval) {
-  //     const interval = intervalTimesInSeconds.find((item) => item.value == String(user?.user?.interval));
-  //     console.log(interval, interval?.option, user?.user?.interval);
-  //     setDefaultTextForInterval(interval?.option || 'Select Time Interval');
-  //   }
-
-  //   /* ───────────────────────────────────────────────────────── */
-  //   /* 1.  Un‑subscribed user ‑‑ force 3‑minute default         */
-  //   /* ───────────────────────────────────────────────────────── */
-  //   if (!hasSubscription) {
-  //     setDefaultTextForInterval('3 minutes');
-  //     setTimeInterval('180000');
-  //     return; // nothing else to check
-  //   }
-
-  //   /* ───────────────────────────────────────────────────────── */
-  //   /* 2.  Subscribed user with a saved custom interval         */
-  //   /* ───────────────────────────────────────────────────────── */
-  //   if (user?.user?.interval) {
-  //     const match = intervalTimesInSeconds.find((i) => i.value === String(user.interval));
-  //     setDefaultTextForInterval(match?.option ?? 'Select Time Interval');
-  //     setTimeInterval(match?.value ?? '180000');
-  //   }
-  // }, [user?.user]);
 
   useEffect(() => {
     if (user?.user) {

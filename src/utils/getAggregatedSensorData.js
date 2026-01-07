@@ -9,11 +9,17 @@ import weekOfYear from 'dayjs/plugin/weekOfYear';
 import mongoose from 'mongoose';
 dayjs.extend(weekOfYear);
 export const getSensorsAggregatedData = async ({
+  models, // injected models
   sensors,
   groupBy = 'day',
   scope = 'building',
 }) => {
-  const models = initModels(sequelize);
+  // const models = initModels(sequelize); // REMOVED
+
+  if (!models) {
+    console.error("Models not provided to getSensorsAggregatedData");
+    return [];
+  }
 
   // Optional: test connection
   await sequelize.authenticate();
@@ -61,16 +67,11 @@ export const getSensorsAggregatedData = async ({
       try {
         // console.log(`\nProcessing sensor type: ${type}`);
 
-        // Get model class for sensor type
-        const modelInfo = MODEL_CLASSES.find(m => m.name === type);
-        if (!modelInfo) {
-          //   console.log(`Model info not found for type: ${type}`);
-          return { type, map: {} };
-        }
+        // Get model class for sensor type (from injected models)
+        const ModelClass = models[type]; // Use injected models
 
-        const ModelClass = modelInfo.cls;
         if (!ModelClass || typeof ModelClass.findAll !== 'function') {
-          console.log(`ModelClass or findAll not available for type: ${type}`);
+          // console.log(`ModelClass or findAll not available for type: ${type}`);
           return { type, map: {} };
         }
 
@@ -189,7 +190,7 @@ export const getSensorsAggregatedData = async ({
   return merged;
 };
 
-export const getDoorQueueAndOccupancyStats = async sensorArray => {
+export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) {
     return {
       totalOccupied: 0,
@@ -200,7 +201,7 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
     };
   }
 
-  initModels(sequelize);
+  // initModels(sequelize); // REMOVED
 
   const doorQueueSensors = sensorArray.filter(s => s.sensorType === 'door_queue' && s.uniqueId);
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
@@ -214,11 +215,11 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
   const restrooms = []; // new array to hold restroom info
 
   // === Door Queue ===
-  const DoorQueueModelEntry = MODEL_CLASSES.find(m => m.name === 'door_queue');
-  if (DoorQueueModelEntry?.cls && doorQueueSensors.length > 0) {
+  const DoorQueueModel = models['door_queue'];
+  if (DoorQueueModel && doorQueueSensors.length > 0) {
     const uniqueIds = doorQueueSensors.map(s => s.uniqueId);
 
-    const dqRecords = await DoorQueueModelEntry.cls.findAll({
+    const dqRecords = await DoorQueueModel.findAll({
       where: { sensor_unique_id: { [Op.in]: uniqueIds } },
       attributes: ['sensor_unique_id', 'count', 'windowCount', 'timestamp'],
       order: [
@@ -291,11 +292,12 @@ export const getDoorQueueAndOccupancyStats = async sensorArray => {
 };
 
 export const getWaterLeakageAggregatedData = async ({
+  models,
   sensors,
   groupBy = 'day',
   scope = 'building',
 }) => {
-  const models = initModels(sequelize);
+  // const models = initModels(sequelize); // REMOVED
   await sequelize.authenticate();
 
   if (!Array.isArray(sensors) || sensors.length === 0) return [];
@@ -305,7 +307,7 @@ export const getWaterLeakageAggregatedData = async ({
 
   if (validSensors.length === 0) return [];
 
-  const ModelClass = MODEL_CLASSES.find(m => m.name === 'water_leakage')?.cls;
+  const ModelClass = models['water_leakage'];
   if (!ModelClass) {
     console.error('water_leakage model not found');
     return [];
@@ -415,24 +417,24 @@ export const getWaterLeakageAggregatedData = async ({
   return Object.values(periodMap);
 };
 
-export const getRestroomChartReport = async sensorArray => {
+export const getRestroomChartReport = async (models, sensorArray) => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) return [];
 
-  initModels(sequelize);
+  // initModels(sequelize); // REMOVED
 
   // Filter occupancy sensors
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
   if (occupancySensors.length === 0) return [];
 
-  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
-  if (!OccupancyModelEntry?.cls) return [];
+  const OccupancyModel = models['occupancy'];
+  if (!OccupancyModel) return [];
 
   const uniqueIds = occupancySensors.map(s => s.uniqueId);
 
   // Fetch all occupancy records for the current year
   const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
-  const records = await OccupancyModelEntry.cls.findAll({
+  const records = await OccupancyModel.findAll({
     where: {
       sensor_unique_id: { [Op.in]: uniqueIds },
       timestamp: { [Op.gte]: startOfYear },
@@ -526,10 +528,10 @@ export const getRestroomChartReport = async sensorArray => {
   ];
 };
 
-export const getSlateChartReport = async sensorArray => {
+export const getSlateChartReport = async (models, sensorArray) => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) return [];
 
-  initModels(sequelize);
+  // initModels(sequelize); // REMOVED
 
   // Only occupancy sensors
   const occupancySensors = sensorArray.filter(
@@ -538,8 +540,8 @@ export const getSlateChartReport = async sensorArray => {
 
   if (occupancySensors.length === 0) return [];
 
-  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
-  if (!OccupancyModelEntry?.cls) return [];
+  const OccupancyModel = models['occupancy'];
+  if (!OccupancyModel) return [];
 
   // Map SQL uniqueId -> Mongo Sensor _id and sensor object
   const uniqueIdToSensor = {};
@@ -552,7 +554,7 @@ export const getSlateChartReport = async sensorArray => {
   const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
   // Fetch occupancy records from SQL
-  const records = await OccupancyModelEntry.cls.findAll({
+  const records = await OccupancyModel.findAll({
     where: {
       sensor_unique_id: { [Op.in]: uniqueIds },
       timestamp: { [Op.gte]: startOfYear },
@@ -664,7 +666,7 @@ export const getTotalToiletsByBuildingId = async buildingId => {
   return result[0]?.totalToilets || 0;
 };
 
-export const getOccupancyStats = async sensorArray => {
+export const getOccupancyStats = async (models, sensorArray) => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) {
     return {
       totalOccupancySensors: 0,
@@ -674,7 +676,7 @@ export const getOccupancyStats = async sensorArray => {
   }
 
   // Init sequelize models
-  initModels(sequelize);
+  // initModels(sequelize); // REMOVED
 
   // ✅ Filter occupancy sensors only
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
@@ -689,8 +691,8 @@ export const getOccupancyStats = async sensorArray => {
 
   const uniqueIds = occupancySensors.map(s => s.uniqueId);
 
-  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
-  if (!OccupancyModelEntry?.cls) {
+  const OccupancyModel = models['occupancy'];
+  if (!OccupancyModel) {
     return {
       totalOccupancySensors: uniqueIds.length,
       totalOccupied: 0,
@@ -699,7 +701,7 @@ export const getOccupancyStats = async sensorArray => {
   }
 
   // ✅ Get latest record per sensor
-  const records = await OccupancyModelEntry.cls.findAll({
+  const records = await OccupancyModel.findAll({
     where: { sensor_unique_id: { [Op.in]: uniqueIds } },
     attributes: ['sensor_unique_id', 'occupied', 'timestamp'],
     order: [

@@ -49,8 +49,14 @@ const AdminHeader = () => {
     try {
       const res = await logout().unwrap();
 
+      // ✅ Clear Redux state
       dispatch(deleteUser());
       dispatch(resetAuthApiState());
+
+      // ✅ Clear ALL localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+      }
 
       if (res?.success) {
         toast.success(res?.message || 'Logout successfully');
@@ -62,6 +68,12 @@ const AdminHeader = () => {
     } catch (error) {
       dispatch(deleteUser());
       dispatch(resetAuthApiState());
+
+      // ✅ Clear ALL localStorage even on error
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+      }
+
       toast.error(error?.data?.message || 'Something went wrong');
       router.push('/login');
     }

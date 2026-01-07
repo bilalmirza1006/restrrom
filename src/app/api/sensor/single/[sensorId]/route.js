@@ -1,4 +1,4 @@
-import { connectDb, sequelize } from '@/configs/connectDb';
+import { connectCustomMySqll, connectDb, sequelize } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Sensor } from '@/models/sensor.model';
 import { initModels } from '@/sequelizeSchemas/initModels';
@@ -25,11 +25,15 @@ import { turborepoTraceAccess } from 'next/dist/build/turborepo-access-trace';
 import { NextResponse } from 'next/server';
 
 export const GET = asyncHandler(async (req, { params }) => {
+  // await connectDb(); // Ensure Mongo if needed, but connectCustomMySqll does not connect Mongo. 
+  // Wait, existing code had await connectDb().
   await connectDb();
-  initModels(sequelize); // initialize SQL models
 
   const { user } = await isAuthenticated();
   const ownerId = user._id.toString();
+
+  // Connect to custom or global DB
+  const { models } = await connectCustomMySqll(ownerId);
 
   const { sensorId, range } = params; // range: 'hour' | 'day' | 'week' | 'month'
   if (!isValidObjectId(sensorId)) throw new customError(400, 'Invalid sensor id');
@@ -37,11 +41,10 @@ export const GET = asyncHandler(async (req, { params }) => {
   const sensor = await Sensor.findOne({ _id: sensorId, ownerId });
   if (!sensor) throw new customError(404, 'Sensor not found');
 
-  const modelEntry = MODEL_CLASSES.find(
-    m => m.name.toLowerCase() === sensor.sensorType.toLowerCase()
-  );
-  if (!modelEntry?.cls) throw new customError(400, `Unsupported sensor type: ${sensor.sensorType}`);
-  const SqlModel = modelEntry.cls;
+  const sensorType = sensor.sensorType.toLowerCase();
+  const SqlModel = models[sensorType];
+
+  if (!SqlModel) throw new customError(400, `Unsupported sensor type: ${sensor.sensorType}`);
 
   // Latest value
   const latestValue = await SqlModel.findOne({

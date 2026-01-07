@@ -1,20 +1,20 @@
-import mongoose from 'mongoose';
+import { connectCustomMySqll, connectDb } from '@/configs/connectDb';
+import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Building } from '@/models/building.model';
 import { RestRoom } from '@/models/restroom.model';
-import { connectDb, sequelize } from '@/configs/connectDb';
-import { initModels } from '@/sequelizeSchemas/initModels';
 import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
 import { asyncHandler } from '@/utils/asyncHandler';
-import { Op } from 'sequelize';
+import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import { isAuthenticated } from '@/lib/isAuthenticated';
+import { Op } from 'sequelize';
 
 export const GET = asyncHandler(async req => {
-  await connectDb();
-  initModels(sequelize);
-
+  await connectDb(); // Ensure MongoDB is connected for Auth check
   const { user } = await isAuthenticated();
   const ownerId = user._id.toString();
+
+  // Connect to custom or global DB based on user profile
+  const { models } = await connectCustomMySqll(ownerId);
 
   const { searchParams } = new URL(req.url);
   const buildingId = searchParams.get('buildingId');
@@ -89,7 +89,15 @@ export const GET = asyncHandler(async req => {
       if (endDate) where.timestamp[Op.lte] = new Date(endDate);
     }
 
-    const sqlData = await cls.findAll({
+    // Get the dynamic model class for this connection
+    const ModelClass = models[name];
+
+    if (!ModelClass) {
+      console.warn(`Model ${name} not found in initialized models`);
+      continue;
+    }
+
+    const sqlData = await ModelClass.findAll({
       where,
       order: [['timestamp', 'DESC']],
       limit: limitToLatest10 ? 10 : undefined,
@@ -124,5 +132,11 @@ export const GET = asyncHandler(async req => {
   return NextResponse.json({
     success: true,
     data: buildingsWithSensors,
+  }, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    }
   });
 });

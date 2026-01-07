@@ -1,4 +1,4 @@
-import { connectDb } from '@/configs/connectDb';
+import { connectCustomMySqll, connectDb } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Building } from '@/models/building.model';
 import { RestRoom } from '@/models/restroom.model';
@@ -18,6 +18,9 @@ export const GET = asyncHandler(async req => {
     return NextResponse.json({ success: false, message: 'ownerId required' });
   }
 
+  // Connect to custom or global DB based on user profile
+  const { models } = await connectCustomMySqll(ownerId);
+  console.log('modelsss', models);
   const url = new URL(req.url);
   const period = url.searchParams.get('period'); // day | week | month
   const latest = url.searchParams.get('latest'); // true
@@ -41,7 +44,11 @@ export const GET = asyncHandler(async req => {
     });
 
     // Get performance data for the period
-    const overAllBuildingPerformance = await getBuildingPerformanceFromSensors(allSensors, period);
+    const overAllBuildingPerformance = await getBuildingPerformanceFromSensors(
+      models,
+      allSensors,
+      period
+    );
 
     // Attach building names
     const finalPerformance = overAllBuildingPerformance.map(item => ({
@@ -65,7 +72,7 @@ export const GET = asyncHandler(async req => {
   if (latest === 'true') {
     const allSensors = await Sensor.find({ ownerId }).lean();
 
-    const topBuildings = await getLatestBuildingPerformance(allSensors);
+    const topBuildings = await getLatestBuildingPerformance(models, allSensors);
 
     const summedBuildings = topBuildings.map(b => ({
       ...b,
@@ -97,7 +104,7 @@ export const GET = asyncHandler(async req => {
     buildingIdToNameMap[b._id.toString()] = b.location || 'Unnamed Building';
   });
 
-  const topBuildings = await getLatestBuildingPerformance(allSensors);
+  const topBuildings = await getLatestBuildingPerformance(models, allSensors);
   const summedBuildings = topBuildings.map(b => ({
     buildingName: buildingIdToNameMap[b.buildingId.toString()] || b.buildingId,
     totalPerformance: Object.values(b.performance).reduce((acc, val) => acc + val, 0),
@@ -126,5 +133,11 @@ export const GET = asyncHandler(async req => {
         totalSensors: allSensors.length,
       },
     },
+  }, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    }
   });
 });

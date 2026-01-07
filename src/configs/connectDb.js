@@ -87,25 +87,75 @@ export const connectCustomMySqll = async userId => {
   let dbConnection = sequelize; // default = global
   let customDbConnected = false;
 
-  try {
-    /* 1. Cache hit? ------------------------------------------------ */
-    if (mySqlConnectionCache.has(String(userId))) {
-      console.log('cache hit');
-      return mySqlConnectionCache.get(String(userId));
-    }
-    console.log('cache miss');
+  console.log('================ DB CONNECTION START ================');
+  console.log('User ID:', userId);
 
-    /* 2. Read user profile ---------------------------------------- */
+  try {
+    /* 1. Read user profile ---------------------------------------- */
+    console.log('📄 Fetching user profile...');
     const userProfile = await Auth.findById(userId);
     if (!userProfile) throw new Error('User not found');
 
-    const { customDbHost, customDbName, customDbUsername, customDbPassword, customDbPort } =
-      userProfile;
+    const {
+      customDbHost,
+      customDbName,
+      customDbUsername,
+      customDbPassword,
+      customDbPort,
+      isCustomDb,
+    } = userProfile;
 
     const hasAllCreds =
       customDbHost && customDbName && customDbUsername && customDbPassword && customDbPort;
 
-    if (userProfile.isCustomDb && hasAllCreds) {
+    /* 2. Cache check with validation ------------------------------ */
+    if (mySqlConnectionCache.has(String(userId))) {
+      const cached = mySqlConnectionCache.get(String(userId));
+      const config = cached?.dbConnection?.config;
+
+      // Determine desired mode
+      const shouldBeCustom = Boolean(isCustomDb && hasAllCreds);
+
+      // Get cached mode (default to false if undefined)
+      const cachedIsCustom = Boolean(cached?.isCustom);
+
+      // Extract credentials
+      const cachedDbName = config?.database;
+      const cachedHost = config?.host;
+      const cachedPort = config?.port;
+      const cachedUser = config?.username;
+
+      // Check if credentials changed (only relevant if we want custom)
+      const isCredsChanged =
+        cachedDbName !== customDbName ||
+        cachedHost !== customDbHost ||
+        Number(cachedPort) !== Number(customDbPort) ||
+        cachedUser !== customDbUsername;
+
+      // Invalidate if:
+      // 1. Mode switched (Custom <-> Global)
+      // 2. Mode is Custom AND credentials changed
+      if (
+        cachedIsCustom !== shouldBeCustom ||
+        (shouldBeCustom && isCredsChanged)
+      ) {
+        console.warn('⚠️ DB Connection Mismatch → clearing stale cache', {
+          reason: cachedIsCustom !== shouldBeCustom ? 'Mode Switch' : 'Creds Changed',
+          cached: { isCustom: cachedIsCustom, host: cachedHost || 'GLOBAL' },
+          target: { isCustom: shouldBeCustom, host: customDbHost || 'GLOBAL' }
+        });
+        mySqlConnectionCache.delete(String(userId));
+      } else {
+        console.log('🟡 DB CACHE HIT → Returning cached connection');
+        return cached;
+      }
+    } else {
+      console.log('🟠 DB CACHE MISS → Creating new connection');
+    }
+
+    /* 3. Decide DB type ------------------------------------------- */
+    if (isCustomDb && hasAllCreds) {
+      console.log('🔵 Using CUSTOM MySQL connection');
       dbConnection = new Sequelize(customDbName, customDbUsername, customDbPassword, {
         host: customDbHost,
         port: Number(customDbPort) || 3306,
@@ -114,44 +164,60 @@ export const connectCustomMySqll = async userId => {
         dialectModule: mysql2,
       });
       customDbConnected = true;
+    } else {
+      // Only log if we are NOT using custom
+      console.log('🟢 Using GLOBAL MySQL connection');
     }
 
-    /* 3. Authenticate (retry‑3) ----------------------------------- */
+    /* 4. Authenticate (retry-3) ----------------------------------- */
     let retries = 3;
     while (retries) {
       try {
+        console.log(`🔐 Authenticating ${customDbConnected ? 'CUSTOM' : 'GLOBAL'} MySQL...`);
         await dbConnection.authenticate();
-        console.log('✅ Authenticated MySQL');
+        console.log('✅ MySQL authentication successful');
         break;
       } catch (err) {
         retries -= 1;
+        console.error(
+          `❌ MySQL auth failed (${customDbConnected ? 'CUSTOM' : 'GLOBAL'}) | Retries left: ${retries}`,
+          err.message
+        );
         if (!retries) throw err;
-        console.error('❌ MySQL auth failed, retrying...', err.message);
         await new Promise(res => setTimeout(res, 2000));
       }
     }
 
-    /* 4. Mark status, sync models --------------------------------- */
+    /* 5. Mark status & sync --------------------------------------- */
     userProfile.isCustomDbConnected = customDbConnected;
     await userProfile.save();
 
+    console.log(`✅ CONNECTED → ${customDbConnected ? 'CUSTOM' : 'GLOBAL'} MySQL`, {
+      userId,
+      dbName: customDbConnected ? customDbName : 'GLOBAL_DB',
+      host: customDbConnected ? customDbHost : 'DEFAULT_HOST',
+    });
+
+    console.log('📦 Initializing models...');
     const models = initModels(dbConnection);
+
+    console.log('🔄 Syncing database...');
     await dbConnection.sync();
 
-    console.log(
-      `✅ Connected to ${customDbConnected ? 'Custom' : 'Global'} MySQL for user ${userId}`
-    );
-
-    /* 5. Cache & return ------------------------------------------- */
-    const payload = { dbConnection, models };
+    /* 6. Cache & return ------------------------------------------- */
+    const payload = { dbConnection, models, isCustom: customDbConnected };
     mySqlConnectionCache.set(String(userId), payload);
+
+    console.log('💾 DB connection cached successfully');
+    console.log('================ DB CONNECTION END =================');
+
     return payload;
   } catch (err) {
     mySqlConnectionCache.delete(String(userId));
-    console.error('Unable to connect to the database:', err.message);
+    console.error('🔥 DB CONNECTION FAILED:', err.message);
     throw new Error(
       err.message ||
-        'Something went wrong with your database credentials. Please contact the admin.'
+      'Something went wrong with your database credentials. Please contact the admin.'
     );
   }
 };

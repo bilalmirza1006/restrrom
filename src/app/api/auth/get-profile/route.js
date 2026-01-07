@@ -26,7 +26,6 @@ export const GET = asyncHandler(async () => {
 
     try {
       await connectCustomMySqll(String(user?._id));
-      console.log('✅ Custom DB connected successfully');
     } catch (err) {
       console.error('❌ Custom DB connection failed:', err.message);
       throw new customError(500, `Custom DB connection failed: ${err.message}`);
