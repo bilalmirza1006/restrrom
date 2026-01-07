@@ -65,7 +65,7 @@ const AllBuildings = () => {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-md md:p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-base leading-[32px] font-semibold md:text-lg">
+        <h4 className="text-base leading-8 font-semibold md:text-lg">
           {user?.role === 'admin' ? 'All Buildings' : 'Assigned Buildings'}
         </h4>
 

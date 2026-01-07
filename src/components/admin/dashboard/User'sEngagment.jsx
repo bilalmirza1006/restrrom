@@ -56,7 +56,7 @@ function UsersEngagment() {
     },
   ];
   return (
-    <div className="mt-5 h-fit basis-[100%] rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
+    <div className="mt-5 h-fit basis-full rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
       <div className="mb-5 flex items-center justify-between px-2">
         <h1 className="text-[20px] font-bold">User’s Engagement</h1>
       </div>

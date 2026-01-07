@@ -80,7 +80,7 @@ function RestRoomPerformance() {
     },
   ];
   return (
-    <div className="mt-5 basis-[100%] rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
+    <div className="mt-5 basis-full rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="text-[20px] font-bold">Restrooms Performance</h1>
       </div>

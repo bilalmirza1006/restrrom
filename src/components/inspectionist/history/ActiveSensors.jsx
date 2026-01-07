@@ -22,7 +22,7 @@ const NestedPieChart = ({ title, data }) => {
   );
 
   return (
-    <div className="relative h-[490px] w-[470px] rounded-lg bg-white px-6 py-7 shadow-lg">
+    <div className="relative h-122.5 w-117.5 rounded-lg bg-white px-6 py-7 shadow-lg">
       <div>
         <h1 className="text-xl font-medium">{title}</h1>
       </div>

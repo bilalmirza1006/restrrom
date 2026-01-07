@@ -81,7 +81,7 @@ const HistoryCard = ({ buildingId, restroom }) => {
       {restroom?.restroomInspections?.map(restroom => (
         <div
           key={restroom?.restroomId}
-          className="flex w-[700px] flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
+          className="flex w-175 flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
         >
           <div className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ const HistoryCard = ({ buildingId, restroom }) => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => toggleTable(restroom?.restroomId)}
-                className="rounded-[8px] border border-[#A449EB96] bg-[#ccbfd696] p-2"
+                className="rounded-lg border border-[#A449EB96] bg-[#ccbfd696] p-2"
               >
                 <FaCaretDown
                   className={

@@ -66,12 +66,12 @@ const AdminAside = () => {
   return (
     <aside
       className={`relative hidden transition-all duration-300 xl:block ${
-        isMenuOpen ? 'w-[84px]' : 'w-[246px]'
+        isMenuOpen ? 'w-21' : 'w-61.5'
       }`}
     >
       {/* Arrow icon */}
       <div
-        className={`absolute top-[37px] -right-[10px] z-50 hidden cursor-pointer rounded-full bg-white p-1 transition-all duration-300 xl:block ${
+        className={`absolute top-9.25 -right-2.5 z-50 hidden cursor-pointer rounded-full bg-white p-1 transition-all duration-300 xl:block ${
           isMenuOpen ? 'rotate-0' : 'rotate-180'
         }`}
         onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -79,7 +79,7 @@ const AdminAside = () => {
         <FaArrowCircleRight className="text-primary text-lg" />
       </div>
       <div
-        className="bg-aside-grad scroll-0 relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto rounded-lg px-[11px] py-5"
+        className="bg-aside-grad scroll-0 relative flex h-full w-full flex-col overflow-x-hidden overflow-y-auto rounded-lg px-2.75 py-5"
         style={{ boxShadow: '0px 4px 14px 0px #3582E729' }}
       >
         <Image
@@ -113,7 +113,7 @@ const LinkItem = ({ page, pathname, isMenuOpen }) => {
   return (
     <Link
       href={page?.link[0]}
-      className={`flex items-center rounded-lg px-[13px] py-[10px] text-sm font-medium ${
+      className={`flex items-center rounded-lg px-3.25 py-2.5 text-sm font-medium ${
         isMenuOpen ? 'justify-center gap-0' : 'gap-3'
       } ${isLinkActive ? 'text-primary bg-[#e8f2ffaf]' : 'bg-[#e8f2ff1c] text-white'}`}
     >
@@ -127,7 +127,7 @@ const LinkItem = ({ page, pathname, isMenuOpen }) => {
       </span>
       {!isMenuOpen && (page?.title === 'Notification' || page?.title === 'Messages') && (
         <span className="flex flex-1 justify-end">
-          <div className="grid h-[18px] w-[27px] place-items-center rounded-[31px] bg-[#FF2F00] text-[10px] font-semibold text-white">
+          <div className="grid h-4.5 w-6.75 place-items-center rounded-[31px] bg-[#FF2F00] text-[10px] font-semibold text-white">
             {page?.title === 'Notification' && '21'}
             {page?.title === 'Messages' && '3'}
           </div>

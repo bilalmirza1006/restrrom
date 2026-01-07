@@ -43,7 +43,7 @@ function AllBuildingHistory() {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-md md:p-5">
       <div className="mb-4 flex items-center justify-between">
-        <h4 className="text-base leading-[32px] font-semibold md:text-lg">Buildings</h4>
+        <h4 className="text-base leading-8 font-semibold md:text-lg">Buildings</h4>
       </div>
 
       {isLoading ? (
@@ -67,7 +67,7 @@ function AllBuildingHistory() {
           </div>
 
           <div>
-            <div className="w-[720px] overflow-auto sm:w-full">
+            <div className="w-180 overflow-auto sm:w-full">
               <HistoryCard restroom={restroom} />
             </div>
           </div>
@@ -87,22 +87,22 @@ function AllBuildingHistory() {
                       src={item?.building?.buildingThumbnail?.url}
                       width={400}
                       height={200}
-                      className="h-[200px] w-full object-cover"
+                      className="h-50 w-full object-cover"
                       alt="building image"
                     />
                   )}
                 </div>
 
-                <div className="relative top-[-25px] rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
+                <div className="relative -top-6.25 rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
                   <div className="flex w-full flex-wrap items-center justify-between">
                     <div className="text-center sm:text-left">
                       <div className="flex items-center gap-1">
                         <IoLocationSharp />
-                        <p className="text-xs font-[400] text-[#111111] sm:text-base">
+                        <p className="text-xs font-normal text-[#111111] sm:text-base">
                           {item?.building?.location}
                         </p>
                       </div>
-                      <h2 className="mt-1 text-sm font-[500] text-[#111111] sm:text-xl">
+                      <h2 className="mt-1 text-sm font-medium text-[#111111] sm:text-xl">
                         {item?.building?.name}
                       </h2>
                     </div>

@@ -22,7 +22,7 @@ const InputFields = ({ tableId, restroom, customFields = [], onAddField, onField
                 placeholder="Enter Name"
                 value={field.name}
                 onChange={e => onFieldChange(field.id, 'name', e.target.value)}
-                className="mt-2 h-[50px] w-full rounded-xl border-[0.5px] border-[#66666659] px-4 outline-none"
+                className="mt-2 h-12.5 w-full rounded-xl border-[0.5px] border-[#66666659] px-4 outline-none"
               />
             </div>
             <div className="basis-[49%]">
@@ -35,7 +35,7 @@ const InputFields = ({ tableId, restroom, customFields = [], onAddField, onField
                 placeholder="Enter Description"
                 value={field.desc}
                 onChange={e => onFieldChange(field.id, 'desc', e.target.value)}
-                className="mt-2 h-[50px] w-full rounded-xl border-[0.5px] border-[#66666659] px-4 outline-none"
+                className="mt-2 h-12.5 w-full rounded-xl border-[0.5px] border-[#66666659] px-4 outline-none"
               />
             </div>
           </div>

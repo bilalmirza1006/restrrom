@@ -33,7 +33,7 @@ const FloorActivityChart = ({ range, sensorData }) => {
   const colors = ['#FF4C85', '#FF7300', '#1F2253', '#00C49F', '#0088FE', '#AA00FF', '#FFBB28'];
 
   return (
-    <section className="h-[495px] rounded-[14px] px-4 py-3">
+    <section className="h-123.75 rounded-[14px] px-4 py-3">
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={data}>
           <CartesianGrid vertical={false} />

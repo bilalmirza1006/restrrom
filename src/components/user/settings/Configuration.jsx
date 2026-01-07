@@ -192,7 +192,7 @@ const Configuration = () => {
 
   return (
     <section>
-      <h3 className="mb-4 text-lg font-[500] md:text-xl">Pull Request Intervals</h3>
+      <h3 className="mb-4 text-lg font-medium md:text-xl">Pull Request Intervals</h3>
       <form onSubmit={handleSubmit}>
         <div className="mt-4 pl-0 md:mt-6 md:pl-8">
           {hasSubscription ? (

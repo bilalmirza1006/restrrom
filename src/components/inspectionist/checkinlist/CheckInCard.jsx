@@ -104,7 +104,7 @@ const CheckInCard = ({ buildingId }) => {
       {data?.data?.restRooms?.map(restroom => (
         <div
           key={restroom?._id}
-          className="flex w-[700px] flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
+          className="flex w-175 flex-col overflow-auto rounded-lg bg-white shadow-sm sm:w-full"
         >
           <div className="flex items-center justify-between px-3 py-2">
             <div className="flex items-center gap-3">
@@ -114,7 +114,7 @@ const CheckInCard = ({ buildingId }) => {
 
             <div className="flex items-center gap-4">
               <p
-                className={`inline-block rounded-[8px] px-4 py-1.5 text-white capitalize ${
+                className={`inline-block rounded-lg px-4 py-1.5 text-white capitalize ${
                   restroom?.status === 'Active' ? 'bg-[#61CA94]' : 'bg-[#FF8080]'
                 }`}
               >
@@ -122,7 +122,7 @@ const CheckInCard = ({ buildingId }) => {
               </p>
               <button
                 onClick={() => toggleTable(restroom?._id)}
-                className="rounded-[8px] border border-[#A449EB96] bg-[#ccbfd696] p-2"
+                className="rounded-lg border border-[#A449EB96] bg-[#ccbfd696] p-2"
               >
                 <FaCaretDown
                   className={
@@ -167,7 +167,7 @@ const CheckInCard = ({ buildingId }) => {
         <button
           disabled={isLoading}
           onClick={handleSubmit}
-          className="w-[200px] rounded-lg bg-[#A449EB] px-6 py-2 text-white hover:bg-[#922cd8]"
+          className="w-50 rounded-lg bg-[#A449EB] px-6 py-2 text-white hover:bg-[#922cd8]"
         >
           {isLoading ? 'Submitting...' : 'Submit Inspection'}
         </button>

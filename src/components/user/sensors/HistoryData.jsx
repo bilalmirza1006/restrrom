@@ -41,7 +41,7 @@ const HistoryData = ({ datas }) => {
   const data = mapDataForChart(datas[range] || []);
 
   return (
-    <div className="h-[333px] w-full rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
+    <div className="h-83.25 w-full rounded-[15px] border border-gray-200 p-4 shadow-md md:p-5">
       <div className="mb-5 flex items-center justify-between">
         <h6 className="text-primary text-base font-semibold">Historical Data</h6>
         <Dropdown

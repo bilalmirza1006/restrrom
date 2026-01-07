@@ -52,12 +52,12 @@ const Dashboard = () => {
       <div className="col-span-12 lg:col-span-4">
         <ActiveSensors />
       </div>
-      <div className="col-span-12 h-fit rounded-[12px] bg-white lg:col-span-8">
+      <div className="col-span-12 h-fit rounded-xl bg-white lg:col-span-8">
         <div className="mb-4 flex items-center justify-between px-5 pt-5">
           <div>
             <div className="flex h-fit w-fit cursor-pointer items-center justify-between gap-2 border-[#A449EB] text-[12px] text-[#A449EB]">
               <span>Building 1</span>
-              <FaSortDown className="relative top-[-3px]" />
+              <FaSortDown className="relative -top-0.75" />
             </div>
             <h6 className="text-lg font-semibold text-black md:text-2xl">Restrooms Activity</h6>
           </div>

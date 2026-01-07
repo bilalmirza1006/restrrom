@@ -66,7 +66,7 @@ const Review = ({ plan }) => {
         <div>
           <div className="text-primary flex items-center gap-2">
             <FaMapMarkerAlt fontSize={22} />
-            <p className="text-sm font-[600] md:text-base">Billing Address</p>
+            <p className="text-sm font-semibold md:text-base">Billing Address</p>
           </div>
           <p className="md:text-md my-2 text-sm font-semibold md:my-4">
             5678 Maple Avenue, Anytown, CA, 90210, USA
@@ -74,16 +74,16 @@ const Review = ({ plan }) => {
           <PriceList title="Plan Selected:" value={plan.title} />
           <PriceList title="Monthly Fee:" value={`$${totalAmount.toFixed(2)}`} />
           <PriceList title="Tax:" value={`$${tax}`} />
-          <div className="mb-3 h-[1px] w-full bg-[#00000066]"></div>
+          <div className="mb-3 h-px w-full bg-[#00000066]"></div>
           <PriceList title="Total Monthly Charge:" value={`$${totalPrice}`} />
         </div>
 
         <div></div>
 
         <div className="shadow-dashboard rounded-[10px] bg-white px-4 py-4 md:py-6">
-          <h6 className="text-base font-[600] text-black md:text-xl">{plan.title}</h6>
+          <h6 className="text-base font-semibold text-black md:text-xl">{plan.title}</h6>
           <p className="text-[10px] text-[#414141] lg:text-xs">{plan.subtitle}</p>
-          <p className="text-primary mt-1 text-lg font-[600] lg:text-3xl">
+          <p className="text-primary mt-1 text-lg font-semibold lg:text-3xl">
             ${plan.price}
             <span className="text-sm font-normal md:text-lg">/month</span>
           </p>
@@ -102,7 +102,7 @@ const Review = ({ plan }) => {
               </div>
               <div>
                 <button
-                  className="w-[150px] rounded-md px-4 py-2 text-base font-semibold text-white md:w-[200px]"
+                  className="w-37.5 rounded-md px-4 py-2 text-base font-semibold text-white md:w-50"
                   style={{ background: `${plan.btnBg}` }}
                 >
                   Buy Plan

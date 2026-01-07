@@ -46,7 +46,7 @@ function ActiveAlerts() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <GoAlertFill className="text-2xl text-[#FF3B30]" />
-          <h2 className="text-[19px] leading-[30px] font-semibold md:text-lg">Active Alerts</h2>
+          <h2 className="text-[19px] leading-7.5 font-semibold md:text-lg">Active Alerts</h2>
         </div>
         <button onClick={() => handleModalOpen()} className="text-primary cursor-pointer text-xs">
           See all
@@ -79,7 +79,7 @@ function ActiveAlerts() {
             {alerts.map((alert, i) => (
               <div
                 key={i}
-                className="flex items-center gap-2 rounded-[6px] border-l-4 border-[#F42F2F] bg-[#FFECEC] p-[15px] text-[#F42F2F]"
+                className="flex items-center gap-2 rounded-md border-l-4 border-[#F42F2F] bg-[#FFECEC] p-3.75 text-[#F42F2F]"
               >
                 <p className="text-sm md:text-base">{alert}</p>
               </div>
@@ -94,7 +94,7 @@ function ActiveAlerts() {
                 {alerts.map((alert, i) => (
                   <div
                     key={i}
-                    className="mb-2 flex items-center gap-2 rounded-[6px] border-l-4 border-[#F42F2F] bg-[#FFECEC] p-[10px] text-[#F42F2F]"
+                    className="mb-2 flex items-center gap-2 rounded-md border-l-4 border-[#F42F2F] bg-[#FFECEC] p-2.5 text-[#F42F2F]"
                   >
                     <p>{alert}</p>
                   </div>

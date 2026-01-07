@@ -49,7 +49,7 @@ const Dashboard = () => {
       skip: !showLatest,
     }
   );
-  console.log('periodLoading', periodLoading);
+  console.log('dashboardDatadashboardData', dashboardData);
 
   // Decide which data to show in charts
   const overAllBuildingPerformance =
@@ -78,28 +78,29 @@ const Dashboard = () => {
         'https://res.cloudinary.com/hamzanafasat/image/upload/v1766650617/rest-room/building-thumbnails/ijfqz0a4nxkuktaqrkq5.png',
     },
   ];
+  console.log('arraylocationData', dashboardData?.data?.counts?.totalSubscriptions);
   const dashboardCardData = [
     {
       title: 'Total Buildings',
-      value: dashboardData?.data?.totalBuildings || 125, // just the number, no {}
+      value: dashboardData?.data?.counts?.totalBuildings || 125, // just the number, no {}
       icon: '/images/dashboard/total-buildings.png',
       percentageChange: "<span class='text-[#00B69B]'>8.5%</span> Up from yesterday",
     },
     {
       title: 'Total Restrooms',
-      value: dashboardData?.data?.totalRestrooms || 212,
+      value: dashboardData?.data?.counts?.totalRestrooms || 212,
       icon: '/images/dashboard/total-restroom.png', // removed {}
       percentageChange: "<span class='text-[#00B69B]'>8.5%</span> Up from yesterday",
     },
     {
       title: 'Total Sensors',
-      value: dashboardData?.data?.totalSensors || 223,
+      value: dashboardData?.data?.counts?.totalSensors || 223,
       icon: '/images/dashboard/total-sensors.png',
       percentageChange: "<span class='text-[#00B69B]'>8.5%</span> Up from yesterday",
     },
     {
       title: 'Total Subscriptions',
-      value: dashboardData?.data?.totalSubscriptions || 12,
+      value: dashboardData?.data?.counts?.totalSubscriptions || 0,
       icon: '/images/dashboard/total-subscription.png',
       percentageChange: "<span class='text-[#00B69B]'>8.5%</span> Up from yesterday",
     },
@@ -146,7 +147,7 @@ const Dashboard = () => {
             Top Buildings
           </h6>
         </div>
-        <div className="mx-auto flex max-w-[500px] items-center justify-center">
+        <div className="mx-auto flex max-w-125 items-center justify-center">
           {dashboardLoading ? (
             <div className="mx-auto mt-4 flex flex-col items-center">
               {/* Skeleton Pie */}

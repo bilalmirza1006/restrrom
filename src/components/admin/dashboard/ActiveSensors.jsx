@@ -33,7 +33,7 @@ function ActiveSensors() {
 
   function customLegend() {
     return (
-      <div className="relative flex w-[100%] flex-wrap justify-center gap-3">
+      <div className="relative flex w-full flex-wrap justify-center gap-3">
         {legenditems.map((item, index) => (
           <div key={index} className="flex items-center gap-1">
             <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.fill }}></div>
@@ -64,7 +64,7 @@ function ActiveSensors() {
     },
   ];
   return (
-    <div className="mt-5 h-101 basis-[100%] rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
+    <div className="mt-5 h-101 basis-full rounded-xl bg-white px-4 py-3 shadow-lg xl:basis-[32%]">
       <div className="flex items-center gap-2 px-2">
         <span>
           <GoAlertFill fontSize={26} fill="#FF3B30" />

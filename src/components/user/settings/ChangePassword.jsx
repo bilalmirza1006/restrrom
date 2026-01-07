@@ -53,7 +53,7 @@ const ChangePassword = () => {
           onChange={e => setOldPassword(e.target.value)}
         />
         <div
-          className="absolute top-[47px] right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
+          className="absolute top-11.75 right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
           onClick={() => setShowOldPassword(!showOldPassword)}
         >
           {showOldPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
@@ -67,7 +67,7 @@ const ChangePassword = () => {
           onChange={e => setNewPassword(e.target.value)}
         />
         <div
-          className="absolute top-[47px] right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
+          className="absolute top-11.75 right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
           onClick={() => setShowNewPassword(!showNewPassword)}
         >
           {showNewPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}
@@ -81,7 +81,7 @@ const ChangePassword = () => {
           onChange={e => setConfirmPassword(e.target.value)}
         />
         <div
-          className="absolute top-[47px] right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
+          className="absolute top-11.75 right-5 flex cursor-pointer items-center gap-2 text-sm text-[#666666CC] lg:text-lg"
           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
         >
           {showConfirmPassword ? <IoEyeOutline /> : <IoEyeOffOutline />}

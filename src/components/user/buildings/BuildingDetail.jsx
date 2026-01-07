@@ -188,7 +188,7 @@ const BuildingDetail = ({ building }) => {
           isOpen={inspectorModel}
           onClose={() => setInspectorModel(false)}
         >
-          <div className="max-h-[600px] w-full overflow-y-auto p-5 md:min-w-[500px]">
+          <div className="max-h-150 w-full overflow-y-auto p-5 md:min-w-125">
             {inspectorsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
@@ -260,7 +260,7 @@ const InspectorCard = ({ data, onAssign, buildingId }) => {
       <div className="p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-purple-600">
               <span className="text-sm font-semibold text-white">
                 {data?.fullName?.charAt(0) || 'I'}
               </span>
@@ -305,7 +305,7 @@ const InspectorCard = ({ data, onAssign, buildingId }) => {
             <Button
               onClick={isAlreadyAssigned ? handleUnassignClick : handleAssignClick}
               disabled={isLoading}
-              className={`min-w-[100px] rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              className={`min-w-25 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
                 isLoading
                   ? 'cursor-not-allowed bg-gray-100 text-gray-500'
                   : isAlreadyAssigned

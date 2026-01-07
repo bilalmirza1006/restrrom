@@ -65,7 +65,7 @@ const Mapping = ({ setCurrentStep }) => {
       </div>
 
       <div className="mt-4 lg:col-span-2">
-        <div className="h-[325px] rounded-lg shadow-md">
+        <div className="h-81.25 rounded-lg shadow-md">
           <Map lat={mapping.lat} lng={mapping.lng} />
         </div>
       </div>

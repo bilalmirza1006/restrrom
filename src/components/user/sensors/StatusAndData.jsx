@@ -30,7 +30,7 @@ const List = ({ title, value }) => {
     if (typeof value === 'boolean') {
       return (
         <span
-          className={`rounded-lg px-5 py-[5px] text-sm font-medium text-white ${
+          className={`rounded-lg px-5 py-1.25 text-sm font-medium text-white ${
             value ? 'bg-secondary' : 'bg-orange-400'
           }`}
         >
@@ -45,7 +45,7 @@ const List = ({ title, value }) => {
 
       return (
         <span
-          className={`rounded-lg px-5 py-[5px] text-sm font-medium text-white ${
+          className={`rounded-lg px-5 py-1.25 text-sm font-medium text-white ${
             isActive ? 'bg-secondary' : 'bg-gray-400'
           }`}
         >

@@ -25,7 +25,7 @@ const Plans = () => {
                 isActiveTab === tab
                   ? 'bg-primary text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-100'
-              } ${isDisabled ? '!cursor-not-allowed' : 'cursor-pointer'}`}
+              } ${isDisabled ? 'cursor-not-allowed!' : 'cursor-pointer'}`}
               disabled={isDisabled}
               onClick={() => !isDisabled && tabsHandler(tab)}
             >

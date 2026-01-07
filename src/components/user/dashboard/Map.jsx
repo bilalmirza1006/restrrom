@@ -99,7 +99,7 @@ const BuildingMap = ({ locationData = [], user, loading = false }) => {
   // ---------- Skeleton Loading ----------
   if (loading) {
     return (
-      <div className="flex h-[300px] w-full items-center justify-center md:h-[450px]">
+      <div className="flex h-75 w-full items-center justify-center md:h-112.5">
         <Skeleton width="100%" height="100%" />
       </div>
     );
@@ -107,7 +107,7 @@ const BuildingMap = ({ locationData = [], user, loading = false }) => {
 
   // ---------- Normal Map Rendering ----------
   return (
-    <div className="h-[300px] w-full rounded-2xl md:h-[450px]">
+    <div className="h-75 w-full rounded-2xl md:h-112.5">
       <MapContainer
         center={[30.3753, 69.3451]} // Pakistan center
         zoom={6}

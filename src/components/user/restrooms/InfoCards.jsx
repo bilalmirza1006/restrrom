@@ -3,7 +3,7 @@ import React from 'react';
 function InfoCards({ title, borderColor, hoverColor, count, icon }) {
   return (
     <div
-      className={`grow rounded-xl border-t-[10px] bg-white p-5 transition-all duration-200 ${borderColor} ${hoverColor}`}
+      className={`grow rounded-xl border-t-10 bg-white p-5 transition-all duration-200 ${borderColor} ${hoverColor}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">

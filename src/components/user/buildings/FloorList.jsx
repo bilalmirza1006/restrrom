@@ -29,7 +29,7 @@ const FloorList = ({ data, buildingId }) => {
           width={248}
           height={150}
           alt="Floor image"
-          className="size-full h-[150px] rounded-xl border border-[#414141] object-cover sm:w-[250px]"
+          className="size-full h-37.5 rounded-xl border border-[#414141] object-cover sm:w-62.5"
         />
       )}
       <div>

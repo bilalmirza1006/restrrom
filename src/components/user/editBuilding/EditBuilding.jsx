@@ -11,6 +11,7 @@ import {
 } from '@/features/building/buildingApi';
 import Loader from '@/components/global/Loader';
 
+const newLocal = 'text-base leading-[32px] font-semibold md:text-lg';
 const EditBuilding = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const params = useParams();
@@ -42,16 +43,16 @@ const EditBuilding = () => {
 
   return (
     <div className="rounded-[10px] bg-white p-4 md:p-5">
-      <h4 className="text-base leading-[32px] font-semibold md:text-lg">Edit Building</h4>
+      <h4 className={newLocal}>Edit Building</h4>
       <div className="mt-4 flex items-center justify-center">
         {steps.map((step, index) => (
           <div key={index} className="flex items-center">
             <div
-              className={`grid size-[32px] place-items-center rounded-full text-lg font-medium ${
+              className={`grid size-8 place-items-center rounded-full text-lg font-medium ${
                 index > currentStep
                   ? 'bg-[#D9D9D9] text-[#11111180]'
                   : index == currentStep
-                    ? 'bg-[#D9D9D9] text-[#000]'
+                    ? 'bg-[#D9D9D9] text-black'
                     : 'bg-primary text-white'
               }`}
             >
@@ -62,7 +63,7 @@ const EditBuilding = () => {
                 index > currentStep
                   ? 'text-[#11111180]'
                   : index == currentStep
-                    ? 'text-[#000]'
+                    ? 'text-black'
                     : 'text-primary'
               }`}
             >
@@ -70,9 +71,7 @@ const EditBuilding = () => {
             </h6>
             {index < steps.length - 1 && (
               <div
-                className={`h-[2px] w-[100px] ${
-                  index >= currentStep ? 'bg-[#D9D9D9]' : 'bg-primary'
-                }`}
+                className={`h-0.5 w-25 ${index >= currentStep ? 'bg-[#D9D9D9]' : 'bg-primary'}`}
               ></div>
             )}
           </div>
