@@ -9,11 +9,7 @@ import { asyncHandler } from '@/utils/asyncHandler';
 import customError from '@/utils/customError';
 import {
   getDoorQueueAndOccupancyStats,
-  getLatestDoorQueueCounts,
-  getLatestDoorQueueRecords,
   getRestroomChartReport,
-  getRestroomUsageReport,
-  getSensorsAggregatedData,
   getTotalToiletsByBuildingId,
   getWaterLeakageAggregatedData,
 } from '@/utils/getAggregatedSensorData';
@@ -55,7 +51,7 @@ export const GET = asyncHandler(async (req, { params }) => {
     return sendResponse(NextResponse, 'Building fetched successfully', building, accessToken);
   }
 
-  const doorQueueSensors = await getDoorQueueAndOccupancyStats(sensors);
+  const doorQueueSensors = await getDoorQueueAndOccupancyStats(models, sensors);
 
   const getRestroomFillColor = (queueCount, fillColorArray) => {
     if (!fillColorArray || fillColorArray.length === 0) return null;
@@ -113,7 +109,8 @@ export const GET = asyncHandler(async (req, { params }) => {
     return acc;
   }, {});
 
-  const report = await getRestroomChartReport(sensors);
+  const report = await getRestroomChartReport(models, sensors);
+
   console.log('Restroom Chart Report:', report);
   const mostUsedRestroom = report.map(item => {
     // Use the restroomId from the report
@@ -128,22 +125,25 @@ export const GET = asyncHandler(async (req, { params }) => {
   });
 
   const dayData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors,
     groupBy: 'day',
     scope: 'building',
   });
+
   const weekData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors,
     groupBy: 'week',
     scope: 'building',
   });
   const monthData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors,
     groupBy: 'month',
     scope: 'building',
   });
   const totalToilets = await getTotalToiletsByBuildingId(buildingId);
-
   const waterLeakageData = {
     day: dayData,
     week: weekData,

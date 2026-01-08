@@ -1,4 +1,4 @@
-import { connectDb } from '@/configs/connectDb';
+import { connectCustomMySqll, connectDb } from '@/configs/connectDb';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { Building } from '@/models/building.model';
 import { RestRoom } from '@/models/restroom.model';
@@ -12,7 +12,8 @@ export const GET = asyncHandler(async req => {
   await connectDb();
 
   const { user, accessToken } = await isAuthenticated();
-
+  // const { user, accessToken } = await isAuthenticated();
+  const { models } = await connectCustomMySqll(user._id);
   const { searchParams } = new URL(req.url);
   const buildingId = searchParams.get('buildingId');
   if (!buildingId) throw new customError(400, 'Please provide buildingId');
@@ -34,7 +35,7 @@ export const GET = asyncHandler(async req => {
         { sensorType: 1, uniqueId: 1 }
       ).lean();
 
-      const occupancyStats = await getOccupancyStats(sensors);
+      const occupancyStats = await getOccupancyStats(models, sensors);
 
       return {
         ...restroom,

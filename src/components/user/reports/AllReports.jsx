@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import Dropdown from '@/components/global/small/Dropdown';
 import Input from '@/components/global/small/Input';
 import LazyDataTable from './LazyDataTable';
+import { useSelector } from 'react-redux';
 
 // Helper to format sensor type names
 const formatSensorType = type => {
@@ -35,9 +36,10 @@ const commonColumns = [
     name: 'Date',
     selector: row => (
       <p className="text-sm font-bold text-[#060606cc]">
-        {dayjs(row.timestamp).format('DD-MMM-YYYY hh:mm a')}
+        {dayjs(row.timestamp).format('DD-MMM-YYYY hh:mm A')}
       </p>
     ),
+
     sortable: true,
     minWidth: '180px',
   },
@@ -127,7 +129,10 @@ const Reports = () => {
   const [selectedSensor, setSelectedSensor] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
+  const { user, isAuthenticated } = useSelector(state => state.auth);
+  console.log('useruseruseruser', user.user.interval);
+  // const [interval, setInterval] = useState(user.user.interval);
+  const interval = user?.user?.interval;
   // 1. Fetch Buildings
   const { data: buildingsData } = useGetAllBuildingsQuery();
   const buildingsList = buildingsData?.data || [];
@@ -166,6 +171,7 @@ const Reports = () => {
       sensorId: selectedSensor,
       startDate,
       endDate,
+      interval: interval,
     },
     {
       skip: isInvalidDateSelection,
@@ -282,13 +288,13 @@ const Reports = () => {
       {!isLoading &&
         !isFetching &&
         reportsLists.map((list, i) => (
-          <div key={i} className="rounded-[20px] border-[2px] border-[#00000012] bg-white p-4">
+          <div key={i} className="rounded-[20px] border-2 border-[#00000012] bg-white p-4">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-3">
                 <img
                   src={list.image}
                   alt="image"
-                  className="h-[106px] w-[186px] rounded-xl object-cover"
+                  className="h-26.5 w-46.5 rounded-xl object-cover"
                 />
                 <div>
                   <h5 className="text-sm font-bold text-[#2e2e2e] md:text-base">{list.title}</h5>

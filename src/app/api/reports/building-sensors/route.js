@@ -6,7 +6,7 @@ import { MODEL_CLASSES } from '@/sequelizeSchemas/models';
 import { asyncHandler } from '@/utils/asyncHandler';
 import mongoose from 'mongoose';
 import { NextResponse } from 'next/server';
-import { Op } from 'sequelize';
+import { col, fn, literal, Op } from 'sequelize';
 
 export const GET = asyncHandler(async req => {
   await connectDb(); // Ensure MongoDB is connected for Auth check
@@ -24,6 +24,11 @@ export const GET = asyncHandler(async req => {
   const endDate = searchParams.get('endDate');
   const latest = searchParams.get('latest') || 'false';
   const limitToLatest10 = !startDate && !endDate;
+  const intervalParam = searchParams.get('interval'); // milliseconds
+
+  const intervalMs = intervalParam ? parseInt(intervalParam, 10) : null;
+
+  const INTERVAL_MINUTES = intervalMs && intervalMs > 0 ? intervalMs / (1000 * 60) : null;
 
   console.log('➡️ PARAMS RECEIVED:', {
     ownerId,
@@ -97,10 +102,26 @@ export const GET = asyncHandler(async req => {
       continue;
     }
 
+    const attributes = INTERVAL_MINUTES
+      ? [
+          // pick latest record per interval bucket
+          [fn('MAX', col('timestamp')), 'timestamp'],
+          ...Object.keys(ModelClass.rawAttributes)
+            .filter(a => !['id', 'timestamp'].includes(a))
+            .map(a => [fn('ANY_VALUE', col(a)), a]),
+        ]
+      : undefined;
+
+    const group = INTERVAL_MINUTES
+      ? [literal(`FLOOR(UNIX_TIMESTAMP(timestamp) / ${INTERVAL_MINUTES * 60})`)]
+      : undefined;
+
     const sqlData = await ModelClass.findAll({
       where,
+      attributes,
+      group,
       order: [['timestamp', 'DESC']],
-      limit: limitToLatest10 ? 10 : undefined,
+      limit: !INTERVAL_MINUTES && limitToLatest10 ? 10 : undefined,
       raw: true,
     });
 
@@ -129,14 +150,17 @@ export const GET = asyncHandler(async req => {
 
   console.log('✅ FINAL RESPONSE:', restroomDetails ? 'RESTROOM ATTACHED' : 'NO RESTROOM ATTACHED');
 
-  return NextResponse.json({
-    success: true,
-    data: buildingsWithSensors,
-  }, {
-    headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+  return NextResponse.json(
+    {
+      success: true,
+      data: buildingsWithSensors,
+    },
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     }
-  });
+  );
 });

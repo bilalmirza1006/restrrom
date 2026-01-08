@@ -1,4 +1,4 @@
-import { connectDb } from '@/configs/connectDb';
+import { connectCustomMySqll, connectDb } from '@/configs/connectDb';
 import { configureCloudinary, removeFromCloudinary } from '@/lib/cloudinary';
 import { isAuthenticated } from '@/lib/isAuthenticated';
 import { RestRoom } from '@/models/restroom.model';
@@ -18,6 +18,7 @@ export const GET = asyncHandler(async (req, { params }) => {
   await connectDb();
 
   const { user, accessToken } = await isAuthenticated();
+  const { models } = await connectCustomMySqll(user._id);
 
   // DO NOT use await on params
   const { restroomId } = await params;
@@ -36,8 +37,9 @@ export const GET = asyncHandler(async (req, { params }) => {
   }
 
   // Generate report from the populated sensors
-  const mostUseSlate = await getSlateChartReport(restroom.sensors);
+  const mostUseSlate = await getSlateChartReport(models, restroom.sensors);
   const dayData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors: restroom.sensors,
     groupBy: 'day',
     scope: 'building',
@@ -45,11 +47,13 @@ export const GET = asyncHandler(async (req, { params }) => {
   console.log('dayData', dayData);
 
   const weekData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors: restroom.sensors,
     groupBy: 'week',
     scope: 'building',
   });
   const monthData = await getWaterLeakageAggregatedData({
+    models: models,
     sensors: restroom.sensors,
     groupBy: 'month',
     scope: 'building',
@@ -59,7 +63,7 @@ export const GET = asyncHandler(async (req, { params }) => {
     week: weekData,
     month: monthData,
   };
-  const occupancyStats = await getOccupancyStats(restroom.sensors);
+  const occupancyStats = await getOccupancyStats(models, restroom.sensors);
   console.log('occupancyStatsoccupancyStatsoccupancyStatsoccupancyStats', occupancyStats);
 
   // Attach report to the restroom object (for response only)

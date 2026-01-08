@@ -17,7 +17,7 @@ export const getSensorsAggregatedData = async ({
   // const models = initModels(sequelize); // REMOVED
 
   if (!models) {
-    console.error("Models not provided to getSensorsAggregatedData");
+    console.error('Models not provided to getSensorsAggregatedData');
     return [];
   }
 
@@ -197,11 +197,9 @@ export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
       totalVacant: 0,
       totalPeopleInQueue: 0,
       totalFlowCount: 0,
-      restrooms: [], // new nested object
+      restrooms: [],
     };
   }
-
-  // initModels(sequelize); // REMOVED
 
   const doorQueueSensors = sensorArray.filter(s => s.sensorType === 'door_queue' && s.uniqueId);
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
@@ -212,10 +210,11 @@ export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
   let totalOccupied = 0;
   let totalVacant = 0;
 
-  const restrooms = []; // new array to hold restroom info
+  const restrooms = [];
 
-  // === Door Queue ===
+  // ================= Door Queue =================
   const DoorQueueModel = models['door_queue'];
+
   if (DoorQueueModel && doorQueueSensors.length > 0) {
     const uniqueIds = doorQueueSensors.map(s => s.uniqueId);
 
@@ -238,8 +237,8 @@ export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
       totalPeopleInQueue += r.count || 0;
       totalFlowCount += r.windowCount || 0;
 
-      // Find the restroom info from sensorArray
       const sensorInfo = doorQueueSensors.find(s => s.uniqueId === r.sensor_unique_id);
+
       if (sensorInfo) {
         restrooms.push({
           restroomId: sensorInfo.restroomId || null,
@@ -251,13 +250,14 @@ export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
     });
   }
 
-  // === Occupancy ===
-  const OccupancyModelEntry = MODEL_CLASSES.find(m => m.name === 'occupancy');
-  if (OccupancyModelEntry?.cls && occupancySensors.length > 0) {
+  // ================= Occupancy =================
+  const OccupancyModel = models['occupancy'];
+
+  if (OccupancyModel && occupancySensors.length > 0) {
     const uniqueIds = occupancySensors.map(s => s.uniqueId);
     totalOccupancySensors = uniqueIds.length;
 
-    const occRecords = await OccupancyModelEntry.cls.findAll({
+    const occRecords = await OccupancyModel.findAll({
       where: { sensor_unique_id: { [Op.in]: uniqueIds } },
       attributes: ['sensor_unique_id', 'occupied', 'timestamp'],
       order: [
@@ -287,7 +287,7 @@ export const getDoorQueueAndOccupancyStats = async (models, sensorArray) => {
     totalVacant,
     totalPeopleInQueue,
     totalFlowCount,
-    restrooms, // nested object per restroom
+    restrooms,
   };
 };
 
@@ -420,8 +420,6 @@ export const getWaterLeakageAggregatedData = async ({
 export const getRestroomChartReport = async (models, sensorArray) => {
   if (!Array.isArray(sensorArray) || sensorArray.length === 0) return [];
 
-  // initModels(sequelize); // REMOVED
-
   // Filter occupancy sensors
   const occupancySensors = sensorArray.filter(s => s.sensorType === 'occupancy' && s.uniqueId);
   if (occupancySensors.length === 0) return [];
@@ -431,7 +429,6 @@ export const getRestroomChartReport = async (models, sensorArray) => {
 
   const uniqueIds = occupancySensors.map(s => s.uniqueId);
 
-  // Fetch all occupancy records for the current year
   const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
   const records = await OccupancyModel.findAll({
@@ -449,19 +446,17 @@ export const getRestroomChartReport = async (models, sensorArray) => {
 
   if (!records.length) return [];
 
-  // Use only the first valid restroomId (assuming all sensors are in the same restroom)
   const restroomId = records.find(r => r.restroomId)?.restroomId;
   if (!restroomId) return [];
 
-  // Optional: fetch actual restroom name
   const restroom = await RestRoom.findOne({
     where: { id: restroomId },
     attributes: ['id', 'name'],
     raw: true,
   });
+
   const restroomName = restroom?.name || restroomId;
 
-  // Initialize aggregation maps
   const rr = {
     name: restroomName,
     totalOccupied: 0,
@@ -478,7 +473,6 @@ export const getRestroomChartReport = async (models, sensorArray) => {
     _monthMap: {},
   };
 
-  // Aggregate records
   records.forEach(r => {
     const occupied = r.occupied ? 1 : 0;
     rr.totalOccupied += occupied;
@@ -496,25 +490,26 @@ export const getRestroomChartReport = async (models, sensorArray) => {
     rr._monthMap[month] = (rr._monthMap[month] || 0) + occupied;
   });
 
-  // Transform maps to arrays
   rr.chartData.hour = Object.entries(rr._hourMap).map(([hour, value]) => ({
-    hour: parseInt(hour),
-    value,
-  }));
-  rr.chartData.day = Object.entries(rr._dayMap).map(([day, value]) => ({
-    day: parseInt(day),
-    value,
-  }));
-  rr.chartData.week = Object.entries(rr._weekMap).map(([week, value]) => ({
-    week: parseInt(week),
-    value,
-  }));
-  rr.chartData.month = Object.entries(rr._monthMap).map(([month, value]) => ({
-    month: parseInt(month),
+    hour: Number(hour),
     value,
   }));
 
-  // Calculate percentage
+  rr.chartData.day = Object.entries(rr._dayMap).map(([day, value]) => ({
+    day: Number(day),
+    value,
+  }));
+
+  rr.chartData.week = Object.entries(rr._weekMap).map(([week, value]) => ({
+    week: Number(week),
+    value,
+  }));
+
+  rr.chartData.month = Object.entries(rr._monthMap).map(([month, value]) => ({
+    month: Number(month),
+    value,
+  }));
+
   const percentage = rr.totalRecords
     ? Math.round((rr.totalOccupied / rr.totalRecords) * 100) + '%'
     : '0%';
