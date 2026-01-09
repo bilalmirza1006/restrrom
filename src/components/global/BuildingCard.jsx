@@ -25,7 +25,7 @@ const BuildingCard = ({ data, loading = false }) => {
         <div className="relative">
           <Skeleton height={200} width="100%" />
         </div>
-        <div className="relative top-[-25px] rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
+        <div className="relative -top-6.25 rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
           <div className="flex w-full flex-wrap items-center justify-between">
             <div className="space-y-1 text-center sm:text-left">
               <div className="flex items-center gap-1">
@@ -60,23 +60,23 @@ const BuildingCard = ({ data, loading = false }) => {
             src={data?.buildingThumbnail?.url}
             width={400}
             height={200}
-            className="h-[200px] w-full object-cover"
+            className="h-50 w-full object-cover"
             alt="building image"
           />
         )}
       </div>
-      <div className="relative top-[-25px] rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
+      <div className="relative -top-6.25 rounded-t-[30px] rounded-b-[20px] bg-[#F7F7F7] p-4 md:p-6">
         <div className="flex w-full flex-wrap items-center justify-between">
           <div className="text-center sm:text-left">
             <div className="flex items-center gap-1">
               <IoLocationSharp />
-              <p className="text-xs font-[400] text-[#111111] sm:text-base">{data?.location}</p>
+              <p className="text-xs font-normal text-[#111111] sm:text-base">{data?.location}</p>
             </div>
-            <h2 className="mt-1 text-sm font-[500] text-[#111111] sm:text-xl">{data?.name}</h2>
+            <h2 className="mt-1 text-sm font-medium text-[#111111] sm:text-xl">{data?.name}</h2>
           </div>
 
           <div
-            className={`${getButtonColor(data?.type)} w-fit rounded-[11px] px-4 py-2 text-sm text-white capitalize`}
+            className={`${getButtonColor(data?.type)} w-fit rounded-xl px-4 py-2 text-sm text-white capitalize`}
           >
             {data?.type}
           </div>
