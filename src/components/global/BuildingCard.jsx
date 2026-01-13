@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import Image from 'next/image';
 import { IoLocationSharp } from 'react-icons/io5';
 import Skeleton from 'react-loading-skeleton';
@@ -19,7 +18,6 @@ const BuildingCard = ({ data, loading = false }) => {
   };
 
   if (loading) {
-    // Skeleton version
     return (
       <div className="overflow-hidden rounded-[20px] bg-gray-100">
         <div className="relative">
@@ -51,7 +49,6 @@ const BuildingCard = ({ data, loading = false }) => {
     );
   }
 
-  // Normal rendering
   return (
     <div className="overflow-hidden rounded-[20px]">
       <div>

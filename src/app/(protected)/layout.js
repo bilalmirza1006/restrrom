@@ -1,4 +1,3 @@
-// app/(protected)/layout.js - UPDATED WITH DEBUGGING
 'use client';
 
 import { useGetProfileQuery } from '@/features/auth/authApi';
@@ -10,7 +9,6 @@ import Loader from '@/components/global/Loader';
 import DebugComponent from '@/components/global/DebugComponent';
 import ErrorBoundary from '@/components/global/ErrorBoundary';
 
-// Debug: Check if components are imported correctly
 console.log('🔍 ProtectedLayout imports:', {
   AuthGuard: typeof AuthGuard,
   Loader: typeof Loader,
@@ -18,7 +16,6 @@ console.log('🔍 ProtectedLayout imports:', {
   setUser: typeof setUser,
 });
 
-// In browser console, check if components exist
 console.log('Component check:');
 console.log('Loader:', require('@/components/global/Loader').default);
 console.log('AuthGuard:', require('@/components/auth/AuthGuard').default);
