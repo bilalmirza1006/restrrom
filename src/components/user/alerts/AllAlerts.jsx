@@ -13,8 +13,8 @@ import {
   useGetAllAlertsQuery,
   useUpdateAlertMutation,
 } from '@/features/alerts/alertsApi';
-
-/* -------------------- CONSTANTS -------------------- */
+import ConfirmationModal from '@/components/global/small/ConfirmationModal';
+import { set } from 'lodash';
 
 const severityOptions = [
   { option: 'Low', value: 'low' },
@@ -32,8 +32,6 @@ const sensorTypes = [
   { option: 'Door Queue', value: 'doorQueue' },
   { option: 'Stall Status', value: 'stallStatus' },
 ];
-
-/* ---------------- SENSOR FIELD CONFIG ---------------- */
 
 const SENSOR_ALERT_FIELDS = {
   occupancy: {
@@ -75,12 +73,20 @@ const SENSOR_ALERT_FIELDS = {
   },
 };
 
-/* ==================== COMPONENT ==================== */
-
 export default function AllAlerts() {
   const [modalType, setModalType] = useState(null);
   const [selectedAlert, setSelectedAlert] = useState(null);
   const [inputEmail, setInputEmail] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+  const [deleteAlertId, setDeleteAlertId] = useState(null);
+  const openConfirmationModal = id => {
+    console.log('idsdsddsdsd', id);
+    setConfirmationModal(true);
+    setDeleteAlertId(id);
+  };
+  const closeConfirmationModal = () => {
+    setConfirmationModal(false);
+  };
 
   const [formData, setFormData] = useState({
     alertName: '',
@@ -99,8 +105,6 @@ export default function AllAlerts() {
   const [createAlert, { isLoading: creating }] = useCreateAlertMutation();
   const [updateAlert, { isLoading: updating }] = useUpdateAlertMutation();
   const [deleteAlert] = useDeleteAlertMutation();
-
-  /* -------------------- HELPERS -------------------- */
 
   const resetForm = () => {
     setFormData({
@@ -161,8 +165,6 @@ export default function AllAlerts() {
     }));
   };
 
-  /* -------------------- SAVE -------------------- */
-
   const handleSave = async () => {
     const { alertName, alertType, severityType, label, min, max, platform, email } = formData;
     const config = SENSOR_ALERT_FIELDS[alertType];
@@ -184,8 +186,8 @@ export default function AllAlerts() {
       name: alertName,
       alertType,
       severity: severityType,
-      label, // explicit label field
-      value: { min, max }, // value object (was condition)
+      label,
+      value: { min, max },
       platform,
       sensorId: formData.sensorId || null,
       status: formData.status || 'active',
@@ -208,20 +210,16 @@ export default function AllAlerts() {
     }
   };
 
-  /* -------------------- DELETE -------------------- */
-
   const handleDelete = async id => {
-    if (!confirm('Delete this alert?')) return;
     try {
-      await deleteAlert(id).unwrap();
+      await deleteAlert(deleteAlertId).unwrap();
       toast.success('Alert deleted');
+      closeConfirmationModal();
       refetch();
     } catch {
       toast.error('Failed to delete alert');
     }
   };
-
-  /* -------------------- TABLE -------------------- */
 
   const columns = [
     { name: 'Name', selector: row => row.name, sortable: true },
@@ -252,16 +250,33 @@ export default function AllAlerts() {
       cell: row => (
         <div className="flex gap-2">
           <MdEdit className="cursor-pointer text-blue-500" onClick={() => openEditModal(row)} />
-          <MdDelete className="cursor-pointer text-red-500" onClick={() => handleDelete(row._id)} />
+          {/* <MdDelete className="cursor-pointer text-red-500" onClick={() => handleDelete(row._id)} /> */}
+          <MdDelete
+            className="cursor-pointer text-red-500"
+            onClick={() => openConfirmationModal(row._id)}
+          />
         </div>
       ),
     },
   ];
 
-  /* ==================== JSX ==================== */
-
   return (
     <div className="p-4">
+      {confirmationModal && (
+        <Modal
+          onClose={closeConfirmationModal}
+          title="Database Storage Confirmation"
+          width="w-[320px] md:w-[450px]"
+        >
+          <ConfirmationModal
+            title="Are you sure you want to delete"
+            confirmText="Yes, Delete"
+            cancelText="No"
+            onCancel={closeConfirmationModal}
+            onConfirm={handleDelete}
+          />
+        </Modal>
+      )}
       {(modalType === 'add' || modalType === 'edit') && (
         <Modal
           key={selectedAlert?._id || 'new'}
@@ -302,20 +317,21 @@ export default function AllAlerts() {
 
             {formData.alertType && (
               <>
-                <Input
+                {/* <Input
                   label="Metric Label"
                   name="label"
                   value={formData.label}
-                  onChange={handleChange}
-                />
-
+                  // onChange={handleChange}
+                  disabled
+                /> */}
+                <label className="text-sm font-semibold text-gray-700">{formData.label}</label>
                 {(() => {
                   const field = SENSOR_ALERT_FIELDS[formData.alertType];
 
                   if (field.type === 'boolean') {
                     return (
                       <Dropdown
-                        label={field.label}
+                        // label={field.label}
                         options={[
                           { option: 'Yes', value: true },
                           { option: 'No', value: false },
@@ -331,7 +347,7 @@ export default function AllAlerts() {
                   if (field.type === 'select') {
                     return (
                       <Dropdown
-                        label={field.label}
+                        // label={field.label}
                         options={field.options}
                         value={formData.min}
                         onSelect={value =>
