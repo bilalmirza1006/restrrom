@@ -22,7 +22,7 @@ export const getSensorsAggregatedData = async ({
   }
 
   // Optional: test connection
-  await sequelize.authenticate();
+  // await sequelize.authenticate(); // REMOVED to support custom DB
   //   console.log('✅ Sequelize connected and models initialized');
 
   if (!sensors || sensors.length === 0) {
@@ -298,7 +298,7 @@ export const getWaterLeakageAggregatedData = async ({
   scope = 'building',
 }) => {
   // const models = initModels(sequelize); // REMOVED
-  await sequelize.authenticate();
+  // await sequelize.authenticate(); // REMOVED to support custom DB
 
   if (!Array.isArray(sensors) || sensors.length === 0) return [];
 

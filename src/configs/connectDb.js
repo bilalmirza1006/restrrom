@@ -201,8 +201,8 @@ export const connectCustomMySqll = async userId => {
     console.log('📦 Initializing models...');
     const models = initModels(dbConnection);
 
-    console.log('🔄 Syncing database...');
-    await dbConnection.sync();
+    // console.log('🔄 Syncing database...');
+    // await dbConnection.sync(); // ⚠️ RISK: Removed for production stability
 
     /* 6. Cache & return ------------------------------------------- */
     const payload = { dbConnection, models, isCustom: customDbConnected };
