@@ -1,43 +1,30 @@
 'use client';
-import React, { useMemo, useState } from 'react';
 import Modal from '@/components/global/Modal';
-import Input from '@/components/global/small/Input';
 import Dropdown from '@/components/global/small/Dropdown';
-import { MdAddBox, MdEdit, MdDelete } from 'react-icons/md';
+import Input from '@/components/global/small/Input';
+import { useMemo, useState } from 'react';
 import DataTable from 'react-data-table-component';
 import toast from 'react-hot-toast';
+import { MdAddBox, MdDelete, MdEdit } from 'react-icons/md';
 
-// Import from ruleEngineApi instead of alertsApi where appropriate
+import RuleDropdown from '@/components/global/small/RuleDropdown';
+import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
+import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import {
   useCreateRuleMutation,
   useDeleteRuleMutation,
   useGetAllRulesQuery,
   useUpdateRuleMutation,
 } from '@/features/ruleEngine/ruleEngine';
-import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
-import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
 import { useGetAllSensorsQuery } from '@/features/sensor/sensorApi';
-import RuleDropdown from '@/components/global/small/RuleDropdown';
 
 import {
-  sensorTypes,
-  severityOptions,
-  getSensorFieldConfig,
-  formatSensorType,
-} from '@/utils/sensorTypes';
-import {
-  formatConditionsForDisplay,
   createBuildingOptions,
   createRestroomOptions,
   createSensorOptions,
 } from '@/utils/alertFormatters';
-import {
-  initialFormState,
-  syncConditionsWithSensors,
-  prepareAlertPayload,
-  validateAlertForm,
-  apiDataToFormData,
-} from '@/utils/alertFormHelpers';
+import { initialFormState } from '@/utils/alertFormHelpers';
+import { formatSensorType, getSensorFieldConfig, severityOptions } from '@/utils/sensorTypes';
 
 export default function RuleEnginePage() {
   const [modalType, setModalType] = useState(null);
@@ -45,18 +32,26 @@ export default function RuleEnginePage() {
   const [inputEmail, setInputEmail] = useState(false);
   const [selectedBuilding, setSelectedBuilding] = useState('');
   const [selectedRestroom, setSelectedRestroom] = useState('');
-  const [selectedSensor, setSelectedSensor] = useState([]); // This will be array of sensorIds
-
+  const [selectedSensor, setSelectedSensor] = useState([]);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+  const [deleteAlertId, setDeleteAlertId] = useState(null);
+  const openConfirmationModal = id => {
+    console.log('idsdsddsdsd', id);
+    setConfirmationModal(true);
+    setDeleteAlertId(id);
+  };
+  const closeConfirmationModal = () => {
+    setConfirmationModal(false);
+  };
   const [formData, setFormData] = useState(initialFormState);
   console.log('formDataformDataformDataformData', formData);
 
-  // API hooks
   const { data: buildingsData } = useGetAllBuildingsQuery();
   const { data: restroomsData } = useGetAllRestroomsQuery(selectedBuilding, {
     skip: !selectedBuilding,
   });
   const { data: sensorsData } = useGetAllSensorsQuery();
-  const { data: rulesData, refetch } = useGetAllRulesQuery(); // Use rules query
+  const { data: rulesData, refetch } = useGetAllRulesQuery();
 
   const [createRule, { isLoading: creating }] = useCreateRuleMutation();
   const [updateRule, { isLoading: updating }] = useUpdateRuleMutation();
@@ -66,7 +61,6 @@ export default function RuleEnginePage() {
   const restroomsList = restroomsData?.data?.restRooms || [];
   const allSensors = sensorsData?.data || [];
 
-  // Derived data
   const filteredSensors = selectedRestroom
     ? allSensors.filter(s => s.restroomId === selectedRestroom)
     : [];
@@ -106,7 +100,6 @@ export default function RuleEnginePage() {
     }
   };
 
-  // Helper to reset form
   const resetForm = () => {
     setFormData(initialFormState);
     setSelectedBuilding('');
@@ -123,7 +116,6 @@ export default function RuleEnginePage() {
   const openEditModal = rule => {
     setSelectedAlert(rule);
 
-    // Convert sensorIds (array of strings) back to sensor objects for the dropdown
     const sensorObjects = (rule.sensorIds || [])
       .map(sensorId => {
         const sensor = allSensors.find(s => s._id === sensorId);
@@ -134,9 +126,8 @@ export default function RuleEnginePage() {
           type: sensor.sensorType,
         };
       })
-      .filter(Boolean); // Remove any undefined values
+      .filter(Boolean);
 
-    // Map rule data to form state
     setFormData({
       ruleName: rule.name,
       severity: rule.severity,
@@ -164,7 +155,6 @@ export default function RuleEnginePage() {
   };
 
   const handleSensorSelection = values => {
-    // values is array of sensor IDs
     setSelectedSensor(values);
   };
 
@@ -180,21 +170,12 @@ export default function RuleEnginePage() {
       return;
     }
 
-    // Construct payload matching new Rule model
-    // values object: { label, id, value }
-    // For now, we'll take the first condition or structure it as needed.
-    // The user requirement said: "object of values like label id values"
-    // Since we have multiple sensors, we might need to decide how 'values' relates to them.
-    // Assuming 'values' stores the rule logic/thresholds applicable to these sensors.
-
-    // Example construction (simplify based on requirements):
     const valuesPayload = {
       label: 'Rule Condition',
       id: 'rule_val_id',
-      value: formData.conditions, // or specific threshold
+      value: formData.conditions,
     };
 
-    // Extract only IDs from selectedSensor (which contains objects with id, name, type)
     const sensorIdsArray = Array.isArray(selectedSensor)
       ? selectedSensor.map(sensor => (typeof sensor === 'string' ? sensor : sensor.id))
       : [];
@@ -257,8 +238,9 @@ export default function RuleEnginePage() {
       selector: row => row.status,
       cell: row => (
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-            }`}
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${
+            row.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+          }`}
         >
           {row.status === 'active' ? 'Active' : 'Inactive'}
         </span>
@@ -286,8 +268,6 @@ export default function RuleEnginePage() {
       }
 
       const condition = formData.conditions?.[sensor.id] || {
-        // i want here log the data
-
         sensorId: sensor.id,
         sensorType: sensor.type,
         label: field?.label || sensor.name,
@@ -303,14 +283,13 @@ export default function RuleEnginePage() {
             <p className="text-xs text-gray-500">Type: {formatSensorType(sensor.type)}</p>
           </div>
 
-          <Input
-            // i want also send the label
+          {/* <Input
             label="Metric Label"
             value={condition.label}
             // onChange={e => handleConditionChange(sensor.id, 'label', e.target.value)}
             disabled
-          />
-
+          /> */}
+          {/* <label className="text-sm text-[#666666]">{condition.label}sd</label> */}
           {field.type === 'boolean' && (
             <Dropdown
               label="Value"
@@ -431,18 +410,6 @@ export default function RuleEnginePage() {
               disabled={!selectedRestroom}
               placeholder="Choose sensors"
             />
-
-            {/* {selectedSensor.length > 0 && (
-              <Dropdown
-                multi={true}
-                label="Sensor Types *"
-                options={sensorTypes}
-                value={formData.sensorTypes || []}
-                onSelect={handleSensorTypeChange}
-                placeholder="Select sensor types"
-                required
-              />
-            )} */}
 
             <Dropdown
               label="Severity *"
