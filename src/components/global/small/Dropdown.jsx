@@ -7,20 +7,23 @@ const Dropdown = ({
   defaultText = 'Select',
   onSelect,
   initialValue = null,
+  value, // ✅ NEW: Controlled value prop
   width,
   label,
   multi = false,
-  disabled = false, // ✅ NEW
+  disabled = false,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(multi ? initialValue || [] : initialValue || null);
 
   const dropdownRef = useRef(null);
 
+  // ✅ Support both controlled (value) and uncontrolled (initialValue) modes
   useEffect(() => {
-    if (multi) setSelected(initialValue || []);
-    else setSelected(initialValue || null);
-  }, [initialValue, multi]);
+    const newValue = value !== undefined ? value : initialValue;
+    if (multi) setSelected(newValue || []);
+    else setSelected(newValue || null);
+  }, [value, initialValue, multi]);
 
   // ✅ Toggle option selection (blocked if disabled)
   const toggleOption = option => {
@@ -80,9 +83,8 @@ const Dropdown = ({
         style={{ width: width || '100%' }}
       >
         <span
-          className={`text-sm font-[500] ${
-            selected && (multi ? selected.length : true) ? 'text-[#414141]' : 'text-[#9CA3AF]'
-          }`}
+          className={`text-sm font-[500] ${selected && (multi ? selected.length : true) ? 'text-[#414141]' : 'text-[#9CA3AF]'
+            }`}
         >
           {getSelectedText()}
         </span>
@@ -105,9 +107,8 @@ const Dropdown = ({
               <li
                 key={option.value}
                 onClick={() => toggleOption(option)}
-                className={`flex items-center gap-2 border-b border-gray-100 px-3 py-2 text-sm hover:bg-[#00000005] ${
-                  isChecked ? 'bg-[#e5f0ff]' : ''
-                }`}
+                className={`flex items-center gap-2 border-b border-gray-100 px-3 py-2 text-sm hover:bg-[#00000005] ${isChecked ? 'bg-[#e5f0ff]' : ''
+                  }`}
               >
                 {multi && (
                   <input type="checkbox" readOnly checked={isChecked} className="accent-blue-500" />

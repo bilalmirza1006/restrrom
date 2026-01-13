@@ -9,17 +9,17 @@ import Alert from '@/models/alert';
 
 // GET all alerts or a single alert by id
 export const GET = asyncHandler(async req => {
-  await isAuthenticated(); // ensure user is authenticated
+  const { user } = await isAuthenticated();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
 
   if (id) {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new customError(400, 'Invalid Alert ID');
-    const alert = await Alert.findById(id);
+    const alert = await Alert.findOne({ _id: id, ownerId: user._id });
     if (!alert) throw new customError(404, 'Alert not found');
     return NextResponse.json({ success: true, alert });
   } else {
-    const alerts = await Alert.find({});
+    const alerts = await Alert.find({ ownerId: user._id }).sort({ timestamp: -1 });
     return NextResponse.json({ success: true, alerts });
   }
 });
@@ -28,7 +28,7 @@ export const GET = asyncHandler(async req => {
 export const POST = asyncHandler(async req => {
   const { user } = await isAuthenticated();
   const body = await req.json();
-  const { name, alertType, severity, value, sensorId, platform, email } = body;
+  const { name, alertType, severity, value, label, sensorId, platform, email, status } = body;
 
   if (!name || !alertType || !severity || !value || !platform) {
     throw new customError(400, 'All required fields must be provided');
@@ -39,9 +39,11 @@ export const POST = asyncHandler(async req => {
     alertType,
     severity,
     value,
+    label,
     sensorId: sensorId || null,
     platform,
     email: platform === 'email' ? email : undefined, // only save email if platform
+    status: status || 'active',
     ownerId: user._id,
   });
 
@@ -52,7 +54,7 @@ export const POST = asyncHandler(async req => {
 export const PUT = asyncHandler(async req => {
   const { user } = await isAuthenticated();
   const body = await req.json();
-  const { id, name, alertType, severity, value, sensorId, platform, email } = body;
+  const { id, name, alertType, severity, value, label, sensorId, platform, email, status } = body;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new customError(400, 'Invalid alert ID');
@@ -65,9 +67,11 @@ export const PUT = asyncHandler(async req => {
   alert.alertType = alertType || alert.alertType;
   alert.severity = severity || alert.severity;
   alert.value = value || alert.value;
+  alert.label = label || alert.label;
   alert.sensorId = sensorId || alert.sensorId;
   alert.platform = platform || alert.platform;
   alert.email = platform === 'email' ? email : undefined;
+  alert.status = status || alert.status;
 
   await alert.save();
   return NextResponse.json({ success: true, message: 'Alert updated successfully', alert });
