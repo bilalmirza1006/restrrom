@@ -1,127 +1,214 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Modal from '@/components/global/Modal';
 import Input from '@/components/global/small/Input';
 import Dropdown from '@/components/global/small/Dropdown';
-import DataTable from 'react-data-table-component';
 import { MdAddBox, MdEdit, MdDelete } from 'react-icons/md';
+import DataTable from 'react-data-table-component';
 import toast from 'react-hot-toast';
 
-// import {
-//   useCreateRuleMutation,
-//   useGetAllRulesQuery,
-//   useUpdateRuleMutation,
-//   useDeleteRuleMutation,
-// } from '@/features/rules/ruleEngineApi';
-import { RULE_SENSOR_CONFIG } from '../sensors/SensorConfig';
+// Import from ruleEngineApi instead of alertsApi where appropriate
 import {
   useCreateRuleMutation,
   useDeleteRuleMutation,
   useGetAllRulesQuery,
   useUpdateRuleMutation,
 } from '@/features/ruleEngine/ruleEngine';
+import { useGetAllBuildingsQuery } from '@/features/building/buildingApi';
+import { useGetAllRestroomsQuery } from '@/features/restroom/restroomApi';
+import { useGetAllSensorsQuery } from '@/features/sensor/sensorApi';
+import RuleDropdown from '@/components/global/small/RuleDropdown';
 
-// import { RULE_SENSOR_CONFIG } from '@/config/ruleSensorConfig';
-
-/* ------------------ CONSTANTS ------------------ */
-
-const severityOptions = [
-  { option: 'Low', value: 'low' },
-  { option: 'Medium', value: 'medium' },
-  { option: 'High', value: 'high' },
-  { option: 'Critical', value: 'critical' },
-];
-
-const sensorTypeOptions = Object.entries(RULE_SENSOR_CONFIG).map(([key, val]) => ({
-  option: val.label,
-  value: key,
-}));
-
-/* ------------------ COMPONENT ------------------ */
+import {
+  sensorTypes,
+  severityOptions,
+  getSensorFieldConfig,
+  formatSensorType,
+} from '@/utils/sensorTypes';
+import {
+  formatConditionsForDisplay,
+  createBuildingOptions,
+  createRestroomOptions,
+  createSensorOptions,
+} from '@/utils/alertFormatters';
+import {
+  initialFormState,
+  syncConditionsWithSensors,
+  prepareAlertPayload,
+  validateAlertForm,
+  apiDataToFormData,
+} from '@/utils/alertFormHelpers';
 
 export default function RuleEnginePage() {
   const [modalType, setModalType] = useState(null);
-  const [selectedRule, setSelectedRule] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState(null);
+  const [inputEmail, setInputEmail] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState('');
+  const [selectedRestroom, setSelectedRestroom] = useState('');
+  const [selectedSensor, setSelectedSensor] = useState([]); // This will be array of sensorIds
 
-  const [formData, setFormData] = useState({
-    name: '',
-    alertType: '',
-    severity: '',
-    sensorId: '',
+  const [formData, setFormData] = useState(initialFormState);
+  console.log('formDataformDataformDataformData', formData);
+
+  // API hooks
+  const { data: buildingsData } = useGetAllBuildingsQuery();
+  const { data: restroomsData } = useGetAllRestroomsQuery(selectedBuilding, {
+    skip: !selectedBuilding,
   });
+  const { data: sensorsData } = useGetAllSensorsQuery();
+  const { data: rulesData, refetch } = useGetAllRulesQuery(); // Use rules query
 
-  const [conditions, setConditions] = useState([]);
-
-  /* ------------------ API ------------------ */
-
-  const { data, refetch } = useGetAllRulesQuery();
   const [createRule, { isLoading: creating }] = useCreateRuleMutation();
   const [updateRule, { isLoading: updating }] = useUpdateRuleMutation();
   const [deleteRule] = useDeleteRuleMutation();
 
-  /* ------------------ HANDLERS ------------------ */
+  const buildingsList = buildingsData?.data || [];
+  const restroomsList = restroomsData?.data?.restRooms || [];
+  const allSensors = sensorsData?.data || [];
+
+  // Derived data
+  const filteredSensors = selectedRestroom
+    ? allSensors.filter(s => s.restroomId === selectedRestroom)
+    : [];
+
+  const buildingOptions = useMemo(() => createBuildingOptions(buildingsList), [buildingsList]);
+  const restroomOptions = useMemo(() => createRestroomOptions(restroomsList), [restroomsList]);
+  const sensorOptions = useMemo(
+    () => createSensorOptions(filteredSensors, formatSensorType),
+    [filteredSensors]
+  );
+
+  const isLoading = creating || updating;
+
+  const handleConditionChange = (sensorId, field, value) => {
+    console.log('handleConditionChange', sensorId, field, value);
+    setFormData(prev => ({
+      ...prev,
+      conditions: {
+        ...prev.conditions,
+        [sensorId]: {
+          ...prev.conditions[sensorId],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const handleDelete = async id => {
+    if (confirm('Are you sure you want to delete this rule?')) {
+      try {
+        await deleteRule(id).unwrap();
+        toast.success('Rule deleted successfully');
+        refetch();
+      } catch (err) {
+        toast.error('Failed to delete rule');
+      }
+    }
+  };
+
+  // Helper to reset form
+  const resetForm = () => {
+    setFormData(initialFormState);
+    setSelectedBuilding('');
+    setSelectedRestroom('');
+    setSelectedSensor([]);
+    setInputEmail(false);
+  };
 
   const openAddModal = () => {
-    setFormData({ name: '', alertType: '', severity: '', sensorId: '' });
-    setConditions([]);
-    setSelectedRule(null);
+    resetForm();
     setModalType('add');
   };
 
   const openEditModal = rule => {
-    setSelectedRule(rule);
+    setSelectedAlert(rule);
+
+    // Convert sensorIds (array of strings) back to sensor objects for the dropdown
+    const sensorObjects = (rule.sensorIds || [])
+      .map(sensorId => {
+        const sensor = allSensors.find(s => s._id === sensorId);
+        if (!sensor) return null;
+        return {
+          id: sensor._id,
+          name: sensor.name,
+          type: sensor.sensorType,
+        };
+      })
+      .filter(Boolean); // Remove any undefined values
+
+    // Map rule data to form state
     setFormData({
-      name: rule.name,
-      alertType: rule.alertType,
+      ruleName: rule.name,
       severity: rule.severity,
-      sensorId: rule.sensorId || '',
+      platform: rule.platform,
+      email: rule.email || '',
+      conditions: rule.values?.value || {},
+      status: rule.status || 'active',
     });
-    setConditions(
-      rule.conditions.map(c => ({
-        ...c,
-        type:
-          RULE_SENSOR_CONFIG[rule.alertType].fields.find(f => f.field === c.field)?.type ||
-          'number',
-      }))
-    );
+
+    setSelectedBuilding(rule.buildingId || '');
+    setSelectedRestroom(rule.restroomId || '');
+    setSelectedSensor(sensorObjects);
+    setInputEmail(rule.platform === 'email');
     setModalType('edit');
   };
 
-  const closeModal = () => setModalType(null);
-
-  const handleSensorChange = sensorType => {
-    const fields = RULE_SENSOR_CONFIG[sensorType]?.fields || [];
-    setFormData(prev => ({ ...prev, alertType: sensorType }));
-
-    setConditions(
-      fields.map(f => ({
-        field: f.field,
-        operator: f.operators[0],
-        value: '',
-        type: f.type,
-      }))
-    );
+  const closeModal = () => {
+    setModalType(null);
+    resetForm();
   };
 
-  const handleConditionChange = (index, key, value) => {
-    const updated = [...conditions];
-    updated[index][key] = value;
-    setConditions(updated);
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSensorSelection = values => {
+    // values is array of sensor IDs
+    setSelectedSensor(values);
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.alertType || !formData.severity) {
-      return toast.error('All required fields must be filled');
+    if (
+      !formData.ruleName ||
+      !formData.severity ||
+      !selectedBuilding ||
+      !selectedRestroom ||
+      selectedSensor.length === 0
+    ) {
+      toast.error('Please fill all required fields');
+      return;
     }
 
+    // Construct payload matching new Rule model
+    // values object: { label, id, value }
+    // For now, we'll take the first condition or structure it as needed.
+    // The user requirement said: "object of values like label id values"
+    // Since we have multiple sensors, we might need to decide how 'values' relates to them.
+    // Assuming 'values' stores the rule logic/thresholds applicable to these sensors.
+
+    // Example construction (simplify based on requirements):
+    const valuesPayload = {
+      label: 'Rule Condition',
+      id: 'rule_val_id',
+      value: formData.conditions, // or specific threshold
+    };
+
+    // Extract only IDs from selectedSensor (which contains objects with id, name, type)
+    const sensorIdsArray = Array.isArray(selectedSensor)
+      ? selectedSensor.map(sensor => (typeof sensor === 'string' ? sensor : sensor.id))
+      : [];
+
     const payload = {
-      ...formData,
-      conditions: conditions.map(c => ({
-        field: c.field,
-        operator: c.operator,
-        value: c.type === 'number' ? Number(c.value) : c.value,
-      })),
+      name: formData.ruleName,
+      buildingId: selectedBuilding,
+      restroomId: selectedRestroom,
+      sensorIds: sensorIdsArray,
+      severity: formData.severity,
+      status: formData.status || 'active',
+      values: valuesPayload,
+      platform: formData.platform,
+      email: formData.platform === 'email' ? formData.email : undefined,
     };
 
     try {
@@ -129,30 +216,54 @@ export default function RuleEnginePage() {
         await createRule(payload).unwrap();
         toast.success('Rule created');
       } else {
-        await updateRule({ id: selectedRule._id, ...payload }).unwrap();
+        await updateRule({ id: selectedAlert._id, ...payload }).unwrap();
         toast.success('Rule updated');
       }
       refetch();
       closeModal();
     } catch (err) {
-      toast.error(err?.data?.message || 'Something went wrong');
+      toast.error(err?.data?.message || 'Failed to save rule');
     }
   };
 
-  const handleDelete = async id => {
-    if (!confirm('Delete this rule?')) return;
-    await deleteRule(id).unwrap();
-    toast.success('Rule deleted');
-    refetch();
-  };
-
-  /* ------------------ TABLE ------------------ */
-
   const columns = [
-    { name: 'Name', selector: r => r.name, sortable: true },
-    { name: 'Sensor', selector: r => r.alertType, sortable: true },
-    { name: 'Severity', selector: r => r.severity },
-    { name: 'Status', selector: r => r.status },
+    { name: 'Rule Name', selector: row => row.name, sortable: true },
+    {
+      name: 'Building',
+      selector: row => row.buildingName || '-',
+      sortable: true,
+    },
+    {
+      name: 'Restroom',
+      selector: row => row.restroomName || '-',
+      sortable: true,
+    },
+    {
+      name: 'Sensors',
+      selector: row => {
+        if (!row.sensors || !Array.isArray(row.sensors) || row.sensors.length === 0) return '-';
+        return row.sensors.map(sensor => sensor.name).join(', ');
+      },
+      wrap: true,
+    },
+    { name: 'Severity', selector: row => row.severity },
+
+    {
+      name: 'Platform',
+      selector: row => (row.platform === 'email' ? `Email: ${row.email}` : row.platform),
+    },
+    {
+      name: 'Status',
+      selector: row => row.status,
+      cell: row => (
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold ${row.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+            }`}
+        >
+          {row.status === 'active' ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
     {
       name: 'Actions',
       cell: row => (
@@ -161,111 +272,286 @@ export default function RuleEnginePage() {
           <MdDelete className="cursor-pointer text-red-500" onClick={() => handleDelete(row._id)} />
         </div>
       ),
+      width: '100px',
     },
   ];
 
-  /* ------------------ UI ------------------ */
+  const renderConditionFields = () => {
+    return selectedSensor.map(sensor => {
+      const field = getSensorFieldConfig(sensor.type);
+      console.log('fieldfieldfield', field);
+      if (!field) {
+        console.warn(`No field config for sensor type: ${sensor.type}`);
+        return null;
+      }
+
+      const condition = formData.conditions?.[sensor.id] || {
+        // i want here log the data
+
+        sensorId: sensor.id,
+        sensorType: sensor.type,
+        label: field?.label || sensor.name,
+        min: '',
+        max: '',
+        type: field?.type || 'range',
+      };
+
+      return (
+        <div key={sensor.id} className="space-y-3 rounded border p-4">
+          <div className="mb-2">
+            <h4 className="text-sm font-semibold text-gray-700">Sensor: {sensor.name}</h4>
+            <p className="text-xs text-gray-500">Type: {formatSensorType(sensor.type)}</p>
+          </div>
+
+          <Input
+            // i want also send the label
+            label="Metric Label"
+            value={condition.label}
+            // onChange={e => handleConditionChange(sensor.id, 'label', e.target.value)}
+            disabled
+          />
+
+          {field.type === 'boolean' && (
+            <Dropdown
+              label="Value"
+              options={[
+                { option: 'Yes', value: 'true' },
+                { option: 'No', value: 'false' },
+              ]}
+              value={condition.min}
+              onSelect={value => handleConditionChange(sensor.id, 'min', value)}
+            />
+          )}
+
+          {field.type === 'select' && (
+            <Dropdown
+              label="Status"
+              options={field.options}
+              value={condition.min}
+              onSelect={value => handleConditionChange(sensor.id, 'min', value)}
+            />
+          )}
+
+          {field.type === 'range' && (
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                type="number"
+                label={`Min ${field.unit || ''}`}
+                value={condition.min}
+                onChange={e => handleConditionChange(sensor.id, 'min', e.target.value)}
+                placeholder="Enter minimum value"
+              />
+
+              <Input
+                type="number"
+                label={`Max ${field.unit || ''}`}
+                value={condition.max}
+                onChange={e => handleConditionChange(sensor.id, 'max', e.target.value)}
+                placeholder="Enter maximum value"
+              />
+            </div>
+          )}
+        </div>
+      );
+    });
+  };
 
   return (
     <div className="p-4">
-      {/* MODAL */}
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Rule Engine</h1>
+        <MdAddBox
+          size={32}
+          className="cursor-pointer text-blue-500 hover:text-blue-600"
+          onClick={openAddModal}
+          title="Add New Rule"
+        />
+      </div>
+
       {(modalType === 'add' || modalType === 'edit') && (
-        <Modal title={modalType === 'add' ? 'Add Rule' : 'Edit Rule'} onClose={closeModal}>
-          <div className="flex flex-col gap-4">
+        <Modal
+          key={selectedAlert?._id || 'new'}
+          title={modalType === 'add' ? 'Add New Rule' : 'Edit Rule'}
+          onClose={closeModal}
+          size="lg"
+        >
+          <div className="flex max-h-[70vh] flex-col gap-4 overflow-y-auto p-1">
             <Input
-              label="Rule Name"
-              value={formData.name}
-              onChange={e => setFormData({ ...formData, name: e.target.value })}
+              label="Rule Name *"
+              name="ruleName"
+              value={formData.ruleName}
+              onChange={handleChange}
+              placeholder="Enter rule name"
+              required
             />
 
             <Dropdown
-              label="Sensor Type"
-              options={sensorTypeOptions}
-              value={formData.alertType}
-              onSelect={handleSensorChange}
+              label="Select Building"
+              options={buildingOptions}
+              value={selectedBuilding}
+              onSelect={value => {
+                setSelectedBuilding(value);
+                setSelectedRestroom('');
+                setSelectedSensor([]);
+                setFormData(prev => ({
+                  ...prev,
+                  buildingId: value,
+                  restroomId: '',
+                  sensors: [],
+                  conditions: {},
+                }));
+              }}
+              placeholder="Choose a building"
             />
 
             <Dropdown
-              label="Severity"
+              label="Select Restroom"
+              options={selectedBuilding ? restroomOptions : []}
+              value={selectedRestroom}
+              onSelect={value => {
+                setSelectedRestroom(value);
+                setSelectedSensor([]);
+                setFormData(prev => ({
+                  ...prev,
+                  restroomId: value,
+                  sensors: [],
+                  conditions: {},
+                }));
+              }}
+              disabled={!selectedBuilding}
+              placeholder="Choose a restroom"
+            />
+
+            <RuleDropdown
+              multi
+              label="Select Sensors *"
+              options={selectedRestroom ? sensorOptions : []}
+              value={selectedSensor}
+              onSelect={handleSensorSelection}
+              disabled={!selectedRestroom}
+              placeholder="Choose sensors"
+            />
+
+            {/* {selectedSensor.length > 0 && (
+              <Dropdown
+                multi={true}
+                label="Sensor Types *"
+                options={sensorTypes}
+                value={formData.sensorTypes || []}
+                onSelect={handleSensorTypeChange}
+                placeholder="Select sensor types"
+                required
+              />
+            )} */}
+
+            <Dropdown
+              label="Severity *"
               options={severityOptions}
               value={formData.severity}
-              onSelect={v => setFormData({ ...formData, severity: v })}
+              onSelect={value => setFormData(prev => ({ ...prev, severity: value }))}
+              placeholder="Select severity level"
+              required
             />
 
-            <Input
-              label="Sensor ID (optional)"
-              value={formData.sensorId}
-              onChange={e => setFormData({ ...formData, sensorId: e.target.value })}
+            <Dropdown
+              label="Status *"
+              options={[
+                { option: 'Active', value: 'active' },
+                { option: 'Inactive', value: 'inactive' },
+              ]}
+              value={formData.status}
+              onSelect={value => setFormData(prev => ({ ...prev, status: value }))}
+              placeholder="Select status"
+              required
             />
 
-            {/* DYNAMIC CONDITIONS */}
-            {conditions.length > 0 && (
-              <div className="border-t pt-4">
-                <h3 className="mb-3 font-semibold">Conditions</h3>
-
-                {conditions.map((c, i) => {
-                  const fieldMeta = RULE_SENSOR_CONFIG[formData.alertType].fields.find(
-                    f => f.field === c.field
-                  );
-
-                  return (
-                    <div key={i} className="mb-3 grid grid-cols-3 items-center gap-3">
-                      <span className="font-medium">{fieldMeta.label}</span>
-
-                      <Dropdown
-                        options={fieldMeta.operators.map(o => ({
-                          option: o,
-                          value: o,
-                        }))}
-                        value={c.operator}
-                        onSelect={v => handleConditionChange(i, 'operator', v)}
-                      />
-
-                      {c.type === 'boolean' ? (
-                        <Dropdown
-                          options={[
-                            { option: 'True', value: true },
-                            { option: 'False', value: false },
-                          ]}
-                          value={c.value}
-                          onSelect={v => handleConditionChange(i, 'value', v)}
-                        />
-                      ) : (
-                        <Input
-                          value={c.value}
-                          onChange={e => handleConditionChange(i, 'value', e.target.value)}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
+            {selectedSensor.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Conditions for Each Sensor</h3>
+                {renderConditionFields()}
               </div>
             )}
 
-            {/* ACTIONS */}
-            <div className="mt-4 flex justify-end gap-3">
-              <button onClick={closeModal} className="rounded bg-gray-500 px-5 py-2 text-white">
+            <div className="space-y-3">
+              <label className="font-semibold">Notification Platform *</label>
+              <div className="flex gap-6">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="platform"
+                    checked={formData.platform === 'email'}
+                    onChange={() => {
+                      setFormData(prev => ({ ...prev, platform: 'email' }));
+                      setInputEmail(true);
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span>Email</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="platform"
+                    checked={formData.platform === 'platform'}
+                    onChange={() => {
+                      setFormData(prev => ({ ...prev, platform: 'platform' }));
+                      setInputEmail(false);
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <span>Platform</span>
+                </label>
+              </div>
+            </div>
+
+            {inputEmail && (
+              <Input
+                type="email"
+                label="Email Address *"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email for notifications"
+                required={formData.platform === 'email'}
+              />
+            )}
+
+            <div className="mt-6 flex justify-end gap-3 border-t pt-4">
+              <button
+                onClick={closeModal}
+                className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-gray-700 hover:bg-gray-50"
+                type="button"
+              >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                disabled={creating || updating}
-                className="rounded bg-blue-600 px-5 py-2 text-white"
+                disabled={isLoading}
+                className="rounded-lg bg-blue-600 px-5 py-2.5 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-blue-300"
+                type="button"
               >
-                Save
+                {isLoading ? 'Saving...' : modalType === 'add' ? 'Create Rule' : 'Update Rule'}
               </button>
             </div>
           </div>
         </Modal>
       )}
 
-      {/* HEADER */}
-      <div className="mb-4 flex justify-end">
-        <MdAddBox fontSize={30} className="cursor-pointer text-blue-500" onClick={openAddModal} />
+      <div className="rounded-lg bg-white shadow-sm">
+        <DataTable
+          columns={columns}
+          data={rulesData?.rules || []}
+          pagination
+          highlightOnHover
+          responsive
+          persistTableHead
+          noDataComponent={
+            <div className="py-8 text-center text-gray-500">
+              No rules found. Click the + icon to create your first rule.
+            </div>
+          }
+        />
       </div>
-
-      {/* TABLE */}
-      <DataTable columns={columns} data={data?.rules || []} pagination highlightOnHover />
     </div>
   );
 }
