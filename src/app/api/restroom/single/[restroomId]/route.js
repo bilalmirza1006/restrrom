@@ -103,7 +103,7 @@ export const PUT = asyncHandler(async (req, { params }) => {
   await configureCloudinary();
 
   const { user, accessToken } = await isAuthenticated();
-  const { restroomId } = params;
+  const { restroomId } = await params;
 
   if (!isValidObjectId(restroomId)) {
     throw new customError(400, 'Invalid restroom id');

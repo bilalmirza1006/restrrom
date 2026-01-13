@@ -130,7 +130,7 @@ const Reports = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const { user, isAuthenticated } = useSelector(state => state.auth);
-  console.log('useruseruseruser', user.user.interval);
+  console.log('selectedBuildingselectedBuilding', selectedBuilding);
   // const [interval, setInterval] = useState(user.user.interval);
   const interval = user?.user?.interval;
   // 1. Fetch Buildings
