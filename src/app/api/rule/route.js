@@ -16,12 +16,20 @@ export const GET = asyncHandler(async req => {
   const id = searchParams.get('id');
   const alertType = searchParams.get('alertType');
   const severity = searchParams.get('severity');
+  let ownerId;
 
-  let query = { ownerId: user._id };
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'building_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
+  let query = { ownerId: ownerId };
 
   if (id) {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new customError(400, 'Invalid Rule ID');
-    const rule = await Rule.findOne({ _id: id, ownerId: user._id }).lean();
+    const rule = await Rule.findOne({ _id: id, ownerId: ownerId }).lean();
     if (!rule) throw new customError(404, 'Rule not found');
 
     // Populate names for single rule
@@ -36,7 +44,9 @@ export const GET = asyncHandler(async req => {
     }
 
     if (rule.sensorIds && rule.sensorIds.length > 0) {
-      const sensors = await Sensor.find({ _id: { $in: rule.sensorIds } }).select('name sensorType').lean();
+      const sensors = await Sensor.find({ _id: { $in: rule.sensorIds } })
+        .select('name sensorType')
+        .lean();
       rule.sensors = sensors.map(s => ({ id: s._id, name: s.name, type: s.sensorType }));
     }
 
@@ -50,7 +60,7 @@ export const GET = asyncHandler(async req => {
 
   // Enrich rules with building, restroom, and sensor names
   const enrichedRules = await Promise.all(
-    rules.map(async (rule) => {
+    rules.map(async rule => {
       const enrichedRule = { ...rule };
 
       // Get building name
@@ -67,7 +77,9 @@ export const GET = asyncHandler(async req => {
 
       // Get sensor details (name and type)
       if (rule.sensorIds && rule.sensorIds.length > 0) {
-        const sensors = await Sensor.find({ _id: { $in: rule.sensorIds } }).select('name sensorType').lean();
+        const sensors = await Sensor.find({ _id: { $in: rule.sensorIds } })
+          .select('name sensorType')
+          .lean();
         enrichedRule.sensors = sensors.map(s => ({ id: s._id, name: s.name, type: s.sensorType }));
       }
 
@@ -82,7 +94,8 @@ export const GET = asyncHandler(async req => {
 export const POST = asyncHandler(async req => {
   const { user } = await isAuthenticated();
   const data = await req.json();
-  const { name, buildingId, restroomId, sensorIds, severity, values, platform, email, status } = data;
+  const { name, buildingId, restroomId, sensorIds, severity, values, platform, email, status } =
+    data;
 
   if (!name || !severity) {
     throw new customError(400, 'Name and severity are required');
@@ -108,7 +121,8 @@ export const POST = asyncHandler(async req => {
 export const PUT = asyncHandler(async req => {
   const { user } = await isAuthenticated();
   const data = await req.json();
-  const { id, name, buildingId, restroomId, sensorIds, severity, values, status, platform, email } = data;
+  const { id, name, buildingId, restroomId, sensorIds, severity, values, status, platform, email } =
+    data;
 
   if (!id || !mongoose.Types.ObjectId.isValid(id)) throw new customError(400, 'Invalid Rule ID');
 

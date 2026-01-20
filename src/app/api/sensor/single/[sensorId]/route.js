@@ -25,17 +25,25 @@ import { turborepoTraceAccess } from 'next/dist/build/turborepo-access-trace';
 import { NextResponse } from 'next/server';
 
 export const GET = asyncHandler(async (req, { params }) => {
-  // await connectDb(); // Ensure Mongo if needed, but connectCustomMySqll does not connect Mongo. 
+  // await connectDb(); // Ensure Mongo if needed, but connectCustomMySqll does not connect Mongo.
   // Wait, existing code had await connectDb().
   await connectDb();
 
   const { user } = await isAuthenticated();
-  const ownerId = user._id.toString();
+  let ownerId;
+
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'building_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
 
   // Connect to custom or global DB
   const { models } = await connectCustomMySqll(ownerId);
-
-  const { sensorId, range } = params; // range: 'hour' | 'day' | 'week' | 'month'
+  const { sensorId, range } = await params; // range: 'hour' | 'day' | 'week' | 'month'
+  console.log('sensorIdssdsd', sensorId);
   if (!isValidObjectId(sensorId)) throw new customError(400, 'Invalid sensor id');
 
   const sensor = await Sensor.findOne({ _id: sensorId, ownerId });

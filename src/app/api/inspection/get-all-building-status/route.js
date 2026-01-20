@@ -11,9 +11,18 @@ export const GET = asyncHandler(async req => {
   await connectDb();
 
   const { user, accessToken } = await isAuthenticated();
-  if (!user?._id) throw new customError(400, 'User not found');
+  let ownerId;
 
-  const inspections = await BuildingForInspection.find({ ownerId: user._id })
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'building_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
+  if (!user?._id) throw new customError(400, 'User not found');
+  console.log('ownerownerIdId', ownerId);
+  const inspections = await BuildingForInspection.find({ ownerId: ownerId })
     .sort({ createdAt: -1 })
     .lean();
 

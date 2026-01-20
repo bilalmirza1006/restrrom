@@ -12,14 +12,23 @@ export const GET = asyncHandler(async req => {
   const { user } = await isAuthenticated();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
+  console.log('userisdsdd', user._id);
+  let ownerId;
 
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'building_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
   if (id) {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new customError(400, 'Invalid Alert ID');
-    const alert = await Alert.findOne({ _id: id, ownerId: user._id });
+    const alert = await Alert.findOne({ _id: id, ownerId: ownerId });
     if (!alert) throw new customError(404, 'Alert not found');
     return NextResponse.json({ success: true, alert });
   } else {
-    const alerts = await Alert.find({ ownerId: user._id }).sort({ timestamp: -1 });
+    const alerts = await Alert.find({ ownerId: ownerId }).sort({ timestamp: -1 });
     return NextResponse.json({ success: true, alerts });
   }
 });

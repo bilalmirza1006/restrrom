@@ -11,6 +11,7 @@ const FloorList = ({ data, buildingId }) => {
   const getRouteByRole = (role, buildingId, floorId) => {
     switch (role) {
       case 'admin':
+      case 'building_manager':
         return `/admin/floor/floor-detail/${floorId}`;
       case 'super_admin':
         return `/super-admin/floor/floor-detail/${floorId}`;

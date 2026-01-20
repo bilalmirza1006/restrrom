@@ -38,7 +38,7 @@ const Sensors = () => {
   const [selectedSensor, setSelectedSensor] = useState(null);
 
   const { data: adminSensors, isLoading } = useGetAllSensorsQuery({
-    skip: user?.role !== 'admin',
+    skip: user?.role !== 'admin' && user?.role !== 'building_manager',
   });
   const { data: getAllSensors, isLoading: loading } = useGetAllAdminSensorsQuery({
     skip: user?.role !== 'super_admin',
@@ -50,7 +50,7 @@ const Sensors = () => {
   const sensors = useMemo(() => {
     let raw = [];
 
-    if (user?.role === 'admin') raw = adminSensors?.data || [];
+    if (['admin', 'building_manager'].includes(user?.role)) raw = adminSensors?.data || [];
     if (user?.role === 'super_admin') raw = getAllSensors?.data || [];
 
     // Convert status: "true" / "false" → boolean
@@ -102,6 +102,7 @@ const Sensors = () => {
   const getSensorRoute = (role, id) => {
     switch (role) {
       case 'admin':
+      case 'building_manager':
         return `/admin/sensors/sensor-details/${id}`;
       case 'super_admin':
         return `/super-admin/sensors/sensor-detail/${id}`;

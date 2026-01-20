@@ -8,19 +8,38 @@ import { NextResponse } from 'next/server';
 
 export const GET = asyncHandler(async req => {
   await connectDb();
+
   const { user, accessToken } = await isAuthenticated();
+
   let buildings = [];
-  if (user.role == 'inspector') {
-    const data = await BuildingForInspection.find({ inspectorId: user?._id }).populate(
-      'buildingId'
-    );
-    if (data?.length > 0) {
-      data.forEach(item => {
-        if (item?.buildingId?._id) buildings.push(item?.buildingId);
-      });
+
+  // 🔹 Inspector logic (keep as it is)
+  if (user.role === 'inspector') {
+    const data = await BuildingForInspection.find({
+      inspectorId: user._id,
+    }).populate('buildingId');
+
+    if (data?.length) {
+      buildings = data.map(item => item?.buildingId).filter(Boolean);
     }
   } else {
-    buildings = await Building.find({ ownerId: user._id });
+    // 🔹 Determine ownerId based on role
+    let ownerId = user._id;
+
+    if (user.role === 'building_manager') {
+      ownerId = user.creatorId;
+    }
+    if (user.role === 'report_manager') {
+      ownerId = user.creatorId;
+    }
+
+    if (user.role === 'admin') {
+      ownerId = user._id;
+    }
+    console.log('ownerIdownerId', ownerId);
+
+    buildings = await Building.find({ ownerId });
   }
+
   return sendResponse(NextResponse, 'Buildings fetched successfully', buildings, accessToken);
 });

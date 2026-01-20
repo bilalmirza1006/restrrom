@@ -18,17 +18,24 @@ export const GET = asyncHandler(async (req, { params }) => {
   await connectDb();
 
   const { user, accessToken } = await isAuthenticated();
-  const { models } = await connectCustomMySqll(user._id);
+  let ownerId;
 
-  // DO NOT use await on params
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'building_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
+  const { models } = await connectCustomMySqll(ownerId);
+
   const { restroomId } = await params;
 
   if (!isValidObjectId(restroomId)) {
     throw new customError(400, 'Invalid restroom id');
   }
 
-  // Fetch restroom with sensors populated
-  const restroom = await RestRoom.findOne({ _id: restroomId, ownerId: user?._id }).populate(
+  const restroom = await RestRoom.findOne({ _id: restroomId, ownerId: ownerId }).populate(
     'sensors'
   );
 

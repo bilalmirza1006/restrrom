@@ -15,6 +15,7 @@ import {
 } from '@/features/alerts/alertsApi';
 import ConfirmationModal from '@/components/global/small/ConfirmationModal';
 import { set } from 'lodash';
+import { useSelector } from 'react-redux';
 
 const severityOptions = [
   { option: 'Low', value: 'low' },
@@ -79,6 +80,8 @@ export default function AllAlerts() {
   const [inputEmail, setInputEmail] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [deleteAlertId, setDeleteAlertId] = useState(null);
+  const { user } = useSelector(state => state.auth);
+
   const openConfirmationModal = id => {
     console.log('idsdsddsdsd', id);
     setConfirmationModal(true);
@@ -101,7 +104,9 @@ export default function AllAlerts() {
     status: 'active',
   });
 
-  const { data, refetch } = useGetAllAlertsQuery();
+  const { data, refetch } = useGetAllAlertsQuery({
+    skip: user?.role !== 'admin' && user?.role !== 'building_manager',
+  });
   const [createAlert, { isLoading: creating }] = useCreateAlertMutation();
   const [updateAlert, { isLoading: updating }] = useUpdateAlertMutation();
   const [deleteAlert] = useDeleteAlertMutation();

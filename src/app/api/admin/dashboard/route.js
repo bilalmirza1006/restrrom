@@ -12,7 +12,21 @@ export const GET = asyncHandler(async req => {
   await connectDb();
 
   const { user } = await isAuthenticated();
-  const ownerId = user?._id?.toString();
+
+  let ownerId;
+
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (
+    user.role === 'building_manager' ||
+    user.role === 'report_manager' ||
+    user.role === 'building_inspector' ||
+    user.role === 'subscription-manager'
+  ) {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
 
   if (!ownerId) {
     return NextResponse.json({ success: false, message: 'ownerId required' });
@@ -118,26 +132,29 @@ export const GET = asyncHandler(async req => {
     buildingThumbnail: b.buildingThumbnail?.url || null,
   }));
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      buildings,
-      allSensors,
-      topBuildings: summedBuildings,
-      // overAllBuildingPerformance: finalPerformance,
-      locationData: buildingLocations,
-      counts: {
-        totalBuildings: buildings.length,
-        totalRestrooms,
-        totalSubscriptions,
-        totalSensors: allSensors.length,
+  return NextResponse.json(
+    {
+      success: true,
+      data: {
+        buildings,
+        allSensors,
+        topBuildings: summedBuildings,
+        // overAllBuildingPerformance: finalPerformance,
+        locationData: buildingLocations,
+        counts: {
+          totalBuildings: buildings.length,
+          totalRestrooms,
+          totalSubscriptions,
+          totalSensors: allSensors.length,
+        },
       },
     },
-  }, {
-    headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0',
+    {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     }
-  });
+  );
 });

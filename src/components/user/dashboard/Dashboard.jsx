@@ -105,6 +105,24 @@ const Dashboard = () => {
       percentageChange: "<span class='text-[#00B69B]'>8.5%</span> Up from yesterday",
     },
   ];
+  const getRouteByRole = (role, buildingId) => {
+    console.log('Navigating to building ID:', buildingId);
+
+    switch (role) {
+      case 'admin':
+        console.log('Role is admin');
+        return `/admin/buildings/building-detail/${buildingId}`;
+      case 'building_inspector':
+        console.log('Role is building_inspector');
+        return `/inspectionist/checkinlist/${buildingId}`;
+      case 'super_admin':
+        console.log('Role is super_admin');
+        return `/super-admin/buildings/building-details/${buildingId}`;
+      default:
+        console.log('Role is unknown:', role);
+        return '';
+    }
+  };
 
   return (
     <div className="grid grid-cols-12 gap-3">
@@ -184,12 +202,27 @@ const Dashboard = () => {
             See All
           </Link>
         </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
-          {(dashboardData?.data?.buildings.slice(0, 3) || arraylocationData).map((building, i) => (
-            <Link href={`/buildings/${building?.id}`} key={i}>
-              <BuildingCard data={building} loading={dashboardLoading} />
-            </Link>
-          ))}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
+          {dashboardLoading ? (
+            Array.from({ length: 6 }).map((_, i) => <LoadingSkeletonCard key={i} />)
+          ) : dashboardData?.data?.buildings.length > 0 ? (
+            dashboardData?.data?.buildings.map((building, i) => {
+              const buildingId =
+                user?.role === 'building_inspector' ? building?.buildingId?._id : building?._id;
+
+              const route = getRouteByRole(user?.role, buildingId);
+
+              return route ? (
+                <Link href={route} key={i} className="cursor-pointer">
+                  <BuildingCard data={building?.buildingId || building} />
+                </Link>
+              ) : (
+                <BuildingCard data={building} key={i} />
+              );
+            })
+          ) : (
+            <p>No buildings found.</p>
+          )}
         </div>
       </div>
     </div>
@@ -197,3 +230,11 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+const LoadingSkeletonCard = () => (
+  <div className="lp-4 rounded-xl">
+    <Skeleton height={150} className="mb-4" />
+    <Skeleton height={20} width={`80%`} className="mb-2" />
+    <Skeleton height={20} width={`60%`} />
+  </div>
+);

@@ -45,7 +45,7 @@ export const PAGE_PERMISSIONS = {
     exact: false,
   },
   '/admin/history': {
-    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
+    roles: ['admin', 'subscription_manager', 'building_manager'],
     exact: false,
   },
   '/admin/inspection-details/[inspectionId]': {

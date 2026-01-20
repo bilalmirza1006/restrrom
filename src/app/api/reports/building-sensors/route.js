@@ -11,8 +11,16 @@ import { col, fn, literal, Op } from 'sequelize';
 export const GET = asyncHandler(async req => {
   await connectDb(); // Ensure MongoDB is connected for Auth check
   const { user } = await isAuthenticated();
-  const ownerId = user._id.toString();
+  // const ownerId = user._id.toString();
+  let ownerId;
 
+  if (user.role === 'admin') {
+    ownerId = user._id;
+  } else if (user.role === 'report_manager') {
+    ownerId = user.creatorId;
+  } else {
+    ownerId = user._id;
+  }
   // Connect to custom or global DB based on user profile
   const { models } = await connectCustomMySqll(ownerId);
 

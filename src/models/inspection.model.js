@@ -8,7 +8,7 @@ const extraDetailsSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const conditionEnum = ['excellent', 'good', 'average', 'poor', 'bad', 'not_checked'];
+const conditionEnum = ['excellent', 'good', 'malfunctioned', 'bad', 'not_checked'];
 
 const restroomInspectionSchema = new mongoose.Schema(
   {

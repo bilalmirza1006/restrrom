@@ -93,9 +93,9 @@ const Profile = () => {
   );
 
   if (isLoading || !profile) return <Loader />;
-  const imageUrl = profile.image?.url.startsWith('http')
+  const imageUrl = profile.image?.url?.startsWith('http')
     ? profile.image.url
-    : `${process.env.NEXT_PUBLIC_BASE_URL}${profile.image.url}`;
+    : `${process?.env?.NEXT_PUBLIC_BASE_URL}${profile?.image?.url}`;
   console.log('imageUrlimageUrlimageUrl', imageUrl);
 
   return (

@@ -26,9 +26,9 @@ const AllBuildings = () => {
   });
 
   const { data: allData, isLoading: isLoadingAll } = useGetAllBuildingsQuery(undefined, {
-    skip: user?.role !== 'admin',
+    skip: user?.role !== 'admin' && user?.role !== 'building_manager',
   });
-
+  console.log('allDataallData', allData);
   const { data: allAdminBuildings, isLoading: loadingAllAdminBuildings } =
     useGetAllAdminBuildingsQuery(undefined, {
       skip: user?.role !== 'super_admin',
@@ -36,24 +36,31 @@ const AllBuildings = () => {
 
   const buildings = useMemo(() => {
     if (user?.role === 'building_inspector') return assignData?.data || [];
-    if (user?.role === 'admin') return allData?.data || [];
+    if (['admin', 'building_manager'].includes(user?.role)) {
+      return allData?.data || [];
+    }
     if (user?.role === 'super_admin') return allAdminBuildings?.data || [];
     return [];
   }, [user, assignData, allData, allAdminBuildings]);
+  console.log('buildingsbuildingsbuildings', buildings);
 
   const getRouteByRole = (role, buildingId) => {
-    console.log('Navigating to building ID:', buildingId);
+    console.log('Navigating to building ID:', buildingId, role);
 
     switch (role) {
       case 'admin':
-        console.log('Role is admin');
+      case 'building_manager':
+        console.log('Role is admin or building_manager');
         return `/admin/buildings/building-detail/${buildingId}`;
+
       case 'building_inspector':
         console.log('Role is building_inspector');
         return `/inspectionist/checkinlist/${buildingId}`;
+
       case 'super_admin':
         console.log('Role is super_admin');
         return `/super-admin/buildings/building-details/${buildingId}`;
+
       default:
         console.log('Role is unknown:', role);
         return '';
@@ -69,7 +76,7 @@ const AllBuildings = () => {
           {user?.role === 'admin' ? 'All Buildings' : 'Assigned Buildings'}
         </h4>
 
-        {user?.role === 'admin' && (
+        {['admin', 'building_manager'].includes(user?.role) && (
           <Link href="/admin/add-building">
             <FaPlus className="text-2xl text-blue-500 hover:text-blue-600" />
           </Link>
@@ -85,7 +92,7 @@ const AllBuildings = () => {
               user?.role === 'building_inspector' ? building?.buildingId?._id : building?._id;
 
             const route = getRouteByRole(user?.role, buildingId);
-
+            console.log('Route:', route);
             return route ? (
               <Link href={route} key={i} className="cursor-pointer">
                 <BuildingCard data={building?.buildingId || building} />

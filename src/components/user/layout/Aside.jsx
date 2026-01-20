@@ -88,7 +88,7 @@ const pages = [
     icon: <LiaHistorySolid size={20} />,
     // icon: <History />,
     // All manager roles can access settings
-    roles: ['admin', 'report_manager', 'subscription_manager', 'building_manager'],
+    roles: ['admin', 'subscription_manager', 'building_manager'],
   },
 ];
 
