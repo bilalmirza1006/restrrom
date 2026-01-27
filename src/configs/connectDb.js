@@ -1,11 +1,11 @@
 import { Sequelize } from 'sequelize';
 import mongoose from 'mongoose';
-import { getEnv } from './config';
+import { getEnv } from './config.js';
 // import { Sequelize } from "sequelize";
 // import { config } from "../config/config.js";
 import mysql2 from 'mysql2'; // ✅ Use ES Module import
-import { Auth } from '@/models/auth.model';
-import { initModels } from '@/sequelizeSchemas/initModels';
+import { Auth } from '../models/auth.model.js';
+import { initModels } from '../sequelizeSchemas/initModels.js';
 
 let isConnected = false;
 export async function connectDb() {

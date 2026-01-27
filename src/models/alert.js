@@ -5,7 +5,15 @@ const alertSchema = new mongoose.Schema({
   name: { type: String, required: true },
   alertType: {
     type: String,
-    enum: ['occupancy', 'waterLeakage', 'airQuality', 'toiletPaper', 'soapDispenser', 'doorQueue'],
+    enum: [
+      'occupancy',
+      'waterLeakage',
+      'airQuality',
+      'toiletPaper',
+      'soapDispenser',
+      'doorQueue',
+      'stallStatus',
+    ],
     required: true,
   },
   severity: { type: String, enum: ['low', 'medium', 'high', 'critical'], required: true },

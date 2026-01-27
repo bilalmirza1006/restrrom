@@ -2,10 +2,11 @@
   "name": "restoom-next",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
+    "start": "node server.js",
     "lint": "next lint",
     "format": "prettier --write .",
     "ngrok": "ngrok http --domain=urchin-awake-firmly.ngrok-free.app 3000"
@@ -22,10 +23,12 @@
     "leaflet": "^1.9.4",
     "leaflet-draw": "^1.0.4",
     "lodash": "^4.17.21",
-    "mongoose": "^8.13.2",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.21.1",
     "mysql2": "^3.14.3",
     "nanoid": "^5.1.6",
     "next": "16.1.1",
+    "nodemailer": "^7.0.12",
     "pg-hstore": "^2.3.4",
     "react": "^19.2.3",
     "react-circular-progressbar": "^2.2.0",
@@ -39,6 +42,8 @@
     "react-redux": "^9.2.0",
     "recharts": "^2.15.2",
     "sequelize": "^6.37.7",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "stripe": "^18.5.0"
   },
   "devDependencies": {

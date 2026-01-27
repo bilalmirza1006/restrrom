@@ -39,18 +39,6 @@ const pages = [
     link: ['/super-admin/sensors'],
     icon: <SensorsIcon />,
   },
-  {
-    id: 4,
-    title: 'Alerts',
-    link: ['/admin/alerts'],
-    icon: <SensorsIcon />,
-  },
-  {
-    id: 5,
-    title: 'Reports',
-    link: ['/super-admin/reports'],
-    icon: <ReportsIcon />,
-  },
 
   {
     id: 6,

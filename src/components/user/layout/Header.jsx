@@ -11,10 +11,24 @@ import { resetAuthApiState, useGetProfileQuery, useLogoutMutation } from '@/feat
 import { useDispatch } from 'react-redux';
 import { deleteUser } from '@/features/auth/authSlice';
 import toast from 'react-hot-toast';
+import { useSocketNotifications } from '@/hooks/useSocketNotifications';
 
 const Header = () => {
   const [logout, { isLoading }] = useLogoutMutation();
   const { data } = useGetProfileQuery();
+  const userId = data?.data?._id;
+
+  // Initialize socket notifications
+  useSocketNotifications({
+    userId,
+    onNotification: notification => {
+      console.log('🔔 New notification received in UI:', notification);
+    },
+    onCount: count => {
+      console.log('🔢 New notification count:', count);
+    },
+  });
+
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
@@ -101,9 +115,8 @@ const Header = () => {
                     <IoIosArrowForward />
                   </Link>
                   <div
-                    className={`flex cursor-pointer items-center justify-between px-3 py-2 ${
-                      isLoading ? 'pointer-events-none cursor-none opacity-50' : ''
-                    }`}
+                    className={`flex cursor-pointer items-center justify-between px-3 py-2 ${isLoading ? 'pointer-events-none cursor-none opacity-50' : ''
+                      }`}
                     onClick={logoutHandler}
                   >
                     Logout
